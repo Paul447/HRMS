@@ -20,5 +20,7 @@ from django.urls import include
 
 
 urlpatterns = [
-    path('api-auth/',include('rest_framework.urls'))
+    path('api-auth/',include('rest_framework.urls')),
+    path('payfrequency/', include('payfrequency.urls')),
+
 ]
