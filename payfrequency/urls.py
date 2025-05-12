@@ -1,13 +1,15 @@
 from django.urls import path ,include
 from rest_framework.routers import DefaultRouter
-from .views import PayFrequencyViewSet
+from .views import PayFrequencyViewSet,UserViewSet,  GroupViewSet
+from django.contrib.auth.models import User 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import login_page, dashboard
-# router = DefaultRouter()
-# router.register(r'payfrequency', PayFrequencyViewSet)
-urlpatterns = [
-    path('api/protected/',PayFrequencyViewSet.as_view(), name='protected'),
-    path('login/',login_page, name='login'),
-    path('dashboard/', dashboard, name='dashboard'),
-]
+router = DefaultRouter()
+router.register(r'api/pay', PayFrequencyViewSet)
+router.register(r'api/register',UserViewSet)
+router.register(r'api/group', GroupViewSet)
 
+urlpatterns = [
+    path('', include(router.urls)),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
