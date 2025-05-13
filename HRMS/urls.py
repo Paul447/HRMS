@@ -25,6 +25,7 @@ from payfrequency.api import register_register as register_user
 from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
+from ptobalance.api import register as register_ptobalance
 from django.contrib.auth import views as auth_views
 
 
@@ -35,6 +36,7 @@ register_user(router)
 register_group(router)
 register_accuralrates(router)
 register_employeetypes(router)
+register_ptobalance(router)
 
 
 

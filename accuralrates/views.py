@@ -1,7 +1,6 @@
-from django.shortcuts import render
 from .serializer import AccuralRateSerializer
 from .models import AccrualRates
-from rest_framework import viewsets , serializers
+from rest_framework import viewsets 
 
 
 # Create your views here.
