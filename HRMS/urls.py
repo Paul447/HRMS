@@ -24,6 +24,7 @@ from payfrequency.api import register as register_pay
 from payfrequency.api import register_register as register_user
 from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
+from employeetype.api import register as register_employeetypes
 from django.contrib.auth import views as auth_views
 
 
@@ -33,15 +34,12 @@ register_pay(router)
 register_user(router)
 register_group(router)
 register_accuralrates(router)
+register_employeetypes(router)
 
 
 
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    # path('api-auth/',include('rest_framework.urls')),
-    # path('', include('yearofexperience.urls')),
-    # path('', include('payfrequency.urls')),
     path('api/', include(router.urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
