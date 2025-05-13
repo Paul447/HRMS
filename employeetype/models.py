@@ -1,3 +1,8 @@
 from django.db import models
 
 # Create your models here.
+class EmployeeType(models.Model):
+    name = models.CharField(max_length=100, unique=True)  # e.g., "Full-Time", "Part-Time"
+
+    def __str__(self):
+        return self.name

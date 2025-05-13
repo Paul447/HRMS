@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthentic
 class PayFrequencyViewSet(viewsets.ModelViewSet):
     queryset = pay_frequency.objects.all()
     serializer_class = PayFrequencySerializer
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer

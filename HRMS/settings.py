@@ -43,11 +43,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'payfrequency',
     'employeetype',
+    'yearofexperience', 
     'accuralrates',
     'ptobalance',
     'ptorequest',
     'timeclock',
-    'yearofexperience', 
 ]
 
 MIDDLEWARE = [
