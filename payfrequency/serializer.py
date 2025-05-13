@@ -62,6 +62,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 class PayFrequencySerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name = 'pay-detail')
     class Meta:
         model = pay_frequency
         fields = '__all__'

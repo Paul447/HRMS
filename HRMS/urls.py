@@ -23,6 +23,7 @@ from yearofexperience.api import register as register_experience
 from payfrequency.api import register as register_pay
 from payfrequency.api import register_register as register_user
 from payfrequency.api import register_group as register_group
+from accuralrates.api import register as register_accuralrates
 from django.contrib.auth import views as auth_views
 
 
@@ -31,6 +32,7 @@ register_experience(router)
 register_pay(router)
 register_user(router)
 register_group(router)
+register_accuralrates(router)
 
 
 
