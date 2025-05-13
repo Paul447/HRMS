@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import YearOfExperience, User
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
