@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from .serializer import PayFrequencySerializer, UserSerializer,  GroupSerializer
 from rest_framework import viewsets, serializers
-from .models import pay_frequency
+from .models import Pay_Frequency
 from django.contrib.auth.models import User , Permission, Group
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, BasePermission
 
 # Create your views here.
 
 class PayFrequencyViewSet(viewsets.ModelViewSet):
-    queryset = pay_frequency.objects.all()
+    queryset = Pay_Frequency.objects.all()
     serializer_class = PayFrequencySerializer
     # permission_classes = [IsAdminUser]
 class GroupViewSet(viewsets.ModelViewSet):

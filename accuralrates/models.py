@@ -1,6 +1,6 @@
 from django.db import models
 from employeetype.models import EmployeeType
-from payfrequency.models import pay_frequency
+from payfrequency.models import Pay_Frequency
 
 
 # Create your models here.
@@ -10,7 +10,7 @@ class AccrualRates(models.Model):
     accrual_rate = models.FloatField(default=0.0)  # e.g., 1.5 hours per pay period
     annual_accrual_rate = models.FloatField(default=0.0)  # e.g., 18 hours per year
     employee_type = models.ForeignKey(EmployeeType, on_delete=models.CASCADE, related_name="accrual_rates")
-    pay_frequency = models.ForeignKey(pay_frequency, on_delete=models.CASCADE, related_name="accrual_rates")
+    pay_frequency = models.ForeignKey(Pay_Frequency, on_delete=models.CASCADE, related_name="accrual_rates")
 
     class Meta:
         verbose_name = "Accrual Rate"

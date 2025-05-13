@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class pay_frequency(models.Model):
+class Pay_Frequency(models.Model):
     frequency = models.CharField(max_length=100, unique=True)  # e.g., "Monthly", "Bi-Weekly"
 
     class Meta:

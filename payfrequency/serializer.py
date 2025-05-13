@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import pay_frequency
+from .models import Pay_Frequency
 from django.contrib.auth.models import User , Permission, Group
 
 
@@ -64,6 +64,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class PayFrequencySerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name = 'pay-detail')
     class Meta:
-        model = pay_frequency
+        model = Pay_Frequency
         fields = '__all__'
 
