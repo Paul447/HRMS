@@ -1,0 +1,1537 @@
+openapi: 3.0.3
+info:
+  title: Human Resource Management System API
+  version: 1.0.0
+  description: Your project description
+paths:
+  /api/accuralrates/:
+    get:
+      operationId: accuralrates_list
+      tags:
+      - accuralrates
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccuralRate'
+          description: ''
+    post:
+      operationId: accuralrates_create
+      tags:
+      - accuralrates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccuralRate'
+          description: ''
+  /api/accuralrates/{id}/:
+    get:
+      operationId: accuralrates_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Accrual Rate.
+        required: true
+      tags:
+      - accuralrates
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccuralRate'
+          description: ''
+    put:
+      operationId: accuralrates_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Accrual Rate.
+        required: true
+      tags:
+      - accuralrates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AccuralRate'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccuralRate'
+          description: ''
+    patch:
+      operationId: accuralrates_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Accrual Rate.
+        required: true
+      tags:
+      - accuralrates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAccuralRate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAccuralRate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAccuralRate'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccuralRate'
+          description: ''
+    delete:
+      operationId: accuralrates_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Accrual Rate.
+        required: true
+      tags:
+      - accuralrates
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/employeetype/:
+    get:
+      operationId: employeetype_list
+      tags:
+      - employeetype
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmployeeType'
+          description: ''
+    post:
+      operationId: employeetype_create
+      tags:
+      - employeetype
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeType'
+          description: ''
+  /api/employeetype/{id}/:
+    get:
+      operationId: employeetype_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this employee type.
+        required: true
+      tags:
+      - employeetype
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeType'
+          description: ''
+    put:
+      operationId: employeetype_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this employee type.
+        required: true
+      tags:
+      - employeetype
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmployeeType'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeType'
+          description: ''
+    patch:
+      operationId: employeetype_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this employee type.
+        required: true
+      tags:
+      - employeetype
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeType'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeType'
+          description: ''
+    delete:
+      operationId: employeetype_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this employee type.
+        required: true
+      tags:
+      - employeetype
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/experience/:
+    get:
+      operationId: experience_list
+      tags:
+      - experience
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/YearOfExperience'
+          description: ''
+    post:
+      operationId: experience_create
+      tags:
+      - experience
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearOfExperience'
+          description: ''
+  /api/experience/{id}/:
+    get:
+      operationId: experience_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Year of Experience.
+        required: true
+      tags:
+      - experience
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearOfExperience'
+          description: ''
+    put:
+      operationId: experience_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Year of Experience.
+        required: true
+      tags:
+      - experience
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/YearOfExperience'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearOfExperience'
+          description: ''
+    patch:
+      operationId: experience_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Year of Experience.
+        required: true
+      tags:
+      - experience
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedYearOfExperience'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedYearOfExperience'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedYearOfExperience'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearOfExperience'
+          description: ''
+    delete:
+      operationId: experience_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Year of Experience.
+        required: true
+      tags:
+      - experience
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/group/:
+    get:
+      operationId: group_list
+      tags:
+      - group
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+          description: ''
+    post:
+      operationId: group_create
+      tags:
+      - group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Group'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+  /api/group/{id}/:
+    get:
+      operationId: group_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this group.
+        required: true
+      tags:
+      - group
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+    put:
+      operationId: group_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this group.
+        required: true
+      tags:
+      - group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Group'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+    patch:
+      operationId: group_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this group.
+        required: true
+      tags:
+      - group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGroup'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+    delete:
+      operationId: group_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this group.
+        required: true
+      tags:
+      - group
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/pay/:
+    get:
+      operationId: pay_list
+      tags:
+      - pay
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PayFrequency'
+          description: ''
+    post:
+      operationId: pay_create
+      tags:
+      - pay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayFrequency'
+          description: ''
+  /api/pay/{id}/:
+    get:
+      operationId: pay_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pay Frequency.
+        required: true
+      tags:
+      - pay
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayFrequency'
+          description: ''
+    put:
+      operationId: pay_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pay Frequency.
+        required: true
+      tags:
+      - pay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PayFrequency'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayFrequency'
+          description: ''
+    patch:
+      operationId: pay_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pay Frequency.
+        required: true
+      tags:
+      - pay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPayFrequency'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPayFrequency'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPayFrequency'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayFrequency'
+          description: ''
+    delete:
+      operationId: pay_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pay Frequency.
+        required: true
+      tags:
+      - pay
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/ptobalance/:
+    get:
+      operationId: ptobalance_list
+      tags:
+      - ptobalance
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PTOBalanace'
+          description: ''
+    post:
+      operationId: ptobalance_create
+      tags:
+      - ptobalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PTOBalanace'
+          description: ''
+  /api/ptobalance/{id}/:
+    get:
+      operationId: ptobalance_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PTO Balance.
+        required: true
+      tags:
+      - ptobalance
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PTOBalanace'
+          description: ''
+    put:
+      operationId: ptobalance_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PTO Balance.
+        required: true
+      tags:
+      - ptobalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PTOBalanace'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PTOBalanace'
+          description: ''
+    patch:
+      operationId: ptobalance_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PTO Balance.
+        required: true
+      tags:
+      - ptobalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPTOBalanace'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPTOBalanace'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPTOBalanace'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PTOBalanace'
+          description: ''
+    delete:
+      operationId: ptobalance_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PTO Balance.
+        required: true
+      tags:
+      - ptobalance
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/register/:
+    get:
+      operationId: register_list
+      tags:
+      - register
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: register_create
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/register/{id}/:
+    get:
+      operationId: register_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - register
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: register_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: register_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: register_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - register
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/token/verify/:
+    post:
+      operationId: token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerify'
+          description: ''
+components:
+  schemas:
+    AccuralRate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        employee_type:
+          allOf:
+          - $ref: '#/components/schemas/EmployeeType'
+          readOnly: true
+        pay_frequency:
+          allOf:
+          - $ref: '#/components/schemas/PayFrequency'
+          readOnly: true
+        employee_type_id:
+          type: integer
+          writeOnly: true
+        pay_frequency_id:
+          type: integer
+          writeOnly: true
+        year_of_experience:
+          allOf:
+          - $ref: '#/components/schemas/YearOfExperienceEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        accrual_rate:
+          type: number
+          format: double
+        annual_accrual_rate:
+          type: number
+          format: double
+      required:
+      - employee_type
+      - employee_type_id
+      - id
+      - pay_frequency
+      - pay_frequency_id
+      - url
+      - year_of_experience
+    EmployeeType:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - name
+    Group:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: integer
+        name:
+          type: string
+          maxLength: 150
+      required:
+      - name
+      - permissions
+      - url
+    PTOBalanace:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        employee_type:
+          allOf:
+          - $ref: '#/components/schemas/EmployeeType'
+          readOnly: true
+        pay_frequency:
+          allOf:
+          - $ref: '#/components/schemas/PayFrequency'
+          readOnly: true
+        accrual_rate:
+          allOf:
+          - $ref: '#/components/schemas/AccuralRate'
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        year_of_experience:
+          allOf:
+          - $ref: '#/components/schemas/YearOfExperience'
+          readOnly: true
+        employee_type_id:
+          type: integer
+          writeOnly: true
+        pay_frequency_id:
+          type: integer
+          writeOnly: true
+        user_id:
+          type: integer
+          writeOnly: true
+        pto_balance:
+          type: number
+          format: double
+      required:
+      - accrual_rate
+      - employee_type
+      - employee_type_id
+      - id
+      - pay_frequency
+      - pay_frequency_id
+      - url
+      - user
+      - user_id
+      - year_of_experience
+    PatchedAccuralRate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        employee_type:
+          allOf:
+          - $ref: '#/components/schemas/EmployeeType'
+          readOnly: true
+        pay_frequency:
+          allOf:
+          - $ref: '#/components/schemas/PayFrequency'
+          readOnly: true
+        employee_type_id:
+          type: integer
+          writeOnly: true
+        pay_frequency_id:
+          type: integer
+          writeOnly: true
+        year_of_experience:
+          allOf:
+          - $ref: '#/components/schemas/YearOfExperienceEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        accrual_rate:
+          type: number
+          format: double
+        annual_accrual_rate:
+          type: number
+          format: double
+    PatchedEmployeeType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedGroup:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            type: integer
+        name:
+          type: string
+          maxLength: 150
+    PatchedPTOBalanace:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        employee_type:
+          allOf:
+          - $ref: '#/components/schemas/EmployeeType'
+          readOnly: true
+        pay_frequency:
+          allOf:
+          - $ref: '#/components/schemas/PayFrequency'
+          readOnly: true
+        accrual_rate:
+          allOf:
+          - $ref: '#/components/schemas/AccuralRate'
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        year_of_experience:
+          allOf:
+          - $ref: '#/components/schemas/YearOfExperience'
+          readOnly: true
+        employee_type_id:
+          type: integer
+          writeOnly: true
+        pay_frequency_id:
+          type: integer
+          writeOnly: true
+        user_id:
+          type: integer
+          writeOnly: true
+        pto_balance:
+          type: number
+          format: double
+    PatchedPayFrequency:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        frequency:
+          type: string
+          maxLength: 100
+    PatchedUser:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        groups:
+          type: array
+          items:
+            type: integer
+        password:
+          type: string
+          writeOnly: true
+        confirm_password:
+          type: string
+          writeOnly: true
+        user_permissions:
+          type: array
+          items:
+            type: integer
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PatchedYearOfExperience:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        user_id:
+          type: integer
+          writeOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        years_of_experience:
+          type: number
+          format: double
+          readOnly: true
+    PayFrequency:
+      type: object
+      properties:
+        frequency:
+          type: string
+          maxLength: 100
+      required:
+      - frequency
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenVerify:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+      required:
+      - token
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+      required:
+      - username
+    YearOfExperience:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        user_id:
+          type: integer
+          writeOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        years_of_experience:
+          type: number
+          format: double
+          readOnly: true
+      required:
+      - url
+      - user
+      - user_id
+      - years_of_experience
+    YearOfExperienceEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      type: integer
+      description: |-
+        * `1` - 1 Year(s)
+        * `2` - 2 Year(s)
+        * `3` - 3 Year(s)
+        * `4` - 4 Year(s)
+        * `5` - 5 Year(s)
+        * `6` - 6 Year(s)
+        * `7` - 7 Year(s)
+        * `8` - 8 Year(s)
+        * `9` - 9 Year(s)
+        * `10` - 10 Year(s)
+        * `11` - 11 Year(s)
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
