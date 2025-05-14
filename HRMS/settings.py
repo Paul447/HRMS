@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'ptobalance',
     'ptorequest',
     'timeclock',
+    'biweeklycron',
     'drf_spectacular',
     # 'drf_spectacular_sidecar'
 ]
