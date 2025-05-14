@@ -26,6 +26,7 @@ from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance
+from biweeklycron.api import register as register_biweeklycron
 from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
@@ -38,6 +39,7 @@ register_group(router)
 register_accuralrates(router)
 register_employeetypes(router)
 register_ptobalance(router)
+register_biweeklycron(router)
 
 
 

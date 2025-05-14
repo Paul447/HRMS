@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'timeclock',
     'biweeklycron',
     'drf_spectacular',
-    # 'drf_spectacular_sidecar'
+
 ]
 SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead

@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class biweeklycron(models.Model):
+class BiweeklyCron(models.Model):
     run_date = models.DateField(unique=True)
     is_active = models.BooleanField(default=True)
     tag = models.CharField(max_length=100)
