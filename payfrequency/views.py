@@ -20,6 +20,7 @@ class IsSuperUser(BasePermission):
         return request.user and request.user.is_superuser
     
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsSuperUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 

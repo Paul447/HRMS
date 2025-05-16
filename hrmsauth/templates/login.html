@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <form method="POST" action="/auth/api/login/">
+    <input type="text" name="username" placeholder="Username" required />
+    <input type="password" name="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+
+  <h3>Fetch Protected Data</h3>
+  <button id="fetch-data">Get Protected Data</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById('fetch-data').addEventListener('click', () => {
+      fetch('auth/api/protected/', {
+        method: 'GET',
+        credentials: 'include'  // send cookies with request
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(err => console.error(err));
+    });
+  </script>
+</body>
+</html>

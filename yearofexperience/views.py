@@ -3,10 +3,12 @@ from rest_framework.response import Response
 from .models import YearOfExperience
 from django.db import IntegrityError
 from .serializer import YearOfExperienceSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class YearOfExperienceViewSet(viewsets.ModelViewSet):
     queryset = YearOfExperience.objects.all()
     serializer_class = YearOfExperienceSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
