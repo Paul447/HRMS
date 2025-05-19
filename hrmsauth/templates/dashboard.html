@@ -10,22 +10,101 @@
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
     }
+
+    // Toggle submenu visibility
+    function toggleSubmenu(id) {
+      document.getElementById(id).classList.toggle('hidden');
+      const arrow = document.getElementById(id + '-arrow');
+      arrow.classList.toggle('rotate-90');
+    }
   </script>
 </head>
 <body class="bg-gray-100 font-sans">
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-indigo-700 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-indigo-700 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out overflow-y-auto">
     <div class="flex items-center justify-center h-16 shadow-md">
       <h1 class="text-xl font-bold">My Dashboard</h1>
     </div>
-    <nav class="mt-6">
-      <a href="/dashboard" class="block py-3 px-6 hover:bg-indigo-600 transition-colors">Dashboard Home</a>
-      <a href="{% url 'register_user' %}" class="block py-3 px-6 hover:bg-indigo-600 transition-colors font-semibold bg-indigo-800">User Management</a>
-      <a href="/groups" class="block py-3 px-6 hover:bg-indigo-600 transition-colors">Groups</a>
-      <a href="/permissions" class="block py-3 px-6 hover:bg-indigo-600 transition-colors">Permissions</a>
-      <a href="/settings" class="block py-3 px-6 hover:bg-indigo-600 transition-colors">Settings</a>
-      <a href="/logout" class="block py-3 px-6 mt-6 border-t border-indigo-600 hover:bg-indigo-600 transition-colors">Logout</a>
+    <nav class="mt-6 px-2">
+
+      <!-- Dashboard Home (no submenu) -->
+      <a href="/dashboard" class="block py-2 px-3 rounded hover:bg-indigo-600 transition-colors">
+        Dashboard Home
+      </a>
+
+      <!-- User Management menu -->
+      <div class="mt-4">
+        <button onclick="toggleSubmenu('userSubmenu')" class="w-full flex items-center justify-between py-2 px-3 rounded hover:bg-indigo-600 transition-colors focus:outline-none">
+          <span class="font-semibold">User Management</span>
+          <div class="flex items-center space-x-2">
+            <a href="{% url 'register_user' %}" title="Add User" class="p-1 rounded hover:bg-indigo-500" aria-label="Add User">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </a>
+            <svg id="userSubmenu-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
+        <div id="userSubmenu" class="mt-1 ml-4 space-y-1 hidden">
+          <a href="{% url 'register_user' %}" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">View Users</a>
+          <a href="{% url 'register_user' %}" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">Add User</a>
+        </div>
+      </div>
+
+      <!-- Groups menu -->
+      <div class="mt-4">
+        <button onclick="toggleSubmenu('groupsSubmenu')" class="w-full flex items-center justify-between py-2 px-3 rounded hover:bg-indigo-600 transition-colors focus:outline-none">
+          <span class="font-semibold">Groups</span>
+          <div class="flex items-center space-x-2">
+            <a href="/groups/add" title="Add Group" class="p-1 rounded hover:bg-indigo-500" aria-label="Add Group">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </a>
+            <svg id="groupsSubmenu-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
+        <div id="groupsSubmenu" class="mt-1 ml-4 space-y-1 hidden">
+          <a href="/groups" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">View Groups</a>
+          <a href="/groups/add" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">Add Group</a>
+        </div>
+      </div>
+
+      <!-- Permissions menu -->
+      <div class="mt-4">
+        <button onclick="toggleSubmenu('permissionsSubmenu')" class="w-full flex items-center justify-between py-2 px-3 rounded hover:bg-indigo-600 transition-colors focus:outline-none">
+          <span class="font-semibold">Permissions</span>
+          <div class="flex items-center space-x-2">
+            <a href="/permissions/add" title="Add Permission" class="p-1 rounded hover:bg-indigo-500" aria-label="Add Permission">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </a>
+            <svg id="permissionsSubmenu-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
+        <div id="permissionsSubmenu" class="mt-1 ml-4 space-y-1 hidden">
+          <a href="/permissions" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">View Permissions</a>
+          <a href="/permissions/add" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">Add Permission</a>
+        </div>
+      </div>
+
+      <!-- Settings (no submenu) -->
+      <a href="/settings" class="block mt-6 py-2 px-3 rounded hover:bg-indigo-600 transition-colors">
+        Settings
+      </a>
+
+      <!-- Logout -->
+      <a href="/logout" class="block mt-6 border-t border-indigo-600 py-3 px-3 rounded hover:bg-indigo-600 transition-colors">
+        Logout
+      </a>
     </nav>
   </aside>
 
