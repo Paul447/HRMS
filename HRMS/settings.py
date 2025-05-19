@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'payfrequency',
     'employeetype',
@@ -82,6 +83,9 @@ REST_FRAMEWORK = {
     #     'rest_framework.renderers.JSONRenderer',
     # ]
 }
+CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS to send header
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = not DEBUG
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Human Resource Management System API',
@@ -93,15 +97,15 @@ SPECTACULAR_SETTINGS = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=10),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=300),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_COOKIE':'access_token',
-    'AUTH_COOKIE_HTTPS_ONLY': True,
-
+    'AUTH_COOKIE': 'access_token',
+    'AUTH_COOKIE_HTTP_ONLY': True,
 }
+
 
 ROOT_URLCONF = 'HRMS.urls'
 
@@ -141,6 +145,21 @@ DATABASES = {
         },
     }
 }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
 
 
 # Password validation
@@ -178,6 +197,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "hrmsauth" / "static"]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

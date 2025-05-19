@@ -1,33 +1,189 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HRMS Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'hrmsauth/css/login.css' %}">
 </head>
-<body>
-  <h2>Login</h2>
-  <form method="POST" action="/auth/api/login/">
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
-    <button type="submit">Login</button>
-  </form>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="hrms-card w-full max-w-sm p-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-semibold text-gray-800">HR Portal</h1>
+      <p class="text-gray-500 mt-1 text-sm">Enter your credentials to continue</p>
+    </div>
 
-  <h3>Fetch Protected Data</h3>
-  <button id="fetch-data">Get Protected Data</button>
-  <pre id="output"></pre>
+    <!-- Messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="p-3 mb-4 rounded-md bg-red-50 text-red-700 border border-red-100 flex items-start">
+          <svg class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-sm">{{ message }}</span>
+        </div>
+      {% endfor %}
+    {% endif %}
 
-  <script>
-    document.getElementById('fetch-data').addEventListener('click', () => {
-      fetch('auth/api/protected/', {
-        method: 'GET',
-        credentials: 'include'  // send cookies with request
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-      })
-      .catch(err => console.error(err));
-    });
-  </script>
+    <!-- Login Form -->
+    <form id="login-form" method="POST" action="{% url 'token_obtain_pair' %}">
+      {% csrf_token %}
+      <div class="mb-5">
+        <label for="username" class="block text-sm font-medium text-gray-700 mb-1.5">Employee ID</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="e.g. EMP12345"
+          required
+          class="w-full px-4 py-2.5 input-field rounded-md focus:ring-2 focus:ring-blue-100"
+          aria-describedby="username-error"
+          autocomplete="username"
+        />
+        <div id="username-error" class="error-message text-red-500 text-xs mt-1" aria-live="polite"></div>
+      </div>
+
+      <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+          minlength="6"
+          class="w-full px-4 py-2.5 input-field rounded-md focus:ring-2 focus:ring-blue-100"
+          aria-describedby="password-error"
+          autocomplete="current-password"
+        />
+        <div id="password-error" class="error-message text-red-500 text-xs mt-1"></div>
+      </div>
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="w-full btn-primary text-white py-2.5 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        <span id="btn-text">Sign In</span>
+        <svg id="btn-spinner" class="hidden animate-spin h-5 w-5 mx-auto text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </button>
+    </form>
+  </div>
 </body>
+<script src="{% static 'hrmsauth/js/login.js' %}"></script>
 </html>
+
+  {% comment %} <script> {% endcomment %}
+    {% comment %} function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrfToken = getCookie('csrftoken');
+
+    const loginForm = document.getElementById("login-form");
+    const refreshBtn = document.getElementById("refresh-token");
+    const fetchBtn = document.getElementById("fetch-protected");
+    const output = document.getElementById("output");
+
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(loginForm);
+
+fetch("/auth/api/login/", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-CSRFToken": csrfToken
+  },
+  credentials: "include",
+  body: JSON.stringify({
+    username: formData.get("username"),
+    password: formData.get("password")
+  })
+})
+.then(response => response.json())
+.then(data => {
+  if (data.redirect_url) {
+    window.location.href = data.redirect_url;
+  } else {
+    alert("Login failed");
+  }
+})
+.catch(error => {
+  console.error("Login error:", error);
+  alert("Login error");
+});
+
+}); {% endcomment %}
+
+{% comment %} async function fetchWithAutoRefresh(url, options = {}) {
+  // Ensure credentials included for cookies
+  const fetchOptions = {
+    credentials: 'include',
+    ...options,
+  };
+
+  let response = await fetch(url, fetchOptions);
+
+  if (response.status === 401) {
+    // Try refreshing token
+    const refreshResponse = await fetch('/auth/api/token/refresh/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+    });
+
+    if (refreshResponse.ok) {
+      // Refresh succeeded, retry original request
+      response = await fetch(url, fetchOptions);
+      return response;
+    } else {
+      // Refresh failed - session expired or invalid, handle logout or redirect
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
+  return response;
+}
+
+fetchWithAutoRefresh('/auth/api/protected/', { method: 'GET' })
+  .then(async (res) => {
+    if (!res.ok) {
+      throw new Error('Failed to fetch protected data');
+    }
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  })
+  .catch((err) => {
+    output.textContent = `Error: ${err.message}`;
+    // Optionally redirect to login page here
+  }); {% endcomment %}
+
+  {% comment %} </script>
+</body>
+</html> {% endcomment %}
