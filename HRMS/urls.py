@@ -21,8 +21,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 from yearofexperience.api import register as register_experience
 from payfrequency.api import register as register_pay
-from payfrequency.api import register_register as register_user
-from payfrequency.api import register_group as register_group
+from hrmsauth.api import register_user as register_users
+from hrmsauth.api import register_user_permission as register_user_permission
+from hrmsauth.api import register_user_group as register_user_group
+
+# from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance
@@ -33,8 +36,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 router = DefaultRouter()
 register_experience(router)
 register_pay(router)
-register_user(router)
-register_group(router)
+register_users(router)
+
+
+register_user_permission(router)
+register_user_group(router)
+
+# register_group(router)
 register_accuralrates(router)
 register_employeetypes(router)
 register_ptobalance(router)

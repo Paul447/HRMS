@@ -21,6 +21,6 @@ class JWTAuthFromCookieMiddleware(MiddlewareMixin):
 
                 if request.path == login_path:
                     # Redirect to the protected resource if already logged in
-                    return redirect('/api/')
+                    return redirect('/auth/dashboard/')
             except TokenError:
                 pass  # token invalid or expired, client should refresh explicitly

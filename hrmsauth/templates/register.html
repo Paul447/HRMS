@@ -1,0 +1,105 @@
+{% extends "dashboard.html" %}
+{% block title %}
+    Register New User
+{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
+    <h3 class="text-2xl font-semibold mb-6 text-gray-800">Register New User</h3>
+    <form id="register-form" method="POST" action="/users/" class="space-y-5">
+        {% csrf_token %}
+        <div>
+            <label for="username" class="block mb-1 font-medium text-gray-700">Username</label>
+            <input type="text" name="username" id="username" required
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div>
+            <label for="email" class="block mb-1 font-medium text-gray-700">Email</label>
+            <input type="email" name="email" id="email" required
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div>
+            <label for="password" class="block mb-1 font-medium text-gray-700">Password</label>
+            <input type="password" name="password" id="password" required
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div>
+            <label for="confirm_password" class="block mb-1 font-medium text-gray-700">Confirm Password</label>
+            <input type="password" name="confirm_password" id="confirm_password" required
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="is_staff" id="is_staff"
+                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                <span class="ml-2 text-gray-700">Is Staff</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="is_superuser" id="is_superuser"
+                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                <span class="ml-2 text-gray-700">Is Superuser</span>
+            </label>
+        </div>
+
+        <div>
+            <label for="groups" class="block mb-1 font-medium text-gray-700">Groups</label>
+            <select name="groups" id="groups" multiple
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Hold Ctrl (Cmd on Mac) to select multiple</p>
+        </div>
+
+        <div>
+            <label for="user_permissions" class="block mb-1 font-medium text-gray-700">User Permissions</label>
+            <select name="user_permissions" id="user_permissions" multiple
+                class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                {% for perm in permissions %}
+                <option value="{{ perm.id }}">{{ perm.name }}</option>
+                {% endfor %}
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Hold Ctrl (Cmd on Mac) to select multiple</p>
+        </div>
+
+        <button type="submit"
+            class="w-full py-3 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition-colors">
+            Register User
+        </button>
+    </form>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('/api/user_groups/')
+        .then(res => res.json())
+        .then(data => {
+            const groupSelect = document.getElementById('groups');
+            data.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.name;
+                groupSelect.appendChild(option);
+            });
+        });
+
+    fetch('/api/permissions/')
+        .then(res => res.json())
+        .then(data => {
+            const permSelect = document.getElementById('user_permissions');
+            data.forEach(perm => {
+                const option = document.createElement('option');
+                option.value = perm.id;
+                option.textContent = `${perm.name}`;
+                permSelect.appendChild(option);
+            });
+        });
+});
+</script>
+
+{% endblock %}
+
