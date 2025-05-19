@@ -13,65 +13,7 @@
   </div>
 
   <script>
-    function isAccessTokenExpired(token) {
-      if (!token) return true;
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const exp = decoded.exp * 1000;
-      return exp < Date.now();
-    }
 
-    function refreshAccessToken() {
-      const refresh = localStorage.getItem('refreshToken');
-      if (!refresh) return;
-
-      return fetch('http://localhost:8000/api/token/refresh/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refresh }),
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.access) {
-          localStorage.setItem('accessToken', data.access);
-          return data.access;
-        } else {
-          window.location.href = 'index.html';
-        }
-      });
-    }
-
-    async function loadProtectedData() {
-      let accessToken = localStorage.getItem('accessToken');
-      
-      if (isAccessTokenExpired(accessToken)) {
-        accessToken = await refreshAccessToken();
-      }
-
-      if (!accessToken) {
-        alert('Session expired. Please login again.');
-        window.location.href = 'index.html';
-        return;
-      }
-
-      fetch('http://localhost:8000/api/protected/', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('protectedData').textContent = JSON.stringify(data, null, 2);
-      })
-      .catch(err => {
-        console.error('Protected fetch error:', err);
-        alert('Failed to fetch protected data.');
-      });
-    }
-
-    window.onload = loadProtectedData;
   </script>
 </body>
 </html>

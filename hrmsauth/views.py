@@ -30,20 +30,18 @@ class LoginView(TokenObtainPairView):
             access = serializer.validated_data.get("access")
             refresh = serializer.validated_data.get("refresh")
             response = redirect("/api/")
-            response.set_cookie("access_token", access, **COOKIE_SETTINGS , max_age=900)
-            response.set_cookie("refresh_token", refresh, **COOKIE_SETTINGS, max_age=604800)
+    
+            response.set_cookie("hjjlzz_avrlu", access, **COOKIE_SETTINGS , max_age=900)    
+            response.set_cookie("ylmylzo_avrlu", refresh, **COOKIE_SETTINGS, max_age=604800)
             return response
         except Exception:
             messages.error(request, "Invalid username or password.")
             return redirect("/auth/login/")
 
 
-
-
-
 class RefreshTokenView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_token = request.COOKIES.get("ylmylzo_avrlu")
         if not refresh_token:
             return Response({"detail": "Refresh token not found"}, status=401)
 
@@ -55,9 +53,9 @@ class RefreshTokenView(TokenRefreshView):
             new_access = data.get("access")
             new_refresh = data.get("refresh")
 
-            response.set_cookie("access_token", new_access, **COOKIE_SETTINGS)
+            response.set_cookie("hjjlzz_avrlu", new_access, **COOKIE_SETTINGS, max_age=900)
             if new_refresh:
-                response.set_cookie("refresh_token", new_refresh, **COOKIE_SETTINGS)
+                response.set_cookie("ylmylzo_avrlu", new_refresh, **COOKIE_SETTINGS, max_age=86400)
             response.data = {"detail": "Token refreshed"}
         return response
 
@@ -66,8 +64,8 @@ class LogoutView(APIView):
 
     def post(self, request):
         response = Response({"detail": "Logged out"})
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+        response.delete_cookie("hjjlzz_avrlu")
+        response.delete_cookie("ylmylzo_avrlu")
         return response
 
 class ProtectedView(APIView):
