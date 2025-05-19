@@ -98,17 +98,18 @@ class RefreshTokenView(TokenRefreshView):
 # -----------------------------
 # Logout View
 # -----------------------------
-
+@method_decorator(csrf_protect, name='dispatch')
 class LogoutView(APIView):
     """
     Logs out the user by deleting authentication cookies.
     """
     permission_classes = [IsAuthenticated]
 
+       
     def post(self, request):
-        response = Response({"detail": "Logged out"})
-        response.delete_cookie("hjjlzz_avrlu")
-        response.delete_cookie("ylmylzo_avrlu")
+        response = redirect("/auth/login/")
+        response.delete_cookie("hjjlzz_avrlu", path="/")
+        response.delete_cookie("ylmylzo_avrlu", path="/")
         return response
 
 # -----------------------------
@@ -165,9 +166,9 @@ class UserRegisterGroupViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, IsSuperUser]
     queryset = Group.objects.all()
     serializer_class = UserRegisterGroupSerializer
+
     
-
-
+@method_decorator(csrf_protect, name='dispatch')
 class UserViewSet(viewsets.ModelViewSet):
     """
     Full CRUD for the User model. Requires superuser access.

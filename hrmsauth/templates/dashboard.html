@@ -123,7 +123,11 @@
       <h2 class="text-xl font-semibold text-gray-700">User Management</h2>
       <div class="hidden md:flex items-center space-x-4">
         <span class="text-gray-600">Welcome, {{ request.user.username }}</span>
-        <a href="/logout" class="text-indigo-600 hover:text-indigo-800">Logout</a>
+        <form action="{% url 'logout' %}" method="POST" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="text-indigo-600 hover:text-indigo-800">Logout</button>
+        </form>
+        {% comment %} <a href="/auth/api/logout" class="text-indigo-600 hover:text-indigo-800">Logout</a> {% endcomment %}
       </div>
     </header>
 
