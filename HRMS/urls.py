@@ -21,10 +21,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 from yearofexperience.api import register as register_experience
 from payfrequency.api import register as register_pay
-from hrmsauth.api import register_user as register_users
-from hrmsauth.api import register_user_permission as register_user_permission
-from hrmsauth.api import register_user_group as register_user_group
 
+from hrmsauth.views import *
 # from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
@@ -36,13 +34,9 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 router = DefaultRouter()
 register_experience(router)
 register_pay(router)
-register_users(router)
 
 
-register_user_permission(router)
-register_user_group(router)
 
-# register_group(router)
 register_accuralrates(router)
 register_employeetypes(router)
 register_ptobalance(router)
@@ -50,17 +44,23 @@ register_biweeklycron(router)
 
 
 
+# HRMS Auth URLs
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'groups', GroupViewSet, basename='group')
+router.register(r'permissions', UserRegisterPermissionViewSet, basename='permission')
+router.register(r'user_groups', UserRegisterGroupViewSet, basename='user_group')
+# HRMS Auth endpoints urls 
+
 
 urlpatterns = [
-    path('auth/', include('hrmsauth.api')),
+    path('auth/', include('hrmsauth.url')),
     
     path('api/', include(router.urls)),
-    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'), 
-    # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # # Optional UI:
+
     
+    # Yaml schema generation
     # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    # Need to generate the documentation of apiendpoints
+
 ]
