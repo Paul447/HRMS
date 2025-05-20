@@ -14,12 +14,12 @@ from rest_framework import viewsets
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
 
-from .serializer import (
-    UserSerializer,
-    GroupSerializer,
-    UserRegisterPermissionSerializer,
-    UserRegisterGroupSerializer,
-)
+# from .serializer import (
+#     UserSerializer,
+#     GroupSerializer,
+#     UserRegisterPermissionSerializer,
+#     UserRegisterGroupSerializer,
+# )
 
 import logging
 
@@ -140,44 +140,44 @@ class IsSuperUser(BasePermission):
 # ViewSets for Group, Permission, and User
 # -----------------------------
 
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    CRUD operations for Django's built-in Group model.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+# class GroupViewSet(viewsets.ModelViewSet):
+#     """
+#     CRUD operations for Django's built-in Group model.
+#     """
+#     queryset = Group.objects.all()
+#     serializer_class = GroupSerializer
 
 
-class UserRegisterPermissionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Allows listing and managing available permissions
-    (for use when assigning to users or groups).
-    """
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    queryset = Permission.objects.all()
-    serializer_class = UserRegisterPermissionSerializer
+# class UserRegisterPermissionViewSet(viewsets.ReadOnlyModelViewSet):
+#     """
+#     Allows listing and managing available permissions
+#     (for use when assigning to users or groups).
+#     """
+#     permission_classes = [IsAuthenticated, IsSuperUser]
+#     queryset = Permission.objects.all()
+#     serializer_class = UserRegisterPermissionSerializer
 
 
-class UserRegisterGroupViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Allows listing and managing available groups
-    (for use when assigning to users).
-    """
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    queryset = Group.objects.all()
-    serializer_class = UserRegisterGroupSerializer
+# class UserRegisterGroupViewSet(viewsets.ReadOnlyModelViewSet):
+#     """
+#     Allows listing and managing available groups
+#     (for use when assigning to users).
+#     """
+#     permission_classes = [IsAuthenticated, IsSuperUser]
+#     queryset = Group.objects.all()
+#     serializer_class = UserRegisterGroupSerializer
 
     
-@method_decorator(csrf_protect, name='dispatch')
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    Full CRUD for the User model. Requires superuser access.
-    Uses a custom serializer that includes password logic,
-    group and permission assignment, and validation.
-    """
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+# @method_decorator(csrf_protect, name='dispatch')
+# class UserViewSet(viewsets.ModelViewSet):
+#     """
+#     Full CRUD for the User model. Requires superuser access.
+#     Uses a custom serializer that includes password logic,
+#     group and permission assignment, and validation.
+#     """
+#     # permission_classes = [IsAuthenticated, IsSuperUser]
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
 
 
 
@@ -207,3 +207,12 @@ class RegisterUserView(APIView):
     permission_classes = [IsAuthenticated, IsSuperUser]
     def get(self, request):
         return render(request, "register.html")
+class ViewUsersView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    def get(self, request):
+        return render(request, "viewuser.html")
+class EditUserView(APIView):
+    permission_classes = [IsAuthenticated, IsSuperUser]
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        return render(request, "edituser.html", {"user": user})

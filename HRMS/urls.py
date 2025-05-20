@@ -45,10 +45,10 @@ register_biweeklycron(router)
 
 
 # HRMS Auth URLs
-router.register(r'users', UserViewSet, basename='user')
-router.register(r'groups', GroupViewSet, basename='group')
-router.register(r'permissions', UserRegisterPermissionViewSet, basename='permission')
-router.register(r'user_groups', UserRegisterGroupViewSet, basename='user_group')
+# router.register(r'users', UserViewSet, basename='user')
+# router.register(r'groups', GroupViewSet, basename='group')
+# router.register(r'permissions', UserRegisterPermissionViewSet, basename='permission')
+# router.register(r'user_groups', UserRegisterGroupViewSet, basename='user_group')
 # HRMS Auth endpoints urls 
 
 
@@ -56,6 +56,7 @@ urlpatterns = [
     path('auth/', include('hrmsauth.url')),
     
     path('api/', include(router.urls)),
+    path('admin/', admin.site.urls),
 
     
     # Yaml schema generation

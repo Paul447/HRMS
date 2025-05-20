@@ -34,7 +34,7 @@
       </a>
 
       <!-- User Management menu -->
-      <div class="mt-4">
+      {% comment %} <div class="mt-4">
         <button onclick="toggleSubmenu('userSubmenu')" class="w-full flex items-center justify-between py-2 px-3 rounded hover:bg-indigo-600 transition-colors focus:outline-none">
           <span class="font-semibold">User Management</span>
           <div class="flex items-center space-x-2">
@@ -49,10 +49,10 @@
           </div>
         </button>
         <div id="userSubmenu" class="mt-1 ml-4 space-y-1 hidden">
-          <a href="{% url 'register_user' %}" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">View Users</a>
+          <a href="{% url 'view_users' %}" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">View Users</a>
           <a href="{% url 'register_user' %}" class="block py-1 px-3 rounded hover:bg-indigo-600 transition-colors">Add User</a>
         </div>
-      </div>
+      </div> {% endcomment %}
 
       <!-- Groups menu -->
       <div class="mt-4">
