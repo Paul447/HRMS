@@ -113,19 +113,6 @@ class LogoutView(APIView):
         return response
 
 # -----------------------------
-# Protected Test View
-# -----------------------------
-
-class ProtectedView(APIView):
-    """
-    Sample protected API view.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        return Response({"message": f"Hello {request.user.username}, you're authenticated!"})
-
-# -----------------------------
 # Permissions
 # -----------------------------
 
@@ -136,62 +123,12 @@ class IsSuperUser(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
 
+
+
+
 # -----------------------------
-# ViewSets for Group, Permission, and User
+# User Registration APIViews
 # -----------------------------
-
-# class GroupViewSet(viewsets.ModelViewSet):
-#     """
-#     CRUD operations for Django's built-in Group model.
-#     """
-#     queryset = Group.objects.all()
-#     serializer_class = GroupSerializer
-
-
-# class UserRegisterPermissionViewSet(viewsets.ReadOnlyModelViewSet):
-#     """
-#     Allows listing and managing available permissions
-#     (for use when assigning to users or groups).
-#     """
-#     permission_classes = [IsAuthenticated, IsSuperUser]
-#     queryset = Permission.objects.all()
-#     serializer_class = UserRegisterPermissionSerializer
-
-
-# class UserRegisterGroupViewSet(viewsets.ReadOnlyModelViewSet):
-#     """
-#     Allows listing and managing available groups
-#     (for use when assigning to users).
-#     """
-#     permission_classes = [IsAuthenticated, IsSuperUser]
-#     queryset = Group.objects.all()
-#     serializer_class = UserRegisterGroupSerializer
-
-    
-# @method_decorator(csrf_protect, name='dispatch')
-# class UserViewSet(viewsets.ModelViewSet):
-#     """
-#     Full CRUD for the User model. Requires superuser access.
-#     Uses a custom serializer that includes password logic,
-#     group and permission assignment, and validation.
-#     """
-#     # permission_classes = [IsAuthenticated, IsSuperUser]
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class FrontendLoginView(APIView):
@@ -203,16 +140,3 @@ class DashboardView(APIView):
 
     def get(self, request):
         return render(request, "dashboard.html")
-class RegisterUserView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    def get(self, request):
-        return render(request, "register.html")
-class ViewUsersView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    def get(self, request):
-        return render(request, "viewuser.html")
-class EditUserView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperUser]
-    def get(self, request, user_id):
-        user = User.objects.get(id=user_id)
-        return render(request, "edituser.html", {"user": user})
