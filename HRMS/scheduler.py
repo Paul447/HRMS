@@ -1,5 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.cron import CronTrigger 
+from apscheduler.triggers.interval import IntervalTrigger
 
 from yearofexperience.tasks import update_experience_records
 from ptobalance.tasks import update_pto_balance_monthly, update_pto_balance_biweekly
