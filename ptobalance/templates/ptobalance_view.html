@@ -86,6 +86,7 @@
                 }
             })
             .then(data => {
+                const pto = data[0];
                 document.getElementById('employee-type').textContent = pto.employee_type.name;
                 document.getElementById('pay-frequency').textContent = pto.pay_frequency.frequency;
                 document.getElementById('accrual-rate').textContent = pto.accrual_rate.accrual_rate;
