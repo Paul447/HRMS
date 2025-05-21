@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'biweeklycron',
     'drf_spectacular',
     'hrmsauth',
+    'department',
+    'paytype',
 
 ]
 SPECTACULAR_SETTINGS = {
