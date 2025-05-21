@@ -86,15 +86,12 @@
                 }
             })
             .then(data => {
-                const pto = data[0];
-                console.log(pto);
                 document.getElementById('employee-type').textContent = pto.employee_type.name;
                 document.getElementById('pay-frequency').textContent = pto.pay_frequency.frequency;
                 document.getElementById('accrual-rate').textContent = pto.accrual_rate.accrual_rate;
                 document.getElementById('pto-balance').textContent = pto.pto_balance;
                 document.getElementById('username').textContent = pto.user.username;
                 document.getElementById('years-of-experience').textContent = pto.year_of_experience.years_of_experience;
-
             }) 
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
