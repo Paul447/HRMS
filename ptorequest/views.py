@@ -12,5 +12,10 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
     queryset = PTORequests.objects.all()
     serializer_class = PTORequestsSerializer
     permission_classes = [IsAuthenticated]
-    
+
+class PTORequestsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return render(request, 'ptorequest.html')
 
