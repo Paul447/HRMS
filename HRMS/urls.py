@@ -54,7 +54,7 @@ register_biweeklycron(router)
 
 urlpatterns = [
     path('auth/', include('hrmsauth.url')),
-    
+    path('auth/', include('ptobalance.url')),
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
 

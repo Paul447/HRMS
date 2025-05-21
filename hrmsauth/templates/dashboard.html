@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>User Management Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>{% block title %}Admin Portal{% endblock %}</title> <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -229,6 +228,7 @@
         </svg>
         <span class="font-medium">Settings</span>
       </a>
+
       <form action="{% url 'logout' %}" method="POST" class="w-full">
         {% csrf_token %}
         <button type="submit" class="flex items-center space-x-3 mt-6 border-t border-primary-700 py-3 px-4 rounded-lg hover:bg-primary-700 transition-all duration-200 group w-full text-left">
@@ -238,8 +238,6 @@
           <span class="font-medium">Logout</span>
         </button>
       </form>
-
-    </form>
     </nav>
   </aside>
 
@@ -252,8 +250,8 @@
         </svg>
       </button>
       <div class="flex items-center space-x-4">
-        <h2 class="text-2xl font-semibold text-secondary-800">User Management</h2>
-        <span class="hidden md:inline-block px-3 py-1 text-sm font-medium bg-primary-100 text-primary-800 rounded-full">Admin Dashboard</span>
+        <h2 class="text-2xl font-semibold text-secondary-800">{% block page_title %}Dashboard{% endblock %}</h2>
+        <span class="hidden md:inline-block px-3 py-1 text-sm font-medium bg-primary-100 text-primary-800 rounded-full">Admin Portal</span>
       </div>
       <div class="flex items-center space-x-4">
         <div class="relative">
@@ -287,14 +285,8 @@
               Dashboard
             </a>
           </li>
-          <li aria-current="page">
-            <div class="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-              <span class="ml-1 text-sm font-semibold text-primary-600 md:ml-2">User Management</span>
-            </div>
-          </li>
+          {% block breadcrumb_items %}
+          {% endblock %}
         </ol>
       </nav>
     </div>
@@ -302,9 +294,9 @@
     <main class="flex-grow container mx-auto p-6 md:p-10">
       {% block content %}
       <div class="bg-white rounded-lg shadow-md p-8 text-center border border-secondary-200">
-        <h3 class="text-2xl font-bold text-secondary-800 mb-4">Welcome to User Management!</h3>
+        <h3 class="text-2xl font-bold text-secondary-800 mb-4">Welcome to your Dashboard!</h3>
         <p class="text-secondary-600 mb-6">
-          Use the sidebar navigation to view, add, and manage users, groups, and permissions.
+          Navigate through the sidebar to manage different aspects of the portal.
         </p>
         <div class="flex justify-center space-x-4">
           <a href="/users" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">

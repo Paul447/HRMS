@@ -1,0 +1,106 @@
+{% extends 'dashboard.html' %}
+
+{% block title %}Employee Details{% endblock %}
+
+{% block page_title %}Employee Details{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-sm font-semibold text-primary-600 md:ml-2">Employee Details</span>
+    </div>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 col-span-1 md:col-span-2 lg:col-span-3">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-secondary-800 flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0v10v-4M16 4v10m-2 0h-4" />
+                </svg>
+                <span>Employee Information</span>
+            </h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+            <div>
+                <p class="text-sm font-medium text-secondary-500">Employee Type</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="employee-type"></p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-secondary-500">Pay Frequency</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="pay-frequency"></p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-secondary-500">Accrual Rate</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="accrual-rate"></p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-secondary-500">Username</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="username"></p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-secondary-500">Years of Experience</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="years-of-experience"></p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-secondary-500">PTO Balance</p>
+                <p class="mt-1 text-base font-semibold text-secondary-800" id="pto-balance"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 text-center">
+        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Quick Stats</h4>
+        <p class="text-secondary-600">This could be a summary of system health or recent activity.</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 text-center">
+        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Recent Notifications</h4>
+        <p class="text-secondary-600">Display important alerts here.</p>
+    </div>
+
+</div>
+<script>
+    // JavaScript for any dynamic functionality can be added here
+    document.addEventListener('DOMContentLoaded', () => {
+        // Example: Initialize tooltips, dropdowns, etc.
+        fetch('/api/ptobalance/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: "include"
+        })
+        .then(response => {
+            if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .then(data => {
+                const pto = data[0];
+                console.log(pto);
+                document.getElementById('employee-type').textContent = pto.employee_type.name;
+                document.getElementById('pay-frequency').textContent = pto.pay_frequency.frequency;
+                document.getElementById('accrual-rate').textContent = pto.accrual_rate.accrual_rate;
+                document.getElementById('pto-balance').textContent = pto.pto_balance;
+                document.getElementById('username').textContent = pto.user.username;
+                document.getElementById('years-of-experience').textContent = pto.year_of_experience.years_of_experience;
+
+            }) 
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    });
+  
+
+</script>
+{% endblock %}

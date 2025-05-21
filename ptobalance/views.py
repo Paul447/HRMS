@@ -4,36 +4,22 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import IntegrityError
 from .serializer import PTOBalanaceSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from django.shortcuts import render
 # Create your views here.
 
-class PTOBalanceViewSet(viewsets.ModelViewSet):
-    queryset = PTOBalance.objects.all()
+class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PTOBalanaceSerializer
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    permission_classes = [IsAuthenticated]
 
-        try:
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except IntegrityError as e:
-            # Handle the integrity error gracefully
-            return Response(
-                {"detail": f"Integrity Error: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    def get_queryset(self):
+        user = self.request.user
+        return PTOBalance.objects.filter(user=user)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get('partial', False))
-        serializer.is_valid(raise_exception=True)
 
-        try:
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        except IntegrityError as e:
-            # Handle the integrity error gracefully
-            return Response(
-                {"detail": f"Integrity Error: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+class PTOBalanceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return render(request, 'ptobalance_view.html')    
