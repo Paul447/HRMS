@@ -28,6 +28,9 @@ from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance
 from biweeklycron.api import register as register_biweeklycron
+from ptorequest.api import register as register_ptorequest
+from department.api import register as register_department
+from paytype.api import register as register_paytype    
 from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
@@ -35,8 +38,12 @@ router = DefaultRouter()
 register_experience(router)
 register_pay(router)
 
+register_paytype(router)
+register_department(router)
 
 
+
+register_ptorequest(router)
 register_accuralrates(router)
 register_employeetypes(router)
 register_ptobalance(router)

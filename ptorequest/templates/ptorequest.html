@@ -1,0 +1,82 @@
+{% extends "dashboard.html" %}
+
+{% block title %}PTO Request{% endblock %}
+{% block page_title %}Submit New PTO Request{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-sm font-semibold text-primary-600 md:ml-2">PTO Request</span>
+    </div>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6 md:p-8 border border-secondary-200">
+    <h2 class="text-2xl md:text-3xl font-extrabold text-secondary-800 mb-6 text-center">Your Paid Time Off Request</h2>
+    <p class="text-secondary-600 mb-8 text-center max-w-2xl mx-auto">
+        Please fill out the form below to submit your PTO request. Ensure all details are accurate for timely processing.
+    </p>
+
+    <form action="/submit-pto-request" method="POST" class="space-y-6">
+        {% csrf_token %} {# IMPORTANT: Keep this line for Django forms! #}
+
+        <div>
+            <label for="department_name" class="block text-sm font-medium text-secondary-700 mb-2">Department</label>
+            <select id="department_name" name="department_name" required
+                    class="block w-full px-4 py-2 border border-secondary-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-base transition-all duration-200 ease-in-out bg-white text-secondary-800">
+                <option value="">Select your Department</option>
+                <option value="IT">IT Department</option>
+                <option value="HR">Human Resources</option>
+                <option value="Sales">Sales</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+                </select>
+        </div>
+
+        <div>
+            <label for="pay_types" class="block text-sm font-medium text-secondary-700 mb-2">Pay Type</label>
+            <select id="pay_types" name="pay_types" required
+                    class="block w-full px-4 py-2 border border-secondary-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-base transition-all duration-200 ease-in-out bg-white text-secondary-800">
+                <option value="">Select Pay Type</option>
+                <option value="Vacation">Vacation</option>
+                <option value="Sick Leave">Sick Leave</option>
+                <option value="Personal Day">Personal Day</option>
+                <option value="Bereavement">Bereavement</option>
+                </select>
+        </div>
+
+        <div>
+            <label for="start_date_time" class="block text-sm font-medium text-secondary-700 mb-2">Start Date and Time</label>
+            <input type="datetime-local" id="start_date_time" name="start_date_time" required
+                   class="block w-full px-4 py-2 border border-secondary-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-base transition-all duration-200 ease-in-out text-secondary-800">
+        </div>
+
+        <div>
+            <label for="end_date_time" class="block text-sm font-medium text-secondary-700 mb-2">End Date and Time</label>
+            <input type="datetime-local" id="end_date_time" name="end_date_time" required
+                   class="block w-full px-4 py-2 border border-secondary-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-base transition-all duration-200 ease-in-out text-secondary-800">
+        </div>
+
+        <div>
+            <label for="reason" class="block text-sm font-medium text-secondary-700 mb-2">Reason for PTO</label>
+            <textarea id="reason" name="reason" rows="5" required
+                      class="block w-full px-4 py-2 border border-secondary-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-base transition-all duration-200 ease-in-out text-secondary-800"
+                      placeholder="e.g., Vacation to visit family, sick leave for flu, personal day for appointment..."></textarea>
+        </div>
+
+        <div class="flex justify-end pt-4">
+            <button type="submit"
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Submit PTO Request
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
