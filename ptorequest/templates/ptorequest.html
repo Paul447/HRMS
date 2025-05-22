@@ -79,22 +79,74 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+   document.addEventListener('DOMContentLoaded', function() {
         const departmentSelect = document.getElementById('department_name');
         const payTypeSelect = document.getElementById('pay_types');
         const form = document.getElementById('ptoRequestForm');
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
 
+        /**
+         * A wrapper around fetch that retries the request once if a 401 Unauthorized is received.
+         * It assumes your Django middleware handles token refreshing and setting new cookies.
+         * @param {string} url - The URL to fetch.
+         * @param {RequestInit} options - The fetch options (e.g., method, headers, body, credentials).
+         * @param {boolean} isRetry - Internal flag to prevent infinite loops (true if this is a retry attempt).
+         * @returns {Promise<Response>} - The fetch response.
+         */
+        async function smartFetch(url, options = {}, isRetry = false) {
+            try {
+                // First attempt to fetch the resource
+                const response = await fetch(url, options);
+
+                // If we get a 401 (Unauthorized) and it's not already a retry
+                if (response.status === 401 && !isRetry) {
+                    console.warn("Received 401 Unauthorized for an API call. Retrying with potentially new token...");
+                    // The server middleware should have refreshed the cookie on this 401 response.
+                    // Now, we immediately retry the exact same request.
+                    return await smartFetch(url, options, true); // Re-call with isRetry = true
+                }
+                
+                // For debugging, useful to see the final status
+                console.log(`API call to ${url} finished with status: ${response.status}`);
+                return response; // Return the response (either original or retried)
+
+            } catch (error) {
+                // Handle network errors or other fetch-related issues
+                console.error("Network or other fetch error during smartFetch:", error);
+                throw error; // Re-throw so the calling function can handle it
+            }
+        }
+
+        /**
+         * Fetches data from an API and populates a dropdown select element.
+         * It uses smartFetch to handle potential token expiry and retries.
+         * @param {string} url - The API endpoint to fetch data from.
+         * @param {HTMLSelectElement} selectElement - The <select> element to populate.
+         * @param {string} defaultOptionText - The text for the initial disabled selected option.
+         * @param {string} valueKey - The key in the API response object for the option's value.
+         * @param {string} labelKey - The key in the API response object for the option's display text.
+         */
         async function fetchAndPopulateDropdown(url, selectElement, defaultOptionText, valueKey, labelKey) {
             try {
-                const response = await fetch(url, {
+                const response = await smartFetch(url, {
                     method: 'GET',
-                    credentials: 'include',
+                    credentials: 'include', // Ensures cookies (like JWT) are sent
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
+
+                // If the response is not OK (e.g., 4xx, 5xx)
+                if (!response.ok) {
+                    // If it's still 401 after smartFetch's retry (means refresh token also failed)
+                    if (response.status === 401) {
+                        console.error("Dropdown data fetch failed: Refresh token invalid. Redirecting to login.");
+                        window.location.href = '/auth/login/'; // Redirect to login page
+                        return; // Stop further execution
+                    }
+                    throw new Error(`Failed to load ${defaultOptionText} with status: ${response.status}`);
+                }
 
                 const data = await response.json();
                 selectElement.innerHTML = `<option value="" disabled selected>${defaultOptionText}</option>`;
@@ -106,20 +158,24 @@
                     selectElement.appendChild(option);
                 });
             } catch (error) {
+                console.error(`Error populating ${defaultOptionText} dropdown:`, error);
                 selectElement.innerHTML = `<option value="" disabled selected>Error loading ${defaultOptionText}</option>`;
             }
         }
 
+        // Initialize dropdowns on page load using smartFetch
         fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
         fetchAndPopulateDropdown('/api/paytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
 
+        // Handle form submission
         form.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            successMessage.classList.add('hidden');
+            event.preventDefault(); // Prevent default form submission
+            successMessage.classList.add('hidden'); // Hide previous messages
             errorMessage.classList.add('hidden');
 
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Get CSRF token
 
+            // Gather form data
             const payload = {
                 department_name: form.department_name.value,
                 pay_types: form.pay_types.value,
@@ -129,22 +185,35 @@
             };
 
             try {
-                const response = await fetch('/api/pto-requests/', {
+                // Submit form data using smartFetch
+                const response = await smartFetch('/api/pto-requests/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken
+                        'X-CSRFToken': csrftoken // Include CSRF token for POST requests
                     },
-                    credentials: 'include',
+                    credentials: 'include', // Ensure cookies are sent
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error("Submission failed");
+                // Check if the submission was successful
+                if (!response.ok) {
+                    // If still 401 after smartFetch's retry
+                    if (response.status === 401) {
+                        console.error("Form submission failed: Refresh token invalid. Redirecting to login.");
+                        window.location.href = '/auth/login/'; // Redirect to login
+                        return;
+                    }
+                    throw new Error("Form submission failed with status: " + response.status);
+                }
+
+                // Show success message and reset form
                 successMessage.classList.remove('hidden');
                 form.reset();
             } catch (err) {
+                // Show error message
                 errorMessage.classList.remove('hidden');
-                console.error('Submission error:', err);
+                console.error('Form submission error:', err);
             }
         });
     });

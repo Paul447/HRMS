@@ -81,9 +81,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 'DEFAULT_RENDERER_CLASSES': [
-    #     'rest_framework.renderers.JSONRenderer',
-    # ]
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ]
 }
 
 
@@ -100,6 +100,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(minutes=1440),
@@ -108,7 +109,10 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_COOKIE': 'hjjlzz_avrlu',
     'AUTH_COOKIE_HTTP_ONLY': True,
+    'UPDATE_LAST_LOGIN': True,
 }
+ACCESS_TOKEN_COOKIE_NAME = 'hjjlzz_avrlu'
+REFRESH_TOKEN_COOKIE_NAME = 'ylmylzo_avrlu'
 
 
 ROOT_URLCONF = 'HRMS.urls'

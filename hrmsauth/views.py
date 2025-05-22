@@ -1,6 +1,8 @@
 # views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -11,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User, Group, Permission
 from rest_framework import viewsets
+from rest_framework import status
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
 
@@ -71,29 +74,30 @@ class RefreshTokenView(TokenRefreshView):
     Refreshes JWT token using refresh token from cookies.
     Returns only a success message instead of the tokens.
     """
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get("ylmylzo_avrlu")
+    def get(self, request):
+        refresh_token = request.COOKIES.get('ylmylzo_avrlu')
+
         if not refresh_token:
-            return Response({"detail": "Refresh token not found"}, status=401)
+            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        request.data["refresh"] = refresh_token
-        response = super().post(request, *args, **kwargs)
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+            
+            response = Response({"access": new_access_token})
+            response.set_cookie(
+                "hjjlzz_avrlu",
+                new_access_token,
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                max_age=900,
+                path="/",
+            )
+            return response
 
-        if response.status_code == 200:
-            new_access = response.data.get("access")
-            new_refresh = response.data.get("refresh")
-
-            # Set new access token
-            response.set_cookie("hjjlzz_avrlu", new_access, **COOKIE_SETTINGS, max_age=900)
-
-            # Set new refresh token if returned
-            if new_refresh:
-                response.set_cookie("ylmylzo_avrlu", new_refresh, **COOKIE_SETTINGS, max_age=86400)
-
-            # Hide actual token values from frontend
-            response.data = {"detail": "Token refreshed"}
-
-        return response
+        except TokenError:
+            return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
 
 # -----------------------------
 # Logout View
@@ -101,12 +105,22 @@ class RefreshTokenView(TokenRefreshView):
 @method_decorator(csrf_protect, name='dispatch')
 class LogoutView(APIView):
     """
-    Logs out the user by deleting authentication cookies.
+    Logs out the user by deleting authentication cookies and blacklisting refresh token.
     """
     permission_classes = [IsAuthenticated]
 
-       
     def post(self, request):
+        refresh_token = request.COOKIES.get("ylmylzo_avrlu")
+        
+        # Try blacklisting the refresh token
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()  # Requires the blacklist app enabled in SimpleJWT
+            except Exception as e:
+                # Optional: log the error or silently pass
+                pass
+
         response = redirect("/auth/login/")
         response.delete_cookie("hjjlzz_avrlu", path="/")
         response.delete_cookie("ylmylzo_avrlu", path="/")
