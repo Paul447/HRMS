@@ -17,12 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView , TokenVerifyView
 from rest_framework.routers import DefaultRouter
 from yearofexperience.api import register as register_experience
 from payfrequency.api import register as register_pay
 
-from hrmsauth.views import *
+# from hrmsauth.views import *
 # from payfrequency.api import register_group as register_group
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
@@ -31,8 +30,8 @@ from biweeklycron.api import register as register_biweeklycron
 from ptorequest.api import register as register_ptorequest
 from department.api import register as register_department
 from paytype.api import register as register_paytype    
-from django.contrib.auth import views as auth_views
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+# from django.contrib.auth import views as auth_views
+# from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = DefaultRouter()
 register_experience(router)
@@ -51,18 +50,11 @@ register_biweeklycron(router)
 
 
 
-# HRMS Auth URLs
-# router.register(r'users', UserViewSet, basename='user')
-# router.register(r'groups', GroupViewSet, basename='group')
-# router.register(r'permissions', UserRegisterPermissionViewSet, basename='permission')
-# router.register(r'user_groups', UserRegisterGroupViewSet, basename='user_group')
-# HRMS Auth endpoints urls 
-
 
 urlpatterns = [
     path('auth/', include('hrmsauth.url')),
-    path('auth/pto/', include('ptobalance.url')),
-    path('auth/pto/', include('ptorequest.url')),
+    path('auth/ptobalance/', include('ptobalance.url')),
+    path('auth/ptorequest/', include('ptorequest.url')),
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
 

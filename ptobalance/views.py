@@ -2,7 +2,6 @@ from rest_framework import viewsets
 from .models import PTOBalance
 from .serializer import PTOBalanaceSerializer
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.urls import reverse
@@ -21,7 +20,7 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PTOBalanceView(TemplateView):
-    template_name = 'ptobalance.html'
+    template_name = 'ptobalance_view.html'
     def dispatch(self, request, *args, **kwargs):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
 
