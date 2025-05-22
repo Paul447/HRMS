@@ -70,34 +70,10 @@ class TokenObtainPairView(TokenObtainPairView):
 
 class RefreshTokenView(TokenRefreshView):
     """
-    Refreshes JWT token using refresh token from cookies.
-    Returns only a success message instead of the tokens.
+    This view is not used till now. It is going to removed soon.
     """
     pass
-    # def get(self, request):
-    #     refresh_token = request.COOKIES.get('ylmylzo_avrlu')
 
-    #     if not refresh_token:
-    #         return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
-
-    #     try:
-    #         refresh = RefreshToken(refresh_token)
-    #         new_access_token = str(refresh.access_token)
-            
-    #         response = Response({"access": new_access_token})
-    #         response.set_cookie(
-    #             "hjjlzz_avrlu",
-    #             new_access_token,
-    #             httponly=True,
-    #             secure=not settings.DEBUG,
-    #             samesite="Lax",
-    #             max_age=900,
-    #             path="/",
-    #         )
-    #         return response
-
-    #     except TokenError:
-    #         return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
 
 # -----------------------------
 # Logout View
@@ -105,27 +81,9 @@ class RefreshTokenView(TokenRefreshView):
 @method_decorator(csrf_protect, name='dispatch')
 class LogoutView(APIView):
     """
-    Logs out the user by deleting authentication cookies and blacklisting refresh token.
+    Everything in this view is handled by the middleware. This is just a placeholder. Used for the logout URL.
     """
     pass 
-    # permission_classes = [IsAuthenticated]
-
-    # def post(self, request):
-    #     refresh_token = request.COOKIES.get("ylmylzo_avrlu")
-        
-    #     # Try blacklisting the refresh token
-    #     if refresh_token:
-    #         try:
-    #             token = RefreshToken(refresh_token)
-    #             token.blacklist()  # Requires the blacklist app enabled in SimpleJWT
-    #         except Exception as e:
-    #             # Optional: log the error or silently pass
-    #             pass
-
-    #     response = redirect("/auth/login/")
-    #     response.delete_cookie("hjjlzz_avrlu", path="/")
-    #     response.delete_cookie("ylmylzo_avrlu", path="/")
-    #     return response
 
 # -----------------------------
 # Permissions
