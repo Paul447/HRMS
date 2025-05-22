@@ -1,9 +1,8 @@
 # views.py
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework.response import Response
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from django.conf import settings
@@ -11,11 +10,11 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-from django.contrib.auth.models import User, Group, Permission
-from rest_framework import viewsets
-from rest_framework import status
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
+from django.urls import reverse
+from rest_framework_simplejwt.tokens import AccessToken, TokenError
+
 
 # from .serializer import (
 #     UserSerializer,
@@ -43,7 +42,7 @@ COOKIE_SETTINGS = {
 # JWT Login View
 # -----------------------------
 
-class LoginView(TokenObtainPairView):
+class TokenObtainPairView(TokenObtainPairView):
     """
     Custom login view using SimpleJWT.
     Stores access and refresh tokens in HttpOnly cookies.
@@ -74,30 +73,31 @@ class RefreshTokenView(TokenRefreshView):
     Refreshes JWT token using refresh token from cookies.
     Returns only a success message instead of the tokens.
     """
-    def get(self, request):
-        refresh_token = request.COOKIES.get('ylmylzo_avrlu')
+    pass
+    # def get(self, request):
+    #     refresh_token = request.COOKIES.get('ylmylzo_avrlu')
 
-        if not refresh_token:
-            return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
+    #     if not refresh_token:
+    #         return Response({"detail": "No refresh token provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            refresh = RefreshToken(refresh_token)
-            new_access_token = str(refresh.access_token)
+    #     try:
+    #         refresh = RefreshToken(refresh_token)
+    #         new_access_token = str(refresh.access_token)
             
-            response = Response({"access": new_access_token})
-            response.set_cookie(
-                "hjjlzz_avrlu",
-                new_access_token,
-                httponly=True,
-                secure=not settings.DEBUG,
-                samesite="Lax",
-                max_age=900,
-                path="/",
-            )
-            return response
+    #         response = Response({"access": new_access_token})
+    #         response.set_cookie(
+    #             "hjjlzz_avrlu",
+    #             new_access_token,
+    #             httponly=True,
+    #             secure=not settings.DEBUG,
+    #             samesite="Lax",
+    #             max_age=900,
+    #             path="/",
+    #         )
+    #         return response
 
-        except TokenError:
-            return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
+    #     except TokenError:
+    #         return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
 
 # -----------------------------
 # Logout View
@@ -107,24 +107,25 @@ class LogoutView(APIView):
     """
     Logs out the user by deleting authentication cookies and blacklisting refresh token.
     """
-    permission_classes = [IsAuthenticated]
+    pass 
+    # permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        refresh_token = request.COOKIES.get("ylmylzo_avrlu")
+    # def post(self, request):
+    #     refresh_token = request.COOKIES.get("ylmylzo_avrlu")
         
-        # Try blacklisting the refresh token
-        if refresh_token:
-            try:
-                token = RefreshToken(refresh_token)
-                token.blacklist()  # Requires the blacklist app enabled in SimpleJWT
-            except Exception as e:
-                # Optional: log the error or silently pass
-                pass
+    #     # Try blacklisting the refresh token
+    #     if refresh_token:
+    #         try:
+    #             token = RefreshToken(refresh_token)
+    #             token.blacklist()  # Requires the blacklist app enabled in SimpleJWT
+    #         except Exception as e:
+    #             # Optional: log the error or silently pass
+    #             pass
 
-        response = redirect("/auth/login/")
-        response.delete_cookie("hjjlzz_avrlu", path="/")
-        response.delete_cookie("ylmylzo_avrlu", path="/")
-        return response
+    #     response = redirect("/auth/login/")
+    #     response.delete_cookie("hjjlzz_avrlu", path="/")
+    #     response.delete_cookie("ylmylzo_avrlu", path="/")
+    #     return response
 
 # -----------------------------
 # Permissions
@@ -149,8 +150,20 @@ class FrontendLoginView(APIView):
     def get(self, request):
         return render(request, "login.html")
 
-class DashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+# @method_decorator(ensure_csrf_cookie, name='dispatch')
+class DashboardView(TemplateView):
+    template_name = 'dashboard.html'
 
-    def get(self, request):
-        return render(request, "dashboard.html")
+    def dispatch(self, request, *args, **kwargs):
+        access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
+
+        if not access_token:
+            return redirect(reverse('frontend_login'))
+
+        try:
+            AccessToken(access_token).verify()
+        except TokenError:
+            return redirect(reverse('frontend_login'))
+
+        return super().dispatch(request, *args, **kwargs)
+
