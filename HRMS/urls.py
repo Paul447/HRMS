@@ -21,8 +21,8 @@ from rest_framework.routers import DefaultRouter
 from yearofexperience.api import register as register_experience
 from payfrequency.api import register as register_pay
 
-# from hrmsauth.views import *
-# from payfrequency.api import register_group as register_group
+from hrmsauth.views import *
+
 from accuralrates.api import register as register_accuralrates
 from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance

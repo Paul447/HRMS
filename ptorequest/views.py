@@ -8,9 +8,12 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
+@method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):
     queryset = PTORequests.objects.all()
     serializer_class = PTORequestsSerializer
