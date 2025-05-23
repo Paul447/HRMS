@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Initial Data Loading ---
     // Fetch and populate the Department dropdown when the page loads
-    fetchAndPopulateDropdown('http://127.0.0.1:8000/api/userprofile/', departmentSelect, 'Select your Department', 'id', 'name');
+    fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
     // Fetch and populate the Pay Type dropdown when the page loads
     fetchAndPopulateDropdown('/api/paytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
 

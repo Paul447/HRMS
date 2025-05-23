@@ -8,3 +8,6 @@ class PayType(models.Model):
     def __str__(self):
         return self.name
 # Create your models here.
+class UserBasedPayType(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE )
+    pay_type = models.ForeignKey(PayType, on_delete=models.CASCADE, unique=True)

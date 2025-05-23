@@ -1,13 +1,15 @@
-from django.shortcuts import render
 from rest_framework import viewsets 
-from .models import PayType
-
-from .serializer import PayTypeSerializer
+from .models import UserBasedPayType
+from .serializer import UserBasedPayTypeSerializer
 from rest_framework.permissions import IsAuthenticated
 
-class PayTypeViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PayTypeSerializer
+
+
+class UserBasedPayTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserBasedPayTypeSerializer
     permission_classes = [IsAuthenticated]
-    queryset = PayType.objects.all()
+    def get_queryset(self):
+        user = self.request.user
+        return UserBasedPayType.objects.filter(user=user)
 
 # Create your views here.

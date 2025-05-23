@@ -28,7 +28,6 @@ from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance
 from biweeklycron.api import register as register_biweeklycron
 from ptorequest.api import register as register_ptorequest
-from department.api import register as register_department
 from department.api import register_userprofile as register_userprofile
 from paytype.api import register as register_paytype    
 # from django.contrib.auth import views as auth_views
@@ -39,7 +38,7 @@ register_experience(router)
 register_pay(router)
 
 register_paytype(router)
-register_department(router)
+
 register_userprofile(router)
 
 

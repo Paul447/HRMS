@@ -1,6 +1,5 @@
-from .views import DepartmentViewSet , UserProfileViewSet
+from .views import  UserProfileViewSet
 
-def register(router):
-    router.register(r'department', DepartmentViewSet, basename='department')
+
 def register_userprofile(router):
-    router.register(r'userprofile', UserProfileViewSet, basename='userprofile')
+    router.register(r'department', UserProfileViewSet, basename='userprofile')
