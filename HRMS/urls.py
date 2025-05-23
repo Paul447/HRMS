@@ -18,15 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 from rest_framework.routers import DefaultRouter
-from yearofexperience.api import register as register_experience
-from payfrequency.api import register as register_pay
-
 from hrmsauth.views import *
-
-from accuralrates.api import register as register_accuralrates
-from employeetype.api import register as register_employeetypes
 from ptobalance.api import register as register_ptobalance
-from biweeklycron.api import register as register_biweeklycron
 from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
 from paytype.api import register as register_paytype    
@@ -34,8 +27,8 @@ from paytype.api import register as register_paytype
 # from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = DefaultRouter()
-register_experience(router)
-register_pay(router)
+
+
 
 register_paytype(router)
 
@@ -44,10 +37,9 @@ register_userprofile(router)
 
 
 register_ptorequest(router)
-register_accuralrates(router)
-register_employeetypes(router)
+
 register_ptobalance(router)
-register_biweeklycron(router)
+
 
 
 
