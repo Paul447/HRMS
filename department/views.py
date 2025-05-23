@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Department
-from .serializer import DepartmentSerializer
+from .models import Department, UserProfile
+from .serializer import DepartmentSerializer, UserProfileSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
@@ -9,4 +9,9 @@ class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Department.objects.all()
 
-# Create your views here.
+class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        user = self.request.user
+        return UserProfile.objects.filter(user=user)
