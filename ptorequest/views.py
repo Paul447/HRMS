@@ -29,6 +29,13 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         self.http_method_not_allowed(request, *args, **kwargs)
     def partial_update(self, request, *args, **kwargs):
         self.http_method_not_allowed(request, *args, **kwargs)
+    # def create(self, request, *args, **kwargs):
+    #     # Custom logic for creating a PTO request --> Invalid this logic because the users can get the advance payed for their pto in breaks check for the users paytype request and the check for the off balance requested by the user if balance is not sufficient then return the error message to the user
+    #     # You can implement your custom logic here
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class PTORequestsView(TemplateView):
     template_name = 'ptorequest.html'
