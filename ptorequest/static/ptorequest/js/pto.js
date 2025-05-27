@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const clearFormButton = document.getElementById('clearFormButton');
 
+    // --- NEW: Confirmation Modal Elements ---
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmSubmitButton = document.getElementById('confirmSubmitButton');
+    const confirmCancelButton = document.getElementById('confirmCancelButton');
+    // --- END NEW ---
+
 
     /**
      * smartFetch is a robust wrapper around the native Fetch API.
@@ -213,9 +219,72 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch and populate the Pay Type dropdown when the page loads
     fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
 
+    // --- Confirmation Modal Functions ---
+    /**
+     * Shows the custom confirmation modal.
+     */
+    function showConfirmationModal() {
+        confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.remove('animate-fade-out-modal'); // Ensure fade-out isn't active
+        confirmationModal.querySelector('.confirm-modal-content').classList.remove('animate-fade-out-modal');
+        confirmationModal.querySelector('.confirm-modal-content').classList.add('animate-scale-in');
+    }
+
+    /**
+     * Hides the custom confirmation modal.
+     * @param {boolean} animate Whether to apply a fade-out animation.
+     */
+    function hideConfirmationModal(animate = true) {
+        if (animate) {
+            confirmationModal.classList.add('animate-fade-out-modal');
+            confirmationModal.querySelector('.confirm-modal-content').classList.remove('animate-scale-in');
+            confirmationModal.querySelector('.confirm-modal-content').classList.add('animate-fade-out-modal');
+            confirmationModal.addEventListener('animationend', () => {
+                confirmationModal.classList.add('hidden');
+                confirmationModal.classList.remove('animate-fade-out-modal');
+                confirmationModal.querySelector('.confirm-modal-content').classList.remove('animate-fade-out-modal');
+            }, { once: true });
+        } else {
+            confirmationModal.classList.add('hidden');
+        }
+    }
+
+    // This promise will be resolved/rejected when the user clicks a button in the modal.
+    let confirmPromiseResolve;
+
+    /**
+     * Prompts the user with a custom confirmation modal.
+     * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false if cancelled.
+     */
+    function askForConfirmation() {
+        return new Promise(resolve => {
+            confirmPromiseResolve = resolve;
+            showConfirmationModal();
+        });
+    }
+
+    // Add event listeners for the modal buttons
+    confirmSubmitButton.addEventListener('click', () => {
+        hideConfirmationModal();
+        confirmPromiseResolve(true); // User confirmed
+    });
+
+    confirmCancelButton.addEventListener('click', () => {
+        hideConfirmationModal();
+        confirmPromiseResolve(false); // User cancelled
+    });
+
     // --- Form Submission Handling ---
     form.addEventListener('submit', async function(event) {
         event.preventDefault(); // Prevent the browser's default form submission behavior
+
+        // Ask for confirmation using the custom modal
+        const confirmSubmission = await askForConfirmation();
+        if (!confirmSubmission) {
+            // If the user cancels, display a notification and stop the submission.
+            showNotification('PTO request submission cancelled.', 'warning');
+            return; // Exit the event listener
+        }
 
         clearFieldErrors(); // Clear previous field errors
         showLoadingState(); // Show loading spinner and disable button
