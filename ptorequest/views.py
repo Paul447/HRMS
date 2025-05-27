@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from .models import PTORequests
 from .serializer import PTORequestsSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.urls import reverse
@@ -19,26 +21,55 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
     serializer_class = PTORequestsSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        # Optionally limit to the current user's requests
-        return None
-    def destroy(self, request, *args, **kwargs):
-        self.http_method_not_allowed(request, *args, **kwargs)
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)  # allow this if you want users to see their requests
-    def update(self, request, *args, **kwargs):
-        self.http_method_not_allowed(request, *args, **kwargs)
-    def partial_update(self, request, *args, **kwargs):
-        self.http_method_not_allowed(request, *args, **kwargs)
-    # def create(self, request, *args, **kwargs):
-    #     # Custom logic for creating a PTO request --> Invalid this logic because the users can get the advance payed for their pto in breaks check for the users paytype request and the check for the off balance requested by the user if balance is not sufficient then return the error message to the user
-    #     # You can implement your custom logic here
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        """
+        Override the get_queryset method to filter PTO requests by the authenticated user.
+        This ensures that users can only see their own PTO requests.
+        """
+        user = self.request.user
+        
+        return PTORequests.objects.filter(user=user)
+    def perform_create(self, serializer):
+    
+        """
+        Override the perform_create method to automatically assign the authenticated user
+        to the PTO request when it is created.
+        """
+        user = self.request.user
+        serializer.save(user=user)
+    
+    def perform_update(self, serializer):
+        """
+        Automatically assigns the requesting user to the PTO request during update,
+        and ensures the instance being updated belongs to the user.
+        """
+        # Ensure the user can only update their own requests
+        if serializer.instance.user != self.request.user:
+            # You might want to raise a PermissionDenied or return a 403 Forbidden here
+            # Depending on how strict you want this to be. For now, we'll let
+            # the default permission checks handle it (e.g., if get_queryset already filters).
+            # However, explicitly checking here adds an extra layer of security.
+            return Response({"detail": "You do not have permission to edit this request."},
+                            status=status.HTTP_403_FORBIDDEN)
+        serializer.save(user=self.request.user)
 
 class PTORequestsView(TemplateView):
     template_name = 'ptorequest.html'
+    def dispatch(self, request, *args, **kwargs):
+        access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
+
+        if not access_token:
+            return redirect(reverse('frontend_login'))
+
+        try:
+            AccessToken(access_token).verify()
+        except TokenError:
+            return redirect(reverse('frontend_login'))
+
+        return super().dispatch(request, *args, **kwargs)
+
+class TimeoffDetailsView(TemplateView):
+    template_name = 'timeoff_details.html'
+    
     def dispatch(self, request, *args, **kwargs):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
 

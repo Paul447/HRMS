@@ -26,72 +26,65 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         # be provided or modified by the client during create/update operations.
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-    def create(self, validated_data):
+    def validate(self, data):
         """
-        Custom create method to handle automatic field population and calculation.
-
-        This method performs the following:
-        1. Assigns the authenticated user to the PTO request.
-        2. Normalizes 'start_date_time' and 'end_date_time' to the
-           'America/Chicago' timezone, handling both naive and aware inputs.
-        3. Calculates the 'total_hours' duration between the normalized datetimes.
-        4. Saves the new PTORequests instance to the database.
-
-        Args:
-            validated_data (dict): A dictionary of validated data from the request.
-
-        Returns:
-            PTORequests: The newly created PTORequests model instance.
+        Custom validation to ensure end_date_time is not before start_date_time.
+        Also performs timezone normalization and total_hours calculation for both
+        create and update operations.
         """
-        # Define the target timezone for date/time normalization.
+        start_date_time = data.get('start_date_time', self.instance.start_date_time if self.instance else None)
+        end_date_time = data.get('end_date_time', self.instance.end_date_time if self.instance else None)
+
         chicago_tz = pytz.timezone('America/Chicago')
 
-        # Automatically assign the currently authenticated user to the PTO request.
-        # Assumes 'user' is a ForeignKey on the PTORequests model.
-        user = self.context['request'].user
-        validated_data['user'] = user
-
-        # Retrieve start and end datetimes from the validated data.
-        start_date_time = validated_data.get('start_date_time')
-        end_date_time = validated_data.get('end_date_time')
-
-        # --- Timezone Normalization for start_date_time ---
+        # Normalize start_date_time
         if start_date_time:
-            # If the datetime object is naive (no timezone info), localize it
-            # by assuming it's already in the 'America/Chicago' timezone.
             if start_date_time.tzinfo is None:
                 start_date_time = chicago_tz.localize(start_date_time)
-            # If the datetime object is already timezone-aware, convert it
-            # to the 'America/Chicago' timezone.
             else:
                 start_date_time = start_date_time.astimezone(chicago_tz)
+        data['start_date_time'] = start_date_time # Update data with normalized value
 
-        # --- Timezone Normalization for end_date_time ---
+        # Normalize end_date_time
         if end_date_time:
-            # If the datetime object is naive, localize it to 'America/Chicago'.
             if end_date_time.tzinfo is None:
                 end_date_time = chicago_tz.localize(end_date_time)
-            # If the datetime object is aware, convert it to 'America/Chicago'.
             else:
                 end_date_time = end_date_time.astimezone(chicago_tz)
+        data['end_date_time'] = end_date_time # Update data with normalized value
 
-        # Update the validated data with the timezone-normalized datetimes.
-        validated_data['start_date_time'] = start_date_time
-        validated_data['end_date_time'] = end_date_time
 
-        # Calculate total_hours if both start and end datetimes are present.
         if start_date_time and end_date_time:
-            # Calculate the duration (timedelta) between the two datetimes.
-            delta = end_date_time - start_date_time
-            # Convert the duration to total hours, rounded to two decimal places.
-            # This 'total_hours' value will be added to the model instance.
-            # Ensure 'total_hours' is a field on your PTORequests model.
-            validated_data['total_hours'] = round(delta.total_seconds() / 3600.0, 2)
-        else:
-            # If either datetime is missing, default total_hours to 0.0.
-            # (Consider adding validation to ensure these fields are always present).
-            validated_data['total_hours'] = 0.0
+            if end_date_time < start_date_time:
+                raise serializers.ValidationError("End date and time cannot be before start date and time.")
 
-        # Call the parent ModelSerializer's create method to save the
-        # PTORequests instance with all the prepared validated data.
+            # Calculate total_hours
+            delta = end_date_time - start_date_time
+            data['total_hours'] = round(delta.total_seconds() / 3600.0, 2)
+        else:
+            data['total_hours'] = 0.0 # Default if dates are not complete or missing
+
+        # Map 'department_name' to 'department' and 'pay_types' to 'pay_type' for saving
+        # if they are coming as IDs. This is handled by PrimaryKeyRelatedField in the serializer.
+        # So we don't need explicit mapping here if your model fields are `department` and `pay_type`.
+
+        return data
+
+    def create(self, validated_data):
+        """
+        Custom create method to handle automatic user assignment.
+        Timezone normalization and total_hours calculation are now handled in validate.
+        """
+        # User is assigned by the ViewSet's perform_create method
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """
+        Custom update method.
+        Timezone normalization and total_hours calculation are now handled in validate.
+        """
+        # User is assigned by the ViewSet's perform_update method (or checked there)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

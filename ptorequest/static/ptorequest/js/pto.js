@@ -13,12 +13,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const clearFormButton = document.getElementById('clearFormButton');
 
-    // --- NEW: Confirmation Modal Elements ---
+    // --- Confirmation Modal Elements ---
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmSubmitButton = document.getElementById('confirmSubmitButton');
     const confirmCancelButton = document.getElementById('confirmCancelButton');
     // --- END NEW ---
 
+    // --- NEW: Elements for Update Mode ---
+    const pageTitle = document.getElementById('page_title'); // Assuming you have an ID for the page title H2
+    const formHeading = form.querySelector('h2'); // The main form heading within the template
+    const formParagraph = form.querySelector('p'); // The descriptive paragraph
+    let ptoRequestId = null; // Variable to store PTO request ID if in update mode
+    // --- END NEW ---
 
     /**
      * smartFetch is a robust wrapper around the native Fetch API.
@@ -38,23 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function smartFetch(url, options = {}, isRetry = false) {
         try {
-            // Execute the first fetch attempt
             const response = await fetch(url, options);
 
-            // If a 401 Unauthorized status is received and it's not already a retry attempt,
-            // assume the access token has expired and the Django middleware has refreshed it.
             if (response.status === 401 && !isRetry) {
                 console.warn(`[smartFetch] Received 401 for ${url}. Retrying with potentially new token.`);
-                // Recursively call smartFetch for a single retry
                 return await smartFetch(url, options, true);
             }
             
-            return response; // Return the original or retried response
+            return response;
 
         } catch (error) {
-            // Catch and log any network or other unexpected fetch errors
             console.error(`[smartFetch] Network or other fetch error for ${url}:`, error);
-            // Re-throw the error to be handled by the calling function
             throw error;
         }
     }
@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {'success'|'error'|'warning'} type The type of notification.
      */
     function showNotification(message, type = 'success') {
-        // Remove any existing notifications to prevent stacking
         const existingNotification = document.getElementById('global-notification');
         if (existingNotification) {
             existingNotification.remove();
@@ -112,128 +111,101 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         document.body.appendChild(notification);
 
-        // Remove after 5 seconds with a fade-out animation
         setTimeout(() => {
             notification.classList.remove('animate-slide-in');
             notification.classList.add('animate-fade-out');
             notification.addEventListener('animationend', () => {
                 notification.remove();
-            }, { once: true }); // Ensure listener is removed after first use
+            }, { once: true });
         }, 5000);
     }
-
 
     /**
      * Clears all existing field-specific error messages.
      */
     function clearFieldErrors() {
         document.querySelectorAll('.field-errors').forEach(errorDiv => {
-            errorDiv.textContent = ''; // Clear text content
+            errorDiv.textContent = '';
         });
     }
 
     /**
      * Shows the loading spinner and disables the submit button.
+     * @param {string} buttonText The text to display on the button.
      */
-    function showLoadingState() {
+    function showLoadingState(buttonText = 'Processing...') {
         submitButton.disabled = true;
+        submitButtonText.innerHTML = buttonText;
+        submitButtonText.classList.remove('inline-block'); // Ensure it's hidden properly if it was inline-block
         submitButtonText.classList.add('hidden');
         loadingSpinner.classList.remove('hidden');
     }
 
     /**
      * Hides the loading spinner and enables the submit button.
+     * @param {string} originalText The original text for the button.
      */
-    function hideLoadingState() {
+    function hideLoadingState(originalText = 'Submit Request') {
         submitButton.disabled = false;
+        submitButtonText.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                      </svg>${originalText}`;
         submitButtonText.classList.remove('hidden');
+        submitButtonText.classList.add('inline-block');
         loadingSpinner.classList.add('hidden');
     }
 
     /**
      * Fetches data from a specified API endpoint and uses it to populate
-     * a given HTML <select> element. It handles loading states and errors.
-     * This function uses smartFetch for API calls to benefit from token retry logic.
-     *
-     * @param {string} url The API endpoint to fetch data from.
-     * @param {HTMLSelectElement} selectElement The <select> DOM element to populate.
-     * @param {string} defaultOptionText The text for the initial disabled option (e.g., "Select a Department").
-     * @param {string} valueKey The key in the API response object representing the option's value.
-     * @param {string} labelKey The key in the API response object representing the option's display text.
+     * a given HTML <select> element.
      */
     async function fetchAndPopulateDropdown(url, selectElement, defaultOptionText, valueKey, labelKey) {
         try {
-            // Retrieve the CSRF token from the hidden input field.
-            // This is needed for Django's CSRF protection on API requests.
             const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            // Make the API call using smartFetch, including necessary headers and credentials.
             const response = await smartFetch(url, {
                 method: 'GET',
-                // credentials: 'include' ensures HTTP-only cookies (like JWT) are sent.
                 credentials: 'include',
                 headers: {
-                    'X-CSRFToken': csrftoken, // Send the CSRF token for Django's validation
+                    'X-CSRFToken': csrftoken,
                     'Content-Type': 'application/json'
                 }
             });
 
-            // Check if the response was successful (status 2xx)
             if (!response.ok) {
-                // If a 401 persists after smartFetch's retry, it means the refresh token is also invalid.
-                // In this case, redirect the user to the login page.
                 if (response.status === 401) {
                     console.error(`[Dropdown Fetch] Refresh token invalid for ${url}. Redirecting to login.`);
                     window.location.href = '/auth/login/';
-                    return; // Stop execution
+                    return;
                 }
-                // For any other non-OK status, throw an Error.
-                const errorData = await response.json(); // Try to get error details
+                const errorData = await response.json();
                 throw new Error(`Failed to load ${defaultOptionText}. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
             }
 
-            // Parse the JSON data from the response
             const data = await response.json();
             
-            // Clear existing options and add the default placeholder option
             selectElement.innerHTML = `<option value="" disabled selected>${defaultOptionText}</option>`;
 
-            // Populate the dropdown with data from the API response
             data.forEach(item => {
                 const option = document.createElement('option');
-                option.value = item[valueKey];       // Set the option's value
-                option.textContent = item[labelKey]; // Set the option's display text
-                selectElement.appendChild(option);   // Add the option to the select element
+                option.value = item[valueKey];
+                option.textContent = item[labelKey];
+                selectElement.appendChild(option);
             });
         } catch (error) {
-            // Log and display an error message if population fails
             console.error(`[Dropdown Fetch] Error populating ${defaultOptionText} dropdown:`, error);
             selectElement.innerHTML = `<option value="" disabled selected>Error loading ${defaultOptionText}</option>`;
             showNotification(`Error loading ${defaultOptionText}. Please try refreshing the page.`, 'error');
         }
     }
 
-    // --- Initial Data Loading ---
-    // Fetch and populate the Department dropdown when the page loads
-    fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
-    // Fetch and populate the Pay Type dropdown when the page loads
-    fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
-
     // --- Confirmation Modal Functions ---
-    /**
-     * Shows the custom confirmation modal.
-     */
     function showConfirmationModal() {
         confirmationModal.classList.remove('hidden');
-        confirmationModal.classList.remove('animate-fade-out-modal'); // Ensure fade-out isn't active
+        confirmationModal.classList.remove('animate-fade-out-modal');
         confirmationModal.querySelector('.confirm-modal-content').classList.remove('animate-fade-out-modal');
         confirmationModal.querySelector('.confirm-modal-content').classList.add('animate-scale-in');
     }
 
-    /**
-     * Hides the custom confirmation modal.
-     * @param {boolean} animate Whether to apply a fade-out animation.
-     */
     function hideConfirmationModal(animate = true) {
         if (animate) {
             confirmationModal.classList.add('animate-fade-out-modal');
@@ -249,13 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // This promise will be resolved/rejected when the user clicks a button in the modal.
     let confirmPromiseResolve;
 
-    /**
-     * Prompts the user with a custom confirmation modal.
-     * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false if cancelled.
-     */
     function askForConfirmation() {
         return new Promise(resolve => {
             confirmPromiseResolve = resolve;
@@ -266,33 +233,118 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for the modal buttons
     confirmSubmitButton.addEventListener('click', () => {
         hideConfirmationModal();
-        confirmPromiseResolve(true); // User confirmed
+        confirmPromiseResolve(true);
     });
 
     confirmCancelButton.addEventListener('click', () => {
         hideConfirmationModal();
-        confirmPromiseResolve(false); // User cancelled
+        confirmPromiseResolve(false);
     });
+
+    // --- NEW: Populate Form for Update ---
+    /**
+     * Fetches a single PTO request by ID and populates the form fields.
+     * @param {string} id The ID of the PTO request to fetch.
+     */
+    async function populateFormForUpdate(id) {
+        showLoadingState('Loading Data...');
+        try {
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const response = await smartFetch(`/api/pto-requests/${id}/`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login/';
+                    return;
+                }
+                const errorData = await response.json();
+                throw new Error(`Failed to load PTO request for update. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
+            }
+
+            const ptoRequest = await response.json();
+            console.log("PTO Request Data for Update:", ptoRequest);
+
+            // Populate form fields
+            // Ensure dropdowns are populated first before setting their values
+            await Promise.all([
+                fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name'),
+                fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name')
+            ]);
+            
+            form.department_name.value = ptoRequest.department_name; // Should be the ID
+            form.pay_types.value = ptoRequest.pay_types; // Should be the ID
+            
+            // Format datetime-local fields
+            // API returns ISO format, which is directly compatible with datetime-local
+            // If it returns a Z-timezone, we need to strip it for local datetime-local input
+            form.start_date_time.value = ptoRequest.start_date_time ? ptoRequest.start_date_time.slice(0, 16) : '';
+            form.end_date_time.value = ptoRequest.end_date_time ? ptoRequest.end_date_time.slice(0, 16) : '';
+            form.reason.value = ptoRequest.reason || '';
+
+            // Update UI for update mode
+            submitButtonText.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>Update Request
+            `;
+            // Update page title and form heading
+            if (pageTitle) pageTitle.textContent = 'Edit Time Off Request';
+            if (formHeading) formHeading.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Your Time Off Request
+            `;
+            if (formParagraph) formParagraph.textContent = 'Modify the details of your time off request and submit the updates.';
+            clearFormButton.textContent = 'Reset Form'; // Change button text
+
+            showNotification('Form loaded for update.', 'success');
+        } catch (error) {
+            console.error('[Update Load] Error loading PTO request for update:', error);
+            showNotification('Failed to load request details. Please try again.', 'error');
+            // Consider redirecting back to the list if loading fails critically
+            // window.location.href = '/ptorequest/';
+        } finally {
+            hideLoadingState('Submit Request'); // Reset button text to default
+        }
+    }
+
+    // --- Initial Data Loading & Mode Check ---
+    // Extract PTO ID from URL if present (e.g., /ptorequest/submit/?id=123)
+    const urlParams = new URLSearchParams(window.location.search);
+    ptoRequestId = urlParams.get('id');
+
+    if (ptoRequestId) {
+        populateFormForUpdate(ptoRequestId);
+    } else {
+        // Only fetch and populate dropdowns if not in update mode,
+        // as populateFormForUpdate already handles this.
+        fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
+        fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
+    }
 
     // --- Form Submission Handling ---
     form.addEventListener('submit', async function(event) {
-        event.preventDefault(); // Prevent the browser's default form submission behavior
+        event.preventDefault();
 
-        // Ask for confirmation using the custom modal
         const confirmSubmission = await askForConfirmation();
         if (!confirmSubmission) {
-            // If the user cancels, display a notification and stop the submission.
             showNotification('PTO request submission cancelled.', 'warning');
-            return; // Exit the event listener
+            return;
         }
 
-        clearFieldErrors(); // Clear previous field errors
-        showLoadingState(); // Show loading spinner and disable button
+        clearFieldErrors();
+        showLoadingState(ptoRequestId ? 'Updating...' : 'Submitting...'); // Dynamic loading text
 
-        // Retrieve the CSRF token for the POST request
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
-        // Gather all form data into a payload object
         const payload = {
             department_name: form.department_name.value,
             pay_types: form.pay_types.value,
@@ -301,68 +353,83 @@ document.addEventListener('DOMContentLoaded', function() {
             reason: form.reason.value
         };
 
+        let method = 'POST';
+        let url = '/api/pto-requests/';
+
+        if (ptoRequestId) {
+            // If ptoRequestId exists, it's an update operation
+            method = 'PUT'; // Or PATCH, depending on your API design (PUT for full replacement, PATCH for partial)
+            url = `/api/pto-requests/${ptoRequestId}/`;
+            showNotification('Attempting to update request...', 'warning'); // Provide immediate feedback
+        } else {
+            showNotification('Attempting to submit new request...', 'warning');
+        }
+
         try {
-            // Submit the form data to the API using smartFetch
-            const response = await smartFetch('/api/pto-requests/', { // Adjust API endpoint as needed
-                method: 'POST',
+            const response = await smartFetch(url, {
+                method: method,
                 headers: {
-                    'Content-Type': 'application/json', // Specify content type for JSON payload
-                    'X-CSRFToken': csrftoken // Include the CSRF token for server-side validation
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
                 },
-                credentials: 'include', // Ensures HTTP-only cookies (like JWT) are sent with the request
-                body: JSON.stringify(payload) // Convert the payload object to a JSON string
+                credentials: 'include',
+                body: JSON.stringify(payload)
             });
 
-            // Handle response based on status
             if (response.ok) {
-                // Success: Display global success notification, reset form
-                const data = await response.json(); // Get JSON response if available
-                showNotification('Your time off request was successfully submitted!', 'success');
-                form.reset();
-                console.log("[Form Submission] PTO request submitted successfully:", data);
+                const data = await response.json();
+                if (ptoRequestId) {
+                    showNotification('Your time off request was successfully updated!', 'success');
+                    // Optionally, redirect to the list view after update
+                    // window.location.href = '/ptorequest/';
+                } else {
+                    showNotification('Your time off request was successfully submitted!', 'success');
+                    form.reset(); // Only reset form on new creation
+                }
+                console.log("[Form Submission] PTO request processed successfully:", data);
             } else if (response.status === 400) {
-                // Bad Request: Display inline field errors and global error notification
                 const errorData = await response.json();
                 console.error('[Form Submission] Validation Errors:', errorData);
 
                 Object.keys(errorData).forEach(field => {
                     const fieldElement = form.querySelector(`[name="${field}"]`);
                     if (fieldElement) {
-                        const errorDiv = fieldElement.nextElementSibling; // Assuming field-errors div is next sibling
+                        const errorDiv = fieldElement.nextElementSibling;
                         if (errorDiv && errorDiv.classList.contains('field-errors')) {
-                            // Join array errors with space, or just use string error
                             errorDiv.textContent = Array.isArray(errorData[field]) ? errorData[field].join(' ') : errorData[field];
                         }
                     } else if (field === 'non_field_errors' || field === 'detail') {
-                        // Handle non-field errors or general API errors
                         const errorMessageText = Array.isArray(errorData[field]) ? errorData[field].join(' ') : errorData[field];
                         showNotification(`Submission failed: ${errorMessageText}`, 'error');
                     }
                 });
                 showNotification('Please correct the errors in the form.', 'error');
             } else if (response.status === 401) {
-                // Unauthorized: Redirect to login (smartFetch should handle this, but as a fallback)
                 console.error("[Form Submission] Unauthorized. Redirecting to login.");
                 window.location.href = '/auth/login/';
             } else {
-                // Other HTTP errors: Display generic error notification
-                const errorText = await response.text(); // Get raw text for unexpected errors
+                const errorText = await response.text();
                 console.error(`[Form Submission] Server Error (${response.status}):`, errorText);
                 showNotification(`An unexpected error occurred (${response.status}). Please try again.`, 'error');
             }
         } catch (err) {
-            // Network or unhandled JavaScript errors: Display generic error notification
             console.error('[Form Submission] Network or unknown error during submission:', err);
             showNotification('Network error, please check your internet connection and try again.', 'error');
         } finally {
-            hideLoadingState(); // Always hide loading spinner and enable button
+            hideLoadingState(ptoRequestId ? 'Update Request' : 'Submit Request'); // Dynamic button text reset
         }
     });
 
-    // --- Clear Form Button Handling ---
+    // --- Clear/Reset Form Button Handling ---
     clearFormButton.addEventListener('click', function() {
         form.reset();
-        clearFieldErrors(); // Clear any existing errors
-        showNotification('Form cleared!', 'warning');
+        clearFieldErrors();
+        if (ptoRequestId) { // If in update mode, allow option to revert to original data or clear entirely
+            // Optionally, reload original data or just clear
+            // For now, it will simply clear the form fields
+            showNotification('Form cleared. To revert, refresh the page.', 'warning');
+        } else {
+            showNotification('Form cleared!', 'warning');
+        }
     });
 });
