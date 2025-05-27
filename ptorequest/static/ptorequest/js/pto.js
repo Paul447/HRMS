@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch and populate the Department dropdown when the page loads
     fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
     // Fetch and populate the Pay Type dropdown when the page loads
-    fetchAndPopulateDropdown('/api/paytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
+    fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
 
     // --- Form Submission Handling ---
     form.addEventListener('submit', async function(event) {

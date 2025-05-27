@@ -1,15 +1,17 @@
 from rest_framework import viewsets 
-from .models import UserBasedPayType
-from .serializer import UserBasedPayTypeSerializer
+from .models import  DepartmentBasedPayType
+from department.models import UserProfile
+from .serializer import DepartmentBasedPayTypeSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
 
-class UserBasedPayTypeViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = UserBasedPayTypeSerializer
+# Create your views here.
+class DepartmentBasedPayTypeViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = DepartmentBasedPayTypeSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
-        return UserBasedPayType.objects.filter(user=user)
-
-# Create your views here.
+        department = UserProfile.objects.filter(user=user).first()
+        return DepartmentBasedPayType.objects.filter(department=department.department)

@@ -1,4 +1,5 @@
 from django.db import models
+from department.models import Department
 
 class PayType(models.Model):
     name = models.CharField(max_length=100)
@@ -7,7 +8,16 @@ class PayType(models.Model):
 
     def __str__(self):
         return self.name
-# Create your models here.
-class UserBasedPayType(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE )
-    pay_type = models.ForeignKey(PayType, on_delete=models.CASCADE, unique=True)
+
+
+class DepartmentBasedPayType(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    pay_type = models.ForeignKey(PayType, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.department.name} - {self.pay_type.name}"
+    
+    class Meta:
+        verbose_name = "Department Leave Type"
+        verbose_name_plural = "Department  Leave Types"
+        unique_together = ('department', 'pay_type')

@@ -1,7 +1,8 @@
-from  .views import UserBasedPayTypeViewSet
+from  .views import  DepartmentBasedPayTypeViewSet
 
-def register(router):   
-    router.register(r'paytype', UserBasedPayTypeViewSet, basename='paytype')
+
+def register_department(router):
+    router.register(r'departmentpaytype', DepartmentBasedPayTypeViewSet, basename='departmentpaytype')
 
 
     
