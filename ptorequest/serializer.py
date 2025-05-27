@@ -1,30 +1,41 @@
 from rest_framework import serializers
 from .models import PTORequests
 import pytz # Used for explicit timezone handling
+from paytype.models import PayType
+from department.models import Department
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['name']
+
+
+class PayTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayType
+        fields = ['name']
 
 class PTORequestsSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the PTORequests model.
+    department_name_display = DepartmentSerializer(source='department_name', read_only=True)
+    pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
 
-    This serializer handles the creation of PTO requests, automatically assigning
-    the requesting user and calculating the total duration in hours based on
-    start and end datetimes. It explicitly normalizes datetimes to
-    the 'America/Chicago' timezone.
-    """
     class Meta:
-        """
-        Meta options for the PTORequestsSerializer.
-        """
         model = PTORequests
-        # Fields to be included in the serialized output and accepted as input.
-        # Note: 'total_hours' is not listed here as it's calculated internally
-        # and should typically be added to read_only_fields if it's a model field.
-        # Current implementation adds it to validated_data for saving,
-        # so it *must* exist on the model.
-        fields = ['id', 'start_date_time', 'end_date_time', 'department_name', 'pay_types', 'reason']
-        # Fields that are read-only; they will be included in output but cannot
-        # be provided or modified by the client during create/update operations.
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = [
+            'id',
+            'department_name',
+            'department_name_display',
+            'pay_types',
+            'pay_types_display',
+            'start_date_time',
+            'end_date_time',
+            'reason',
+            'total_hours',
+            'status',
+        ]
+        read_only_fields = ['id']
+
+    
 
     def validate(self, data):
         """
@@ -88,3 +99,4 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+

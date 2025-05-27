@@ -26,10 +26,10 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         This ensures that users can only see their own PTO requests.
         """
         user = self.request.user
-        
-        return PTORequests.objects.filter(user=user)
+        # Filter PTO requests in order way by the pending status
+        return PTORequests.objects.filter(user=user, status='pending').order_by('-created_at')
     def perform_create(self, serializer):
-    
+
         """
         Override the perform_create method to automatically assign the authenticated user
         to the PTO request when it is created.

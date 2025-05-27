@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const ptoRequests = await response.json();
-            console.log("Fetched PTO Requests:", ptoRequests);
+            
 
             ptoRequestsList.innerHTML = ''; // Clear loading message
 
@@ -134,9 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     row.innerHTML = `
                         <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">${request.id}</td>
-                        <td class="py-4 px-6">${request.department_name_display || request.department_name}</td> <td class="py-4 px-6">${request.pay_types_display || request.pay_types}</td> <td class="py-4 px-6">${startDate}</td>
+                        <td class="py-4 px-6">${request.department_name_display.name}</td> <td class="py-4 px-6">${request.pay_types_display.name}</td> <td class="py-4 px-6">${startDate}</td>
                         <td class="py-4 px-6">${endDate}</td>
-                        <td class="py-4 px-6">${request.total_hours ? request.total_hours.toFixed(2) : '0.00'}</td>
+                        <td class="py-4 px-6">${request.total_hours}</td>
                         <td class="py-4 px-6 truncate max-w-xs" title="${request.reason}">${request.reason}</td>
                         <td class="py-4 px-6">
                             <button data-id="${request.id}"

@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (ptoRequestId) {
                     showNotification('Your time off request was successfully updated!', 'success');
                     // Optionally, redirect to the list view after update
-                    // window.location.href = '/ptorequest/';
+                    window.location.href = '/auth/ptorequest/details/';
                 } else {
                     showNotification('Your time off request was successfully submitted!', 'success');
                     form.reset(); // Only reset form on new creation
