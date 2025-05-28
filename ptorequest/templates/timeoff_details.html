@@ -6,7 +6,7 @@
 {% block breadcrumb_items %}
 <li aria-current="page">
     <div class="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
         <span class="ml-1 text-sm font-semibold text-blue-600 md:ml-2">My Time Off Requests</span>
@@ -15,66 +15,195 @@
 {% endblock %}
 
 {% block content %}
-<div class="bg-white rounded-xl shadow-lg p-6 md:p-10 border border-gray-200 animate-fade-in">
-    <div class="text-center mb-8">
-        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<div class="bg-white rounded-xl shadow-lg p-6 md:p-8 border border-gray-200 animate-fade-in">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            Your Submitted Time Off Requests
+            Your Time Off Requests
         </h2>
-        <p class="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            Review and manage all your past and pending time off requests below. You can update details as needed.
-        </p>
+        <p class="text-gray-600 text-lg">View, manage, and submit your personal time off requests.</p>
     </div>
 
-    <div class="mb-6 flex justify-end">
+    <div class="mb-5 flex justify-end items-center">
         <a href="{% url 'ptorequest' %}"
-           class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transition-transform duration-200 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Submit New Request
         </a>
     </div>
 
-    <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
-                    <th scope="col" class="py-3 px-6">ID</th>
-                    <th scope="col" class="py-3 px-6">Department</th>
-                    <th scope="col" class="py-3 px-6">Pay Type</th>
-                    <th scope="col" class="py-3 px-6">Start Date</th>
-                    <th scope="col" class="py-3 px-6">End Date</th>
-                    <th scope="col" class="py-3 px-6">Total Hours</th>
-                    <th scope="col" class="py-3 px-6">Reason</th>
-                    <th scope="col" class="py-3 px-6">Actions</th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative" data-sort="id">
+                        No.
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative" data-sort="department_name_display">
+                        Department
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative" data-sort="pay_types_display">
+                        Pay Type
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative date-col" data-sort="start_date_time">
+                        Start Date
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative date-col" data-sort="end_date_time">
+                        End Date
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative" data-sort="total_hours">
+                        Total Hours
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4">Reason</th>
+                    <th scope="col" class="py-3 px-4 cursor-pointer hover:bg-gray-200 transition-colors duration-150 relative" data-sort="status">
+                        Status
+                        <span class="sort-icon absolute right-2 top-1/2 -translate-y-1/2"></span>
+                    </th>
+                    <th scope="col" class="py-3 px-4 text-center">Actions</th>
                 </tr>
             </thead>
-            <tbody id="ptoRequestsList">
-                <tr class="bg-white border-b hover:bg-gray-50">
-                    <td colspan="8" class="py-4 px-6 text-center text-gray-500">Loading requests...</td>
+            <tbody id="ptoRequestsList" class="bg-white divide-y divide-gray-200">
+                <tr class="even:bg-gray-50 hover:bg-blue-50 transition-colors duration-150">
+                    <td class="py-3 px-4">1</td>
+                    <td class="py-3 px-4">Sales</td>
+                    <td class="py-3 px-4">Vacation</td>
+                    <td class="py-3 px-4 date-col">2024-07-01</td>
+                    <td class="py-3 px-4 date-col">2024-07-05</td>
+                    <td class="py-3 px-4">40</td>
+                    <td class="py-3 px-4 max-w-xs truncate" title="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.">Lorem ipsum dolor sit amet...</td>
+                    <td class="py-3 px-4">
+                        <span class="status-badge status-pending">Pending</span>
+                    </td>
+                    <td class="py-3 px-4 text-center flex justify-center items-center space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors" title="Edit Request">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors" title="Delete Request">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                <tr id="loadingRow">
+                    <td colspan="9" class="py-10 text-center text-blue-500">
+                        <div class="flex items-center justify-center space-x-3">
+                            <svg class="animate-spin -ml-1 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-lg font-medium">Loading requests...</span>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
-        <div id="noRequestsMessage" class="hidden py-8 text-center text-gray-500 text-lg">
-            You haven't submitted any time off requests yet.
-            <a href="{% url 'ptorequest' %}" class="text-blue-600 hover:underline ml-1">Submit your first one!</a>
+        <div id="noRequestsMessage" class="hidden py-8 text-center text-gray-500 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p>You haven't submitted any time off requests yet.</p>
+            <a href="{% url 'ptorequest' %}" class="text-blue-600 hover:underline mt-2 inline-block font-medium">Submit your first one!</a>
         </div>
-        <div id="errorMessage" class="hidden py-8 text-center text-red-600 text-lg">
-            Error loading requests. Please try again.
+        <div id="errorMessage" class="hidden py-8 text-center text-red-600 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Error loading requests. Please try again later.</p>
+        </div>
+    </div>
+
+    <div id="paginationControls" class="flex justify-between items-center mt-6 hidden">
+        <button id="prevPage" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">Previous</button>
+        <span id="pageInfo" class="text-gray-600 text-sm font-medium"></span>
+        <button id="nextPage" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">Next</button>
+    </div>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-3">
+        </div>
+
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-70 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center transition-opacity duration-300 confirm-modal-overlay">
+        <div class="relative p-6 border w-full max-w-md shadow-lg rounded-lg bg-white transform transition-transform duration-300 animate-scale-in confirm-modal-content">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-100">
+                    <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-xl leading-6 font-semibold text-gray-900 mt-4">Confirm Deletion</h3>
+                <div class="mt-2 px-4 py-2">
+                    <p class="text-base text-gray-600">Are you sure you want to delete this time off request? This action cannot be undone.</p>
+                </div>
+                <div class="mt-6 flex justify-center gap-4">
+                    <button id="cancelDeleteBtn" class="px-5 py-2.5 rounded-lg text-base font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button id="confirmDeleteBtn" class="px-5 py-2.5 rounded-lg text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Add any specific styles for this list page here if needed,
-       though most will come from Tailwind or dashboard.html. */
+    /* Base styles for table header sort icons */
+    .sort-icon {
+        width: 12px; /* Slightly smaller */
+        height: 12px; /* Slightly smaller */
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 0.2rem; /* Adjust as needed */
+        color: #9ca3af; /* gray-400, default inactive color */
+    }
+
+    /* Up arrow */
+    .sort-icon::before {
+        content: '▲';
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+    /* Down arrow */
+    .sort-icon::after {
+        content: '▼';
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    /* Show both arrows on hover */
+    th[data-sort]:hover .sort-icon::before,
+    th[data-sort]:hover .sort-icon::after {
+        opacity: 0.6; /* Dimmed on hover */
+    }
+
+    /* Active sort direction */
+    th.sorted-asc .sort-icon::before {
+        opacity: 1; /* Active up arrow */
+        color: #2563eb; /* blue-600 */
+    }
+    th.sorted-desc .sort-icon::after {
+        opacity: 1; /* Active down arrow */
+        color: #2563eb; /* blue-600 */
+    }
+
+    /* Hide the non-active arrow when sorted */
+    th.sorted-asc .sort-icon::after,
+    th.sorted-desc .sort-icon::before {
+        opacity: 0;
+    }
+
+    /* General animations */
     @keyframes fade-in {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -82,8 +211,158 @@
     .animate-fade-in {
         animation: fade-in 0.6s ease-out forwards;
     }
+
+    /* Toast notification animations */
+    @keyframes slide-in-right {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fade-out-right {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+    }
+    .toast-enter-active { animation: slide-in-right 0.3s ease-out forwards; }
+    .toast-leave-active { animation: fade-out-right 0.5s ease-in forwards; }
+
+
+    /* Modal animations */
+    @keyframes scale-in {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fade-out-modal {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    .animate-scale-in {
+        animation: scale-in 0.3s ease-out forwards;
+    }
+
+    .animate-fade-out-modal {
+        animation: fade-out-modal 0.3s ease-in forwards;
+    }
+
+    /* Spinner animation */
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Styles for status badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.6rem; /* Adjusted for better look */
+        border-radius: 9999px;
+        font-size: 0.75rem; /* text-xs */
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+        text-transform: capitalize;
+    }
+    .status-pending {
+        background-color: #fef9c3; /* yellow-100 light */
+        color: #a16207; /* yellow-700 dark */
+    }
+    .status-approved {
+        background-color: #dcfce7; /* green-100 light */
+        color: #166534; /* green-700 dark */
+    }
+    .status-rejected {
+        background-color: #fee2e2; /* red-100 light */
+        color: #b91c1c; /* red-700 dark */
+    }
+    .status-cancelled {
+        background-color: #e5e7eb; /* gray-200 */
+        color: #4b5563; /* gray-700 */
+    }
+    .status-info {
+        background-color: #e0f2fe; /* light blue */
+        color: #0c4a6e; /* dark blue */
+    }
+
+    /* Custom styles for table columns to manage width and prevent congestion */
+    .date-col {
+        min-width: 120px; /* Consistent min-width for dates */
+    }
+
+    td.truncate {
+        white-space: nowrap; /* Keep text on one line */
+        overflow: hidden;
+        text-overflow: ellipsis; /* Show ellipsis for overflow */
+        max-width: 180px; /* Adjust as needed */
+        display: inline-block; /* Required for text-overflow to work reliably with max-width */
+        vertical-align: middle; /* Align with other content */
+    }
+
+    /* Add this to your JS for dynamic row rendering */
+    /* function createTableRow(request) {
+        return `
+            <tr class="even:bg-gray-50 hover:bg-blue-50 transition-colors duration-150">
+                <td class="py-3 px-4">${request.id}</td>
+                <td class="py-3 px-4">${request.department_name_display}</td>
+                <td class="py-3 px-4">${request.pay_types_display}</td>
+                <td class="py-3 px-4 date-col">${new Date(request.start_date_time).toLocaleDateString()}</td>
+                <td class="py-3 px-4 date-col">${new Date(request.end_date_time).toLocaleDateString()}</td>
+                <td class="py-3 px-4">${request.total_hours}</td>
+                <td class="py-3 px-4 max-w-xs truncate" title="${request.reason}">${request.reason}</td>
+                <td class="py-3 px-4">
+                    <span class="status-badge status-${request.status.toLowerCase()}">${request.status}</span>
+                </td>
+                <td class="py-3 px-4 text-center flex justify-center items-center space-x-2">
+                    <button class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors" title="Edit Request" data-id="${request.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                    <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors delete-btn" title="Delete Request" data-id="${request.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+    } */
 </style>
 
 {% load static %}
-<script src="{% static 'ptorequest/js/pto_list.js' %}" defer></script>
+<script src="{% static 'ptorequest/js/pto_list.js' %}" type="module" defer></script>
+<script>
+    // Example for toast notifications (you'd integrate this with your JS)
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `p-4 rounded-lg shadow-lg flex items-center space-x-3 text-white toast-enter-active`;
+
+        let bgColor = 'bg-green-500';
+        let icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+
+        if (type === 'error') {
+            bgColor = 'bg-red-500';
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        } else if (type === 'info') {
+            bgColor = 'bg-blue-500';
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        }
+
+        toast.innerHTML = `${icon}<span class="font-medium">${message}</span>`;
+        toast.classList.add(bgColor);
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('toast-enter-active');
+            toast.classList.add('toast-leave-active');
+            toast.addEventListener('animationend', () => toast.remove());
+        }, 3000); // Toast disappears after 3 seconds
+    }
+
+    // Example usage (call these from your pto_list.js after an action)
+    // showToast('Request submitted successfully!', 'success');
+    // showToast('Failed to delete request.', 'error');
+</script>
 {% endblock %}

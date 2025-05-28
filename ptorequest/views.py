@@ -12,45 +12,48 @@ from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import api_view, permission_classes
 
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 @method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):
     queryset = PTORequests.objects.all()
     serializer_class = PTORequestsSerializer
     permission_classes = [IsAuthenticated]
-    def get_queryset(self):
-        """
-        Override the get_queryset method to filter PTO requests by the authenticated user.
-        This ensures that users can only see their own PTO requests.
-        """
-        user = self.request.user
-        # Filter PTO requests in order way by the pending status
-        return PTORequests.objects.filter(user=user, status='pending').order_by('-created_at')
-    def perform_create(self, serializer):
 
-        """
-        Override the perform_create method to automatically assign the authenticated user
-        to the PTO request when it is created.
-        """
+    def get_queryset(self):
         user = self.request.user
-        serializer.save(user=user)
-    
-    def perform_update(self, serializer):
-        """
-        Automatically assigns the requesting user to the PTO request during update,
-        and ensures the instance being updated belongs to the user.
-        """
-        # Ensure the user can only update their own requests
-        if serializer.instance.user != self.request.user:
-            # You might want to raise a PermissionDenied or return a 403 Forbidden here
-            # Depending on how strict you want this to be. For now, we'll let
-            # the default permission checks handle it (e.g., if get_queryset already filters).
-            # However, explicitly checking here adds an extra layer of security.
-            return Response({"detail": "You do not have permission to edit this request."},
-                            status=status.HTTP_403_FORBIDDEN)
+        return PTORequests.objects.filter(user=user, status='pending').order_by('-created_at')
+
+    def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.user != self.request.user:
+            return Response(
+                {"detail": "You do not have permission to edit this request."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='approved-and-rejected', permission_classes=[IsAuthenticated])
+    def approved_and_rejected(self, request):
+        user = request.user
+
+        approved = PTORequests.objects.filter(user=user, status__iexact='approved').order_by('-created_at')
+        rejected = PTORequests.objects.filter(user=user, status__iexact='rejected').order_by('-created_at')
+
+        return Response({
+            "approved_requests": PTORequestsSerializer(approved, many=True).data,
+            "rejected_requests": PTORequestsSerializer(rejected, many=True).data
+        })
+
+
+
 
 class PTORequestsView(TemplateView):
     template_name = 'ptorequest.html'

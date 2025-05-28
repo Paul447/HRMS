@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.warn(`[smartFetch] Received 401 for ${url}. Retrying with potentially new token.`);
                 return await smartFetch(url, options, true);
             }
-            
+
             return response;
 
         } catch (error) {
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const data = await response.json();
-            
+
             selectElement.innerHTML = `<option value="" disabled selected>${defaultOptionText}</option>`;
 
             data.forEach(item => {
@@ -277,10 +277,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name'),
                 fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name')
             ]);
-            
+
             form.department_name.value = ptoRequest.department_name; // Should be the ID
             form.pay_types.value = ptoRequest.pay_types; // Should be the ID
-            
+
             // Format datetime-local fields
             // API returns ISO format, which is directly compatible with datetime-local
             // If it returns a Z-timezone, we need to strip it for local datetime-local input
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoadingState(ptoRequestId ? 'Updating...' : 'Submitting...'); // Dynamic loading text
 
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        
+
         const payload = {
             department_name: form.department_name.value,
             pay_types: form.pay_types.value,
@@ -355,11 +355,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let method = 'POST';
         let url = '/api/pto-requests/';
+        let successMessage = 'Your time off request was successfully submitted!'; // Default message
 
         if (ptoRequestId) {
             // If ptoRequestId exists, it's an update operation
             method = 'PUT'; // Or PATCH, depending on your API design (PUT for full replacement, PATCH for partial)
             url = `/api/pto-requests/${ptoRequestId}/`;
+            successMessage = 'Your time off request was successfully updated!'; // Update message
             showNotification('Attempting to update request...', 'warning'); // Provide immediate feedback
         } else {
             showNotification('Attempting to submit new request...', 'warning');
@@ -378,14 +380,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const data = await response.json();
-                if (ptoRequestId) {
-                    showNotification('Your time off request was successfully updated!', 'success');
-                    // Optionally, redirect to the list view after update
-                    window.location.href = '/auth/ptorequest/details/';
-                } else {
-                    showNotification('Your time off request was successfully submitted!', 'success');
-                    form.reset(); // Only reset form on new creation
-                }
+                // Pass the success message via URL query parameter
+                window.location.href = `/auth/ptorequest/details/?message=${encodeURIComponent(successMessage)}&type=success`;
                 console.log("[Form Submission] PTO request processed successfully:", data);
             } else if (response.status === 400) {
                 const errorData = await response.json();
