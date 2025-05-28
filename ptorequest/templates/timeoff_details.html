@@ -36,7 +36,8 @@
         </a>
     </div>
 
-    <div class="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-200">
+    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">Pending Requests</h3>
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-200 mb-8">
         <table class="w-full text-sm text-left text-gray-700">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
@@ -73,30 +74,6 @@
                 </tr>
             </thead>
             <tbody id="ptoRequestsList" class="bg-white divide-y divide-gray-200">
-                <tr class="even:bg-gray-50 hover:bg-blue-50 transition-colors duration-150">
-                    <td class="py-3 px-4">1</td>
-                    <td class="py-3 px-4">Sales</td>
-                    <td class="py-3 px-4">Vacation</td>
-                    <td class="py-3 px-4 date-col">2024-07-01</td>
-                    <td class="py-3 px-4 date-col">2024-07-05</td>
-                    <td class="py-3 px-4">40</td>
-                    <td class="py-3 px-4 max-w-xs truncate" title="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.">Lorem ipsum dolor sit amet...</td>
-                    <td class="py-3 px-4">
-                        <span class="status-badge status-pending">Pending</span>
-                    </td>
-                    <td class="py-3 px-4 text-center flex justify-center items-center space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors" title="Edit Request">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors" title="Delete Request">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
                 <tr id="loadingRow">
                     <td colspan="9" class="py-10 text-center text-blue-500">
                         <div class="flex items-center justify-center space-x-3">
@@ -104,7 +81,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span class="text-lg font-medium">Loading requests...</span>
+                            <span class="text-lg font-medium">Loading pending requests...</span>
                         </div>
                     </td>
                 </tr>
@@ -114,14 +91,100 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p>You haven't submitted any time off requests yet.</p>
+            <p>You haven't submitted any pending time off requests yet.</p>
             <a href="{% url 'ptorequest' %}" class="text-blue-600 hover:underline mt-2 inline-block font-medium">Submit your first one!</a>
         </div>
         <div id="errorMessage" class="hidden py-8 text-center text-red-600 text-lg bg-white rounded-b-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p>Error loading requests. Please try again later.</p>
+            <p>Error loading pending requests. Please try again later.</p>
+        </div>
+    </div>
+
+    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">Approved Requests</h3>
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-200 mb-8">
+        <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th scope="col" class="py-3 px-4">No.</th>
+                    <th scope="col" class="py-3 px-4">Department</th>
+                    <th scope="col" class="py-3 px-4">Pay Type</th>
+                    <th scope="col" class="py-3 px-4 date-col">Start Date</th>
+                    <th scope="col" class="py-3 px-4 date-col">End Date</th>
+                    <th scope="col" class="py-3 px-4">Total Hours</th>
+                    <th scope="col" class="py-3 px-4">Reason</th>
+                    <th scope="col" class="py-3 px-4">Status</th>
+                </tr>
+            </thead>
+            <tbody id="approvedRequestsList" class="bg-white divide-y divide-gray-200">
+                <tr id="loadingApprovedRow">
+                    <td colspan="8" class="py-10 text-center text-blue-500">
+                        <div class="flex items-center justify-center space-x-3">
+                            <svg class="animate-spin -ml-1 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-lg font-medium">Loading approved requests...</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="noApprovedRequestsMessage" class="hidden py-8 text-center text-gray-500 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>No approved time off requests found.</p>
+        </div>
+        <div id="errorApprovedMessage" class="hidden py-8 text-center text-red-600 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Error loading approved requests. Please try again later.</p>
+        </div>
+    </div>
+
+    <h3 class="text-xl md:text-2xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">Rejected Requests</h3>
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th scope="col" class="py-3 px-4">No.</th>
+                    <th scope="col" class="py-3 px-4">Department</th>
+                    <th scope="col" class="py-3 px-4">Pay Type</th>
+                    <th scope="col" class="py-3 px-4 date-col">Start Date</th>
+                    <th scope="col" class="py-3 px-4 date-col">End Date</th>
+                    <th scope="col" class="py-3 px-4">Total Hours</th>
+                    <th scope="col" class="py-3 px-4">Reason</th>
+                    <th scope="col" class="py-3 px-4">Status</th>
+                </tr>
+            </thead>
+            <tbody id="rejectedRequestsList" class="bg-white divide-y divide-gray-200">
+                <tr id="loadingRejectedRow">
+                    <td colspan="8" class="py-10 text-center text-blue-500">
+                        <div class="flex items-center justify-center space-x-3">
+                            <svg class="animate-spin -ml-1 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-lg font-medium">Loading rejected requests...</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="noRejectedRequestsMessage" class="hidden py-8 text-center text-gray-500 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>No rejected time off requests found.</p>
+        </div>
+        <div id="errorRejectedMessage" class="hidden py-8 text-center text-red-600 text-lg bg-white rounded-b-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Error loading rejected requests. Please try again later.</p>
         </div>
     </div>
 
@@ -298,36 +361,6 @@
         display: inline-block; /* Required for text-overflow to work reliably with max-width */
         vertical-align: middle; /* Align with other content */
     }
-
-    /* Add this to your JS for dynamic row rendering */
-    /* function createTableRow(request) {
-        return `
-            <tr class="even:bg-gray-50 hover:bg-blue-50 transition-colors duration-150">
-                <td class="py-3 px-4">${request.id}</td>
-                <td class="py-3 px-4">${request.department_name_display}</td>
-                <td class="py-3 px-4">${request.pay_types_display}</td>
-                <td class="py-3 px-4 date-col">${new Date(request.start_date_time).toLocaleDateString()}</td>
-                <td class="py-3 px-4 date-col">${new Date(request.end_date_time).toLocaleDateString()}</td>
-                <td class="py-3 px-4">${request.total_hours}</td>
-                <td class="py-3 px-4 max-w-xs truncate" title="${request.reason}">${request.reason}</td>
-                <td class="py-3 px-4">
-                    <span class="status-badge status-${request.status.toLowerCase()}">${request.status}</span>
-                </td>
-                <td class="py-3 px-4 text-center flex justify-center items-center space-x-2">
-                    <button class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors" title="Edit Request" data-id="${request.id}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
-                    <button class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors delete-btn" title="Delete Request" data-id="${request.id}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </td>
-            </tr>
-        `;
-    } */
 </style>
 
 {% load static %}

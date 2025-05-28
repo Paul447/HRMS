@@ -16,6 +16,8 @@ class PayTypeSerializer(serializers.ModelSerializer):
         fields = ['name']
 
 class PTORequestsSerializer(serializers.ModelSerializer):
+    # returning all department_name and pay_types as display fields
+    # This is the vulnerable part, as it assumes that the related fields are correctly set up
     department_name_display = DepartmentSerializer(source='department_name', read_only=True)
     pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
 
@@ -33,7 +35,7 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             'total_hours',
             'status',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id','status']
 
     
 

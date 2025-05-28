@@ -66,7 +66,7 @@ export async function fetchPTORequests() {
  */
 export async function fetchApprovedAndRejectedRequests() {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch('/api/pto-requests/approved-rejected/', {
+    const response = await smartFetch('/api/pto-requests/approved-and-rejected/', {
         method: 'GET',
         credentials: 'include',
         headers: {
