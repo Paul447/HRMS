@@ -44,12 +44,6 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
             case 'pending':
                 statusClass = 'status-pending';
                 break;
-            case 'cancelled':
-                statusClass = 'status-cancelled';
-                break;
-            case 'draft':
-                statusClass = 'status-info';
-                break;
         }
 
         // Build the common table cells

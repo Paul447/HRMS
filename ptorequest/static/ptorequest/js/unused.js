@@ -269,7 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const ptoRequest = await response.json();
-            console.log("PTO Request Data for Update:", ptoRequest);
 
             // Populate form fields
             // Ensure dropdowns are populated first before setting their values

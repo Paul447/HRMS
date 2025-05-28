@@ -12,12 +12,9 @@ from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
-from rest_framework.decorators import api_view, permission_classes
-
+from rest_framework.decorators import action
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
 @method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):

@@ -1,9 +1,9 @@
 // static/ptorequest/js/pto_list.js
 
-import { fetchPTORequests, deletePTORequest, fetchApprovedAndRejectedRequests } from './modules/apiService.js';
-import { showToast, toggleLoading, toggleNoRequestsMessage, toggleErrorMessage, checkURLForMessages } from './modules/uiHelpers.js';
-import { renderRequests } from './modules/tableRenderer.js';
-import { sortRequests, updateSortIndicators } from './modules/sorter.js';
+import { fetchPTORequests, deletePTORequest, fetchApprovedAndRejectedRequests } from './modules/ptoview/apiService.js';
+import { showToast, toggleLoading, toggleNoRequestsMessage, toggleErrorMessage, checkURLForMessages } from './modules/ptoview/uiHelpers.js';
+import { renderRequests } from './modules/ptoview/tableRenderer.js';
+// Removed: import { sortRequests, updateSortIndicators } from './modules/sorter.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements for Pending Requests
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const noRequestsMessage = document.getElementById('noRequestsMessage');
     const errorMessage = document.getElementById('errorMessage');
     const loadingRow = document.getElementById('loadingRow');
-    const tableHeaders = document.querySelectorAll('th[data-sort]'); // Only for pending table
+    // Removed: const tableHeaders = document.querySelectorAll('th[data-sort]'); // Only for pending table
 
     // DOM Elements for Approved Requests
     const approvedRequestsList = document.getElementById('approvedRequestsList');
@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // State Variables
     let allPendingRequests = [];
-    let currentSortColumn = null;
-    let currentSortDirection = 'asc';
+    // Removed: let currentSortColumn = null;
+    // Removed: let currentSortDirection = 'asc';
     let requestIdToDelete = null;
 
     /**
-     * Orchestrates fetching, sorting, and rendering *pending* requests.
+     * Orchestrates fetching and rendering *pending* requests.
      */
     async function loadAndRenderPendingRequests() {
         toggleLoading(loadingRow, true);
@@ -47,7 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             allPendingRequests = await fetchPTORequests();
-            applySortingAndRenderPending();
+            // Directly render without sorting
+            renderRequests(
+                allPendingRequests,
+                ptoRequestsList,
+                noRequestsMessage,
+                true, // allowActions = true
+                handleUpdateClick,
+                handleDeleteClick
+            );
         } catch (error) {
             console.error('Error in loadAndRenderPendingRequests:', error);
             toggleErrorMessage(errorMessage, true);
@@ -57,21 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    /**
-     * Applies the current sorting to the pending requests and then renders them.
-     */
-    function applySortingAndRenderPending() {
-        const sortedRequests = sortRequests(allPendingRequests, currentSortColumn, currentSortDirection);
-        // Pass true for `allowActions` for pending requests
-        renderRequests(
-            sortedRequests,
-            ptoRequestsList,
-            noRequestsMessage,
-            true, // allowActions = true
-            handleUpdateClick,
-            handleDeleteClick
-        );
-    }
+    // Removed: function applySortingAndRenderPending() { ... }
+    // The sorting logic is now removed.
 
     /**
      * Fetches and renders approved/rejected requests.
@@ -146,7 +141,15 @@ document.addEventListener('DOMContentLoaded', function() {
             await deletePTORequest(requestIdToDelete);
             allPendingRequests = allPendingRequests.filter(req => req.id !== parseInt(requestIdToDelete));
             showToast('Time off request deleted successfully!', 'success');
-            applySortingAndRenderPending(); // Re-render pending table with updated data
+            // Re-render pending table with updated data (no sorting applied now)
+            renderRequests(
+                allPendingRequests,
+                ptoRequestsList,
+                noRequestsMessage,
+                true, // allowActions = true
+                handleUpdateClick,
+                handleDeleteClick
+            );
         } catch (error) {
             console.error('Error deleting PTO request:', error);
             showToast('Failed to delete time off request. Please try again.', 'error');
@@ -166,20 +169,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Event Listeners ---
 
-    // Table header sort listeners (only for pending requests table)
-    tableHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-            const sortColumn = this.dataset.sort;
-            if (currentSortColumn === sortColumn) {
-                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSortColumn = sortColumn;
-                currentSortDirection = 'asc'; // Default to ascending when changing column
-            }
-            updateSortIndicators(tableHeaders, currentSortColumn, currentSortDirection);
-            applySortingAndRenderPending();
-        });
-    });
+    // Removed: Table header sort listeners
+    // tableHeaders.forEach(header => {
+    //     header.addEventListener('click', function() {
+    //         const sortColumn = this.dataset.sort;
+    //         if (currentSortColumn === sortColumn) {
+    //             currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    //         } else {
+    //             currentSortColumn = sortColumn;
+    //             currentSortDirection = 'asc'; // Default to ascending when changing column
+    //         }
+    //         updateSortIndicators(tableHeaders, currentSortColumn, currentSortDirection);
+    //         applySortingAndRenderPending();
+    //     });
+    // });
 
     // Confirmation Modal button listeners
     confirmDeleteBtn.addEventListener('click', confirmDeletion);
