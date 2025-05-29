@@ -49,7 +49,7 @@ export function showLoadingState(submitButton, submitButtonText, loadingSpinner,
     submitButtonText.classList.remove('inline-block');
     submitButtonText.classList.add('hidden');
     loadingSpinner.classList.remove('hidden');
-    console.log(`[FormHandler] Loading state activated: "${buttonText}"`);
+    
 }
 
 /**
@@ -67,7 +67,7 @@ export function hideLoadingState(submitButton, submitButtonText, loadingSpinner,
     submitButtonText.classList.remove('hidden');
     submitButtonText.classList.add('inline-block');
     loadingSpinner.classList.add('hidden');
-    console.log(`[FormHandler] Loading state deactivated. Button text: "${originalText}"`);
+    
 }
 
 /**
@@ -86,7 +86,7 @@ export function hideLoadingState(submitButton, submitButtonText, loadingSpinner,
  */
 export async function populateFormForUpdate(id, form, pageTitle, formHeading, formParagraph, submitButtonText, clearFormButton, showLoadingStateFn, hideLoadingStateFn, showNotificationFn) {
     showLoadingStateFn(form.querySelector('#submitButton'), submitButtonText, form.querySelector('#loadingSpinner'), 'Loading Data...');
-    console.log(`[FormHandler] Attempting to load form data for PTO ID: ${id}`);
+    
     try {
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const response = await smartFetch(`/api/pto-requests/${id}/`, {
@@ -109,18 +109,18 @@ export async function populateFormForUpdate(id, form, pageTitle, formHeading, fo
         }
 
         const ptoRequest = await response.json();
-        console.log('[FormHandler] PTO Request data fetched:', ptoRequest);
+        
 
         // Populate form fields
-        form.department_name.value = ptoRequest.department_name;
-        form.pay_types.value = ptoRequest.pay_types;
+        form.department_name.value = ptoRequest.department_name_display.id;
+        form.pay_types.value = ptoRequest.pay_types_display.id;
         form.start_date_time.value = ptoRequest.start_date_time ? ptoRequest.start_date_time.slice(0, 16) : '';
         form.end_date_time.value = ptoRequest.end_date_time ? ptoRequest.end_date_time.slice(0, 16) : '';
         form.reason.value = ptoRequest.reason || '';
 
         showNotificationFn('Form loaded for update.', 'success');
     } catch (error) {
-        console.error('[FormHandler] Error loading PTO request for update:', error);
+        
         showNotificationFn('Failed to load request details. Please try again.', 'error');
     } finally {
         hideLoadingStateFn(form.querySelector('#submitButton'), submitButtonText, form.querySelector('#loadingSpinner'), 'Submit Request');
@@ -153,7 +153,7 @@ export function updateUIMode(ptoRequestId, pageTitle, formHeading, formParagraph
         `;
         if (formParagraph) formParagraph.textContent = 'Modify the details of your time off request and submit the updates.';
         clearFormButton.textContent = 'Reset Form';
-        console.log('[FormHandler] UI updated to "update" mode.');
+        
     } else {
         submitButtonText.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 inline-block align-text-bottom" viewBox="0 0 20 20" fill="currentColor">
@@ -169,6 +169,6 @@ export function updateUIMode(ptoRequestId, pageTitle, formHeading, formParagraph
         `;
         if (formParagraph) formParagraph.textContent = 'Fill out the form below to submit a new time off request.';
         clearFormButton.textContent = 'Clear';
-        console.log('[FormHandler] UI updated to "create" mode.');
+        
     }
 }

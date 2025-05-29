@@ -7,13 +7,13 @@ from department.models import Department
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['name']
+        fields = ['id','name']
 
 
 class PayTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PayType
-        fields = ['name']
+        fields = ['id','name']
 
 class PTORequestsSerializer(serializers.ModelSerializer):
     # returning all department_name and pay_types as display fields
@@ -25,9 +25,9 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         model = PTORequests
         fields = [
             'id',
-            'department_name',
+            # 'department_name',
             'department_name_display',
-            'pay_types',
+            # 'pay_types',
             'pay_types_display',
             'start_date_time',
             'end_date_time',

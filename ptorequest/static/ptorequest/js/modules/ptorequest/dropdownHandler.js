@@ -13,7 +13,7 @@ import { showNotification } from './notificationService.js';
  * @param {string} labelKey The key from the API response object to use as the option's text.
  */
 export async function fetchAndPopulateDropdown(url, selectElement, defaultOptionText, valueKey, labelKey) {
-    console.log(`[DropdownHandler] Fetching data for dropdown: ${defaultOptionText} from ${url}`);
+   
     try {
         const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const response = await smartFetch(url, {
@@ -36,7 +36,7 @@ export async function fetchAndPopulateDropdown(url, selectElement, defaultOption
         }
 
         const data = await response.json();
-        console.log(`[DropdownHandler] Data fetched for ${defaultOptionText}:`, data);
+        
 
         selectElement.innerHTML = `<option value="" disabled selected>${defaultOptionText}</option>`;
 
@@ -46,9 +46,8 @@ export async function fetchAndPopulateDropdown(url, selectElement, defaultOption
             option.textContent = item[labelKey];
             selectElement.appendChild(option);
         });
-        console.log(`[DropdownHandler] Populated dropdown: ${defaultOptionText}`);
+        
     } catch (error) {
-        console.error(`[DropdownHandler] Error populating ${defaultOptionText} dropdown:`, error);
         selectElement.innerHTML = `<option value="" disabled selected>Error loading ${defaultOptionText}</option>`;
         showNotification(`Error loading ${defaultOptionText}. Please try refreshing the page.`, 'error');
     }

@@ -68,14 +68,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     ptoRequestId = urlParams.get('id');
 
     if (ptoRequestId) {
-        console.log(`[pto_request_main.js] Detected ptoRequestId: ${ptoRequestId}. Entering update mode.`);
+        
         // In update mode, populate dropdowns and then form data
         await fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
         await fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
         await populateFormForUpdate(ptoRequestId, form, pageTitle, formHeading, formParagraph, submitButtonText, clearFormButton, showLoadingState, hideLoadingState, showNotification);
         updateUIMode(ptoRequestId, pageTitle, formHeading, formParagraph, submitButtonText, clearFormButton);
     } else {
-        console.log('[pto_request_main.js] No ptoRequestId found. Entering create mode.');
+        
         // In create mode, just populate dropdowns
         fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
         fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
@@ -84,16 +84,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     // --- Form Submission Handling ---
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        console.log('[pto_request_main.js] Form submission initiated.');
+        
 
         // Ask for confirmation using the reusable modal
         const confirmed = await askForConfirmation(confirmationModal, confirmSubmitButton, confirmCancelButton);
         if (!confirmed) {
             showNotification('PTO request submission cancelled.', 'warning');
-            console.log('[pto_request_main.js] Form submission cancelled by user.');
+            
             return;
         }
-        console.log('[pto_request_main.js] User confirmed submission.');
+        
 
         clearFieldErrors();
         showLoadingState(submitButton, submitButtonText, loadingSpinner, ptoRequestId ? 'Updating...' : 'Submitting...');
@@ -117,10 +117,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             url = `/api/pto-requests/${ptoRequestId}/`;
             successMessage = 'Your time off request was successfully updated!';
             showNotification('Attempting to update request...', 'warning');
-            console.log(`[pto_request_main.js] Sending PUT request to ${url}`);
+           
         } else {
             showNotification('Attempting to submit new request...', 'warning');
-            console.log(`[pto_request_main.js] Sending POST request to ${url}`);
+            
         }
 
         try {
@@ -136,12 +136,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("[Form Submission] PTO request processed successfully:", data);
+                
                 // Pass the success message via URL query parameter for details page
                 window.location.href = `/auth/ptorequest/details/?message=${encodeURIComponent(successMessage)}&type=success`;
             } else if (response.status === 400) {
                 const errorData = await response.json();
-                console.error('[Form Submission] Validation Errors:', errorData);
+                
 
                 Object.keys(errorData).forEach(field => {
                     const fieldElement = form.querySelector(`[name="${field}"]`);
@@ -157,15 +157,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
                 showNotification('Please correct the errors in the form.', 'error');
             } else if (response.status === 401) {
-                console.error("[Form Submission] Unauthorized. Redirecting to login.");
+                
                 window.location.href = '/auth/login/';
             } else {
                 const errorText = await response.text();
-                console.error(`[Form Submission] Server Error (${response.status}):`, errorText);
+                
                 showNotification(`An unexpected error occurred (${response.status}). Please try again.`, 'error');
             }
         } catch (err) {
-            console.error('[Form Submission] Network or unknown error during submission:', err);
+            
             showNotification('Network error, please check your internet connection and try again.', 'error');
         } finally {
             hideLoadingState(submitButton, submitButtonText, loadingSpinner, ptoRequestId ? 'Update Request' : 'Submit Request');
@@ -181,6 +181,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
             showNotification('Form cleared!', 'warning');
         }
-        console.log('[pto_request_main.js] Form cleared.');
+        
     });
 });
