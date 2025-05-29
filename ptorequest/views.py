@@ -45,9 +45,10 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         rejected = PTORequests.objects.filter(user=user, status__iexact='rejected').order_by('-created_at')
 
         return Response({
-            "approved_requests": PTORequestsSerializer(approved, many=True).data,
-            "rejected_requests": PTORequestsSerializer(rejected, many=True).data
+            "approved_requests": PTORequestsSerializer(approved, many=True, context={'request': request}).data,
+            "rejected_requests": PTORequestsSerializer(rejected, many=True, context={'request': request}).data
         })
+
 
 
 

@@ -1,33 +1,55 @@
 from rest_framework import serializers
 from .models import PTORequests
-import pytz # Used for explicit timezone handling
+import pytz
 from paytype.models import PayType
-from department.models import Department
+from department.models import Department, UserProfile
+from paytype.models import DepartmentBasedPayType
 
 class DepartmentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Department model, used for display purposes.
+    """
     class Meta:
         model = Department
-        fields = ['id','name']
-
+        fields = ['id', 'name']
 
 class PayTypeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the PayType model, used for display purposes.
+    """
     class Meta:
         model = PayType
-        fields = ['id','name']
+        fields = ['id', 'name']
 
 class PTORequestsSerializer(serializers.ModelSerializer):
-    # returning all department_name and pay_types as display fields
-    # This is the vulnerable part, as it assumes that the related fields are correctly set up
+    """
+    Serializer for PTORequests, handling both read and write operations.
+    It includes nested serializers for display fields and uses PrimaryKeyRelatedField
+    for writeable foreign keys with dynamic queryset filtering.
+    """
+    # Read-only fields for displaying related object names
     department_name_display = DepartmentSerializer(source='department_name', read_only=True)
     pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
+
+    # Write-only fields for accepting primary keys for related objects
+    department_name = serializers.PrimaryKeyRelatedField(
+        # Queryset set to none initially, will be dynamically filtered in __init__
+        queryset=Department.objects.none(),
+        write_only=True
+    )
+    pay_types = serializers.PrimaryKeyRelatedField(
+        # Queryset set to none initially, will be dynamically filtered in __init__
+        queryset=PayType.objects.none(),
+        write_only=True
+    )
 
     class Meta:
         model = PTORequests
         fields = [
             'id',
-            # 'department_name',
+            'department_name',
             'department_name_display',
-            # 'pay_types',
+            'pay_types',
             'pay_types_display',
             'start_date_time',
             'end_date_time',
@@ -35,70 +57,103 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             'total_hours',
             'status',
         ]
-        read_only_fields = ['id','status']
+        read_only_fields = ['id', 'status', 'total_hours'] # total_hours is calculated, not directly set by client
 
-    
+    def __init__(self, *args, **kwargs):
+        """
+        Dynamically filters the 'department_name' and 'pay_types' querysets
+        based on the authenticated user's associated departments.
+        """
+        super().__init__(*args, **kwargs)
+
+        request_user = self.context.get('request').user if 'request' in self.context else None
+
+        if request_user and request_user.is_authenticated:
+            # Get department IDs associated with the user efficiently
+            user_department_ids = UserProfile.objects.filter(user=request_user).values_list('department', flat=True)
+
+            # Filter departments available for the user
+            self.fields['department_name'].queryset = Department.objects.filter(id__in=user_department_ids)
+
+            # Filter pay types linked to the user's departments
+            linked_pay_type_ids = DepartmentBasedPayType.objects.filter(
+                department__in=user_department_ids
+            ).values_list('pay_type', flat=True)
+            self.fields['pay_types'].queryset = PayType.objects.filter(id__in=linked_pay_type_ids)
+        else:
+            # If no user or not authenticated, restrict choices to nothing or handle as per policy
+            self.fields['department_name'].queryset = Department.objects.none()
+            self.fields['pay_types'].queryset = PayType.objects.none()
+
+    def _normalize_datetime(self, dt_obj):
+        """
+        Helper method to normalize a datetime object to the Chicago timezone.
+        """
+        if not dt_obj:
+            return None
+
+        chicago_tz = pytz.timezone('America/Chicago')
+        if dt_obj.tzinfo is None:
+            # Assume naive datetimes are in UTC or local server time, then localize to Chicago
+            # For robustness, consider if naive datetimes always come in a specific timezone
+            # If naive datetimes are *expected* to be in Chicago time but without tzinfo:
+            return chicago_tz.localize(dt_obj)
+        else:
+            # Convert aware datetimes to Chicago timezone
+            return dt_obj.astimezone(chicago_tz)
 
     def validate(self, data):
         """
-        Custom validation to ensure end_date_time is not before start_date_time.
-        Also performs timezone normalization and total_hours calculation for both
-        create and update operations.
+        Performs custom validation, timezone normalization, and total_hours calculation.
         """
+        # Retrieve start and end datetimes, prioritizing new data over existing instance data
         start_date_time = data.get('start_date_time', self.instance.start_date_time if self.instance else None)
         end_date_time = data.get('end_date_time', self.instance.end_date_time if self.instance else None)
 
-        chicago_tz = pytz.timezone('America/Chicago')
+        # Normalize datetimes and update data
+        data['start_date_time'] = self._normalize_datetime(start_date_time)
+        data['end_date_time'] = self._normalize_datetime(end_date_time)
 
-        # Normalize start_date_time
-        if start_date_time:
-            if start_date_time.tzinfo is None:
-                start_date_time = chicago_tz.localize(start_date_time)
-            else:
-                start_date_time = start_date_time.astimezone(chicago_tz)
-        data['start_date_time'] = start_date_time # Update data with normalized value
-
-        # Normalize end_date_time
-        if end_date_time:
-            if end_date_time.tzinfo is None:
-                end_date_time = chicago_tz.localize(end_date_time)
-            else:
-                end_date_time = end_date_time.astimezone(chicago_tz)
-        data['end_date_time'] = end_date_time # Update data with normalized value
-
+        # Re-assign normalized values for validation logic
+        start_date_time = data['start_date_time']
+        end_date_time = data['end_date_time']
 
         if start_date_time and end_date_time:
             if end_date_time < start_date_time:
                 raise serializers.ValidationError("End date and time cannot be before start date and time.")
 
-            # Calculate total_hours
+            # Calculate total_hours based on normalized datetimes
             delta = end_date_time - start_date_time
             data['total_hours'] = round(delta.total_seconds() / 3600.0, 2)
+        elif start_date_time or end_date_time:
+            # If only one date is provided, it's an incomplete range.
+            # You might want to add a validation error here or set total_hours to 0.
+            # For now, setting to 0 as in your original.
+            data['total_hours'] = 0.0
         else:
-            data['total_hours'] = 0.0 # Default if dates are not complete or missing
-
-        # Map 'department_name' to 'department' and 'pay_types' to 'pay_type' for saving
-        # if they are coming as IDs. This is handled by PrimaryKeyRelatedField in the serializer.
-        # So we don't need explicit mapping here if your model fields are `department` and `pay_type`.
+            data['total_hours'] = 0.0
 
         return data
 
     def create(self, validated_data):
         """
-        Custom create method to handle automatic user assignment.
-        Timezone normalization and total_hours calculation are now handled in validate.
+        Creates a new PTORequest instance.
+        The 'total_hours' is automatically calculated in `validate`.
+        User assignment is typically handled by the ViewSet.
         """
-        # User is assigned by the ViewSet's perform_create method
+        # Remove display fields as they are not model fields
+        validated_data.pop('department_name_display', None)
+        validated_data.pop('pay_types_display', None)
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         """
-        Custom update method.
-        Timezone normalization and total_hours calculation are now handled in validate.
+        Updates an existing PTORequest instance.
+        The 'total_hours' is automatically calculated in `validate`.
         """
-        # User is assigned by the ViewSet's perform_update method (or checked there)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
+        # Remove display fields as they are not model fields
+        validated_data.pop('department_name_display', None)
+        validated_data.pop('pay_types_display', None)
 
+        return super().update(instance, validated_data)

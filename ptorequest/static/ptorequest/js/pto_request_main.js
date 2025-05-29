@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             end_date_time: form.end_date_time.value,
             reason: form.reason.value
         };
+        console.log('Submitting payload:', payload);
 
         let method = 'POST';
         let url = '/api/pto-requests/';
