@@ -8,6 +8,15 @@ class PTORequestsAdmin(admin.ModelAdmin):
     list_filter = ('status', 'department_name')
     list_editable = ('status',)
     search_fields = ('user__username', 'reason')
+    def get_queryset(self, request):
+        """
+        Override the default queryset to ensure that only PTO requests
+        belonging to the current user are displayed in the admin interface.
+        """
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
 
     def formatted_start_date_time(self, obj):
         """Return start date time in 24-hour format (HH:MM:SS)."""

@@ -15,38 +15,72 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
-
 @method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):
-    queryset = PTORequests.objects.all()
+    """
+    A ViewSet for managing PTO requests.
+    Provides CRUD operations for PTO requests, with specific handling
+    for user-specific access and status-based filtering.
+    """
     serializer_class = PTORequestsSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return PTORequests.objects.filter(user=user, status='pending').order_by('-created_at')
+        """
+        Filters PTO requests to only show those belonging to the authenticated user
+        and with a 'pending' status by default for list views.
+        """
+        # Ensure the request is for the authenticated user and only 'pending' requests initially.
+        # This is suitable for a primary 'pending' list.
+        return PTORequests.objects.filter(user=self.request.user, status='pending').order_by('-created_at')
 
     def perform_create(self, serializer):
+        """
+        Automatically assigns the authenticated user to the PTO request upon creation.
+        """
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
+        """
+        Ensures a user can only update their own PTO requests.
+        """
+        # Check if the instance belongs to the current user before saving
         if serializer.instance.user != self.request.user:
             return Response(
                 {"detail": "You do not have permission to edit this request."},
                 status=status.HTTP_403_FORBIDDEN
             )
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user) # User field remains unchanged, but explicit for clarity
 
-    @action(detail=False, methods=['get'], url_path='approved-and-rejected', permission_classes=[IsAuthenticated])
+    def perform_destroy(self, instance):
+        """
+        Ensures a user can only delete their own PTO requests.
+        """
+        if instance.user != self.request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this request."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        instance.delete()
+
+    @action(detail=False, methods=['get'], url_path='approved-and-rejected')
     def approved_and_rejected(self, request):
+        """
+        Custom action to retrieve a list of a user's approved and rejected PTO requests.
+        Accessible via `/api/ptorequests/approved-and-rejected/`.
+        """
         user = request.user
 
-        approved = PTORequests.objects.filter(user=user, status__iexact='approved').order_by('-created_at')
-        rejected = PTORequests.objects.filter(user=user, status__iexact='rejected').order_by('-created_at')
+        approved_requests = PTORequests.objects.filter(user=user, status__iexact='approved').order_by('-created_at')
+        rejected_requests = PTORequests.objects.filter(user=user, status__iexact='rejected').order_by('-created_at')
+
+        # Serialize the data
+        approved_data = self.get_serializer(approved_requests, many=True).data
+        rejected_data = self.get_serializer(rejected_requests, many=True).data
 
         return Response({
-            "approved_requests": PTORequestsSerializer(approved, many=True, context={'request': request}).data,
-            "rejected_requests": PTORequestsSerializer(rejected, many=True, context={'request': request}).data
+            "approved_requests": approved_data,
+            "rejected_requests": rejected_data
         })
 
 
