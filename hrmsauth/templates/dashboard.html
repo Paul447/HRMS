@@ -99,6 +99,32 @@
         }
       });
     });
+  async function getUserData() {
+    try {
+      const response = await fetch('/auth/api/user/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('access_token')  // Add your JWT here
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('User data:', data);
+        document.getElementsByClassName('user-name')[0].textContent = data.username || 'User';
+        document.getElementById('user-avatar').textContent = data.username ? data.username.charAt(0).toUpperCase() : '?';
+
+      } else {
+        console.error('Failed to fetch user data');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  // Call the function on page load
+  window.onload = getUserData;
   </script>
 </head>
 <body class="bg-secondary-50 font-sans antialiased text-secondary-800">
@@ -283,12 +309,10 @@
           </button>
         </div>
         <div class="flex items-center space-x-2">
-          <div class="h-9 w-9 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium text-lg shadow-md">
-            {{ request.user.username|first|upper }}
+          <div class="h-9 w-9 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium text-lg shadow-md" id="user-avatar">
           </div>
           <div class="hidden md:block">
-            <p class="text-base font-medium text-secondary-700">{{ request.user.username }}</p>
-            <p class="text-xs text-secondary-500">Administrator</p>
+            <p class="text-base font-medium text-secondary-700 user-name" id="user-name"></p>
           </div>
         </div>
       </div>

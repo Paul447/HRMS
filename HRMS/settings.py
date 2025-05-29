@@ -112,6 +112,8 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'hjjlzz_avrlu',
     'AUTH_COOKIE_HTTP_ONLY': True,
     'UPDATE_LAST_LOGIN': True,
+    'USER_ID_FIELD': 'id', # The field on your User model used as ID
+    'USER_ID_CLAIM': 'user_id', # The claim name in the token for the user ID
 }
 ACCESS_TOKEN_COOKIE_NAME = 'hjjlzz_avrlu'
 REFRESH_TOKEN_COOKIE_NAME = 'ylmylzo_avrlu'

@@ -14,6 +14,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
 
 # from .serializer import (
@@ -84,6 +86,16 @@ class LogoutView(APIView):
     Everything in this view is handled by the middleware. This is just a placeholder. Used for the logout URL.
     """
     pass 
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_info(request):
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+    })
 
 # -----------------------------
 # Permissions
