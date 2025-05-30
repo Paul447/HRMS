@@ -51,6 +51,7 @@ urlpatterns = [
     path('auth/ptorequest/', include('ptorequest.url')),
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
+    path('clock/', include('timeclock.url')),
 
     
     # Yaml schema generation
