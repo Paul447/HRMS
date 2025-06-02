@@ -7,5 +7,5 @@ urlpatterns = [
     path('api/logout/', LogoutView.as_view(), name='logout'),
     path('login/', FrontendLoginView.as_view(), name='frontend_login'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('api/user/', user_info, name='user_info'),
+    
 ]

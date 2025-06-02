@@ -56,7 +56,7 @@ export async function handleClockAction(DOMElements, csrftoken, fetchAndRenderCl
     showClockButtonLoadingState(clockButton, `${currentAction}ing...`);
 
     try {
-        const response = await smartFetch('/clock/clock-in-out/', {
+        const response = await smartFetch('/api/clock/clock-in-out/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
