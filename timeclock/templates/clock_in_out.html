@@ -3,28 +3,29 @@
 {% block title %}Clock In/Out{% endblock %}
 
 {% block content %}
-    <div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Time Tracking</h1>
-            <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
-        </div>
-        
-        <div id="payPeriodCard" class="bg-blue-50 rounded-lg p-4 mb-8 border border-blue-100">
-            <div class="text-center text-gray-500">Loading pay period data...</div>
-        </div>
-        
-        <div id="clockInOutCard" class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-8 shadow-inner border border-gray-200">
-            <div class="text-center text-gray-500">Loading clock status...</div>
-        </div>
-
-        <div id="timeEntriesSection" class="space-y-8">
-            <div class="text-center text-gray-500">Loading time entries...</div>
-        </div>
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Time Tracking</h1>
+        <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
     </div>
+
+    <div id="payPeriodCard" class="bg-blue-50 rounded-lg p-4 mb-8 border border-blue-100">
+        <div class="text-center text-gray-500">Loading pay period data...</div>
+    </div>
+
+    <div id="clockInOutCard"
+        class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-8 shadow-inner border border-gray-200">
+        <div class="text-center text-gray-500">Loading clock status...</div>
+    </div>
+
+    <div id="timeEntriesSection" class="space-y-8">
+        <div class="text-center text-gray-500">Loading time entries...</div>
+    </div>
+</div>
 
 {% load static %}
 <script>
-   // Helper function to get CSRF token for POST requests
+    // Helper function to get CSRF token for POST requests
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -55,7 +56,12 @@
                 console.error("Invalid date string passed to formatDate:", isoString);
                 return 'Invalid Date';
             }
-            const options = { weekday: 'short', month: '2-digit', day: '2-digit', year: '2-digit' };
+            const options = {
+                weekday: 'short',
+                month: '2-digit',
+                day: '2-digit',
+                year: '2-digit'
+            };
             return date.toLocaleString(navigator.language, options);
         } catch (e) {
             console.error("Error formatting date:", isoString, e);
@@ -63,11 +69,12 @@
         }
     }
 
+
     // Formats an ISO string to a displayable time (e.g., "11:24 AM")
     function formatOnlyTime(isoString) {
         if (!isoString) {
             // For a null clock_out_time on an active entry, this will return an empty string, which is desired
-            return ''; 
+            return '';
         }
         try {
             const date = new Date(isoString);
@@ -75,18 +82,23 @@
                 console.error("Invalid date string passed to formatOnlyTime:", isoString);
                 return 'Invalid Time';
             }
-            const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+            const options = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
             return date.toLocaleString(navigator.language, options);
         } catch (e) {
             console.error("Error formatting time:", isoString, e);
             return 'Error Time';
         }
     }
-    
+
     // Calculates duration between two ISO strings and formats it (e.g., "X:YY")
     function formatDuration(clockInIso, clockOutIso) {
         if (!clockInIso || !clockOutIso) {
-            console.warn("formatDuration called with missing clockInIso or clockOutIso for calculation:", clockInIso, clockOutIso);
+            console.warn("formatDuration called with missing clockInIso or clockOutIso for calculation:", clockInIso,
+                clockOutIso);
             return '0:00'; // Default for incomplete data
         }
         try {
@@ -143,8 +155,8 @@
         const weekBoundaries = data.week_boundaries;
 
         // Ensure week_boundaries exist and are valid before formatting
-        const week1Start = weekBoundaries ? weekBoundaries.week_1_start : 'N/A';
-        const week1End = weekBoundaries ? weekBoundaries.week_1_end : 'N/A';
+        const week1Start = weekBoundaries ? formatDate(weekBoundaries.week_1_start) : 'N/A';
+        const week1End = weekBoundaries ? formatDate(weekBoundaries.week_1_end) : 'N/A';
         const week2Start = weekBoundaries ? formatDate(weekBoundaries.week_2_start) : 'N/A';
         const week2End = weekBoundaries ? formatDate(weekBoundaries.week_2_end) : 'N/A';
 
@@ -169,7 +181,7 @@
                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <span class="text-sm font-medium text-blue-800">Week ${data.week_number || 'N/A'}: ${week1Start} - ${week1End} | ${week2Start} - ${week2End}</span>
+                    <span class="text-sm font-medium text-blue-800">Week ${data.week_number || 'N/A'}: ${data.week_number === 1 ? `${week1Start} - ${week1End}` : `${week2Start} - ${week2End}`}</span>
                 </div>
             </div>
         `;
@@ -194,7 +206,7 @@
             if (data.active_clock_entry.clock_in_time) {
                 initialDuration = formatDuration(data.active_clock_entry.clock_in_time, new Date().toISOString());
             }
-            
+
             statusHtml = `
                 <div class="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800 mb-3">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -218,7 +230,8 @@
             if (window.durationInterval) clearInterval(window.durationInterval);
             window.durationInterval = setInterval(() => {
                 if (data.active_clock_entry && data.active_clock_entry.clock_in_time) {
-                    const updatedDuration = formatDuration(data.active_clock_entry.clock_in_time, new Date().toISOString());
+                    const updatedDuration = formatDuration(data.active_clock_entry.clock_in_time, new Date()
+                        .toISOString());
                     const durationElement = document.getElementById('currentDuration');
                     if (durationElement) {
                         durationElement.textContent = updatedDuration;
@@ -260,7 +273,7 @@
                 ${buttonHtml}
             </div>
         `;
-        
+
         const clockButton = document.getElementById('clockButton');
         if (clockButton) {
             clockButton.addEventListener('click', handleClockAction);
@@ -284,8 +297,10 @@
         }
 
         const entriesHtml = entries.map(entry => {
-            const displayClockOutTime = entry.clock_out_time ? formatOnlyTime(entry.clock_out_time) : 'Still In';
-            const displayHoursWorked = entry.hours_worked !== null ? parseFloat(entry.hours_worked).toFixed(2) : '0.00'; // Ensure two decimal places
+            const displayClockOutTime = entry.clock_out_time ? formatOnlyTime(entry.clock_out_time) :
+            'Still In';
+            const displayHoursWorked = entry.hours_worked !== null ? parseFloat(entry.hours_worked).toFixed(2) :
+                '0.00'; // Ensure two decimal places
 
             return `
                 <div class="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
@@ -337,7 +352,8 @@
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error(`HTTP error! Status: ${response.status}`, errorData);
-                alert("Failed to load clock data: " + (errorData.detail || errorData.message || "Unknown API error."));
+                alert("Failed to load clock data: " + (errorData.detail || errorData.message ||
+                    "Unknown API error."));
                 return;
             }
 
@@ -346,7 +362,7 @@
 
             renderPayPeriodCard(data);
             renderClockInOutCard(data);
-            
+
             // Clear existing entries before rendering new ones to prevent duplicates on re-render
             const timeEntriesSection = document.getElementById('timeEntriesSection');
             if (timeEntriesSection) {
@@ -399,4 +415,3 @@
     console.log("Script loaded and DOMContentLoaded listener attached.");
 </script>
 {% endblock %}
-
