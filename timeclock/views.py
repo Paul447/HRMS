@@ -177,10 +177,10 @@ class UserClockDataAPIView(APIView):
             "week_number": week_number,
             "week_boundaries": {
                 # Return local dates for display on frontend
-                "week_1_start": week_1_start_local.isoformat(),
-                "week_1_end": week_1_end_local.isoformat(),
-                "week_2_start": week_2_start_local.isoformat(),
-                "week_2_end": week_2_end_local.isoformat(),
+                "week_1_start": week_1_start_local,
+                "week_1_end": week_1_end_local,
+                "week_2_start": week_2_start_local,
+                "week_2_end": week_2_end_local,
             },
             "active_clock_entry": active_clock_entry_data,
             "week_1_entries": week_1_serialized_entries,

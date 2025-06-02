@@ -87,38 +87,72 @@ export function formatOnlyTime(isoString) {
  * @param {string} clockOutIso - ISO 8601 string for clock-out time.
  * @returns {string} Formatted duration or an error message.
  */
+// static/timeclock/js/modules/shared/utils.js
+
+
+// static/timeclock/js/modules/shared/utils.js
+
 export function formatDuration(clockInIso, clockOutIso) {
+    // Basic validation for missing inputs
     if (!clockInIso || !clockOutIso) {
         console.warn("formatDuration called with missing clockInIso or clockOutIso for calculation:", clockInIso,
             clockOutIso);
-        return '0:00'; // Default for incomplete data
+        return '0.00'; // Default for incomplete data, now as decimal hours
     }
+
     try {
         const inTime = new Date(clockInIso);
         const outTime = new Date(clockOutIso);
 
+        // Debugging logs: uncomment if you need to see the Date objects themselves
+        // console.log("--- DEBUG: formatDuration START ---");
+        // console.log("Input clockInIso:", clockInIso);
+        // console.log("Input clockOutIso:", clockOutIso);
+        // console.log("inTime (Date object):", inTime.toISOString());
+        // console.log("outTime (Date object):", outTime.toISOString());
+
+        // Validate if Date objects are valid
         if (isNaN(inTime.getTime()) || isNaN(outTime.getTime())) {
             console.error("Invalid date(s) in formatDuration:", clockInIso, clockOutIso);
-            return 'Invalid Duration';
+            return 'Invalid'; // Changed from 'Invalid Duration' for decimal output
         }
 
+        // Calculate the difference in milliseconds
         const diffMs = outTime - inTime;
+        // Debugging log
+        
 
+        // Handle negative durations (clock out before clock in)
         if (diffMs < 0) {
             console.warn("Clock out time is before clock in time for duration calculation.");
-            return 'Invalid Duration';
+            return 'Invalid'; // Changed from 'Invalid Duration' for decimal output
         }
 
+        // Convert milliseconds to total seconds
         const totalSeconds = Math.floor(diffMs / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        // Debugging log
+        
 
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        // Calculate total hours as a decimal
+        const totalHours = totalSeconds / 3600;
+        
+
+        // Return total hours rounded to two decimal places
+        // Note: JavaScript's toFixed() rounds "half up" (e.g., 0.045 becomes 0.05).
+        // Python's round() uses "round half to even" (e.g., round(0.045, 2) is 0.04).
+        // This might lead to slight differences for specific half-way values,
+        // but for general use, toFixed(2) is standard.
+        return totalHours.toFixed(2);
+
     } catch (e) {
+        // Catch any unexpected errors during calculation
         console.error("Error calculating duration:", clockInIso, clockOutIso, e);
-        return 'Error Calc.';
+        return 'Error'; // Changed from 'Error Calc.' for decimal output
     }
 }
+
+// Ensure other utility functions like formatDate, formatOnlyTime, etc., are also in this file
+// if they are imported elsewhere.
 
 // Global variable for interval management (to clear old intervals on re-render)
 // This is typically managed by the module that creates it, but for simplicity

@@ -61,7 +61,7 @@ async function fetchAndRenderClockData(DOMElements, csrftoken) {
         }
 
         const data = await response.json();
-        console.log("API Response Data:", data);
+        
 
         renderPayPeriodCard(DOMElements.payPeriodCard, data);
         renderClockInOutCard(DOMElements.clockInOutCard, data, () => handleClockAction(DOMElements, csrftoken, fetchAndRenderClockData));

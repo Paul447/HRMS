@@ -13,7 +13,7 @@ export function renderPayPeriodCard(payPeriodCardElement, data) {
         return;
     }
 
-    console.log("[uiRenderer] Rendering Pay Period Card with data:", data);
+    
 
     // Handle case where no active pay period is found
     if (!data || !data.pay_period) {
@@ -33,10 +33,10 @@ export function renderPayPeriodCard(payPeriodCardElement, data) {
     const weekBoundaries = data.week_boundaries;
 
     // Ensure week_boundaries exist and are valid before formatting
-    const week1Start = weekBoundaries ? formatDate(weekBoundaries.week_1_start) : 'N/A';
-    const week1End = weekBoundaries ? formatDate(weekBoundaries.week_1_end) : 'N/A';
-    const week2Start = weekBoundaries ? formatDate(weekBoundaries.week_2_start) : 'N/A';
-    const week2End = weekBoundaries ? formatDate(weekBoundaries.week_2_end) : 'N/A';
+    const week1Start = weekBoundaries ? weekBoundaries.week_1_start : 'N/A';
+    const week1End = weekBoundaries ? weekBoundaries.week_1_end : 'N/A';
+    const week2Start = weekBoundaries ? weekBoundaries.week_2_start : 'N/A';
+    const week2End = weekBoundaries ? weekBoundaries.week_2_end : 'N/A';
 
     const payPeriodStartDisplay = formatPayPeriodDate(pp.start_date);
     const payPeriodEndDisplay = formatPayPeriodDate(pp.end_date);
@@ -80,7 +80,7 @@ export function renderClockInOutCard(clockInOutCardElement, data, clockActionHan
         return;
     }
 
-    console.log("[uiRenderer] Rendering Clock In/Out Card with data:", data);
+    
 
     let buttonHtml = '';
     let statusHtml = '';
@@ -93,7 +93,9 @@ export function renderClockInOutCard(clockInOutCardElement, data, clockActionHan
 
     if (data.current_status === "Clocked In" && data.active_clock_entry) {
         const clockInTime = formatOnlyTime(data.active_clock_entry.clock_in_time);
-        let initialDuration = '0:00';
+
+        // formatDuration now directly returns decimal hours
+        let initialDuration = '0.00';
         if (data.active_clock_entry.clock_in_time) {
             initialDuration = formatDuration(data.active_clock_entry.clock_in_time, new Date().toISOString());
         }
@@ -106,8 +108,8 @@ export function renderClockInOutCard(clockInOutCardElement, data, clockActionHan
                 <span class="font-medium">Clocked In</span>
             </div>
             <p class="text-gray-600 mb-1">Since: <span class="font-medium text-gray-800">${formatDate(data.active_clock_entry.clock_in_time)} ${clockInTime}</span></p>
-            <p class="text-sm text-gray-500">Duration: <span id="currentDuration" class="font-semibold text-gray-800">${initialDuration}</span></p>
-        `;
+            <p class="text-sm text-gray-500">Duration: <span id="currentDuration" class="font-semibold text-gray-800">${initialDuration} hours</span></p>
+        `; // Added " hours" for clarity in display
         buttonHtml = `
             <button id="clockButton" class="w-full max-w-xs mx-auto flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 shadow-md">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -120,18 +122,17 @@ export function renderClockInOutCard(clockInOutCardElement, data, clockActionHan
         // Start interval for duration updates
         window.durationInterval = setInterval(() => {
             if (data.active_clock_entry && data.active_clock_entry.clock_in_time) {
+                // Calls formatDuration, which now returns decimal hours
                 const updatedDuration = formatDuration(data.active_clock_entry.clock_in_time, new Date().toISOString());
                 const durationElement = document.getElementById('currentDuration');
                 if (durationElement) {
-                    durationElement.textContent = updatedDuration;
+                    durationElement.textContent = `${updatedDuration} hours`; // Added " hours" here too
                 } else {
-                    // If element is not found, stop interval to prevent errors
                     clearInterval(window.durationInterval);
                     window.durationInterval = null;
                     console.warn("[uiRenderer] currentDuration element not found, clearing duration interval.");
                 }
             } else {
-                 // If active_clock_entry becomes null/undefined, stop interval
                 clearInterval(window.durationInterval);
                 window.durationInterval = null;
                 console.warn("[uiRenderer] active_clock_entry missing, clearing duration interval.");
@@ -140,7 +141,7 @@ export function renderClockInOutCard(clockInOutCardElement, data, clockActionHan
 
     } else {
         // Clocked Out State
-        if (window.durationInterval) clearInterval(window.durationInterval); // Ensure interval is cleared if not clocked in
+        if (window.durationInterval) clearInterval(window.durationInterval);
         statusHtml = `
             <div class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-800 mb-3">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -190,7 +191,7 @@ export function renderTimeEntries(timeEntriesSectionElement, entries, totalHours
         return;
     }
 
-    console.log(`[uiRenderer] Rendering Week ${weekNum} entries:`, entries, `Total: ${totalHours}`);
+    
 
     // No need to clear existing sections here, as timeclock_main.js now clears the whole section
     // before calling renderTimeEntries for both weeks.
