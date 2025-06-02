@@ -4,6 +4,7 @@ from .models import Clock
 from payperiod.models import PayPeriod  
 from django.utils import timezone
 from decimal import Decimal
+from django.contrib.auth import get_user_model
 
 class PayPeriodSerializer(serializers.ModelSerializer):
     # Display local dates for better readability in the API response
@@ -16,10 +17,10 @@ class PayPeriodSerializer(serializers.ModelSerializer):
         read_only_fields = ['start_date', 'end_date'] # Pay periods are created via admin or management command
 
     def get_start_date_local(self, obj):
-        return timezone.localtime(obj.start_date).strftime('%Y-%m-%d %H:%M %p %Z')
+        return timezone.localtime(obj.start_date).strftime(' %B %d, %Y - %I:%M %p ')
 
     def get_end_date_local(self, obj):
-        return timezone.localtime(obj.end_date).strftime('%Y-%m-%d %H:%M %p %Z')
+        return timezone.localtime(obj.end_date).strftime('%B %d, %Y - %I:%M %p ')
 
 
 class ClockSerializer(serializers.ModelSerializer):
@@ -49,3 +50,10 @@ class ClockSerializer(serializers.ModelSerializer):
         if obj.clock_out_time:
             return timezone.localtime(obj.clock_out_time).strftime('%a %m/%d %H:%M %p')
         return None
+User = get_user_model()
+class ClockSerializerForPunchReport(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    class Meta:
+        model = Clock
+        fields = '__all__' # Or specify fields like ['id', 'user', 'clock_in_time', 'clock_out_time', 'hours_worked', 'pay_period']
+        read_only_fields = ['hours_worked'] # Assuming hours_worked is calculated and not set directly by client

@@ -1,0 +1,547 @@
+{% extends 'dashboard.html' %}
+
+{% block title %}Employee Clock Data Report{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6">Employee Clock Data Report (Admin)</h1>
+
+        <div class="mb-6 bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+            <div>
+                <label for="payPeriodSelector" class="block text-gray-700 text-sm font-bold mb-2">Select Pay Period:</label>
+                <select id="payPeriodSelector" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="">Loading Pay Periods...</option>
+                </select>
+            </div>
+            <button id="exportExcelButton" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" disabled>
+                Export to Excel
+            </button>
+        </div>
+
+        <div id="clockDataReportContainer" class="bg-white p-4 rounded-lg shadow-md overflow-x-auto">
+            <p class="text-gray-500">Select a pay period to view clock data.</p>
+        </div>
+    </div>
+
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+
+<script type="module">
+    // static/timeclock/js/admin_clock_data.js // Inlined here for completeness
+
+    // --- Utility function for authenticated fetches ---
+    async function fetchWithAuth(url, options = {}) {
+        const token = localStorage.getItem('access_token'); // Or wherever you store your token
+
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(url, {
+            ...options,
+            headers: headers,
+        });
+
+        if (response.status === 401) {
+            console.error("Authentication failed or token expired. Redirecting to login.");
+            window.location.href = '/login/'; // Adjust to your login URL
+        }
+
+        return response;
+    }
+
+    // --- Function to render the aggregated clock data report as a TABLE (simplified for display) ---
+    // The complex layout with nested rows and merges will be handled by the Excel export.
+    function renderClockDataReport(containerElement, data) {
+        containerElement.innerHTML = ''; // Clear previous content
+
+        if (!data || !data.pay_period || !data.users_clock_data) {
+            containerElement.innerHTML = '<p class="text-red-600">Failed to load report data.</p>';
+            return;
+        }
+
+        const payPeriodStartDate = data.pay_period.start_date_local;
+        const payPeriodEndDate = data.pay_period.end_date_local;
+
+        let tableHtml = `
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Clock Data for Pay Period: <span class="text-primary-600">${payPeriodStartDate} to ${payPeriodEndDate}</span></h2>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200" id="clockDataTable">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                Employee
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                Week Total
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" colspan="2">
+                                Week Punches
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                Week Punches Duration
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                Regular
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                OT
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
+                                Employee Type
+                            </th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                IN
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                OUT
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+        `;
+
+        if (data.users_clock_data.length > 0) {
+            data.users_clock_data.forEach(userData => {
+                const employeeName = `${userData.first_name} ${userData.last_name} (${userData.username})`;
+                const employeeType = userData.employee_type || 'N/A'; // Assuming employee_type exists in your data
+
+                const week1Punches = userData.week_1_entries;
+                const week2Punches = userData.week_2_entries;
+
+                const week1RowsCount = Math.max(1, week1Punches.length);
+                const week2RowsCount = Math.max(1, week2Punches.length);
+
+                const totalRowsForEmployee = week1RowsCount + week2RowsCount;
+
+
+                // --- Week 1 Block ---
+                for (let i = 0; i < week1RowsCount; i++) {
+                    const punch = week1Punches[i];
+                    tableHtml += `
+                        <tr>
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowspan="${totalRowsForEmployee}">
+                                ${employeeName}
+                                ${userData.current_status === 'Clocked In' ? `
+                                    <div class="text-xs text-green-600 mt-1">Clocked In Since: ${new Date(userData.active_clock_entry.clock_in_time).toLocaleString()}</div>
+                                ` : `<div class="text-xs text-gray-500 mt-1">Clocked Out</div>`}
+                            </td>` : ''}
+
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
+                                Week 1 = ${parseFloat(userData.week_1_total_hours).toFixed(2)}
+                            </td>` : ''}
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch ? new Date(punch.clock_in_time).toLocaleString() : 'No Punches'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch && punch.clock_out_time ? new Date(punch.clock_out_time).toLocaleString() : (punch ? 'Active' : '')}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch ? `${parseFloat(punch.hours_worked || 0).toFixed(2)} hrs` : '0.00 hrs'}
+                            </td>
+
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
+                                ${parseFloat(userData.week_1_regular_hours || 0).toFixed(2)}
+                            </td>` : ''}
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
+                                ${parseFloat(userData.week_1_ot_hours || 0).toFixed(2)}
+                            </td>` : ''}
+
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${totalRowsForEmployee}">
+                                ${employeeType}
+                            </td>` : ''}
+                        </tr>
+                    `;
+                }
+
+                // --- Week 2 Block ---
+                for (let i = 0; i < week2RowsCount; i++) {
+                    const punch = week2Punches[i];
+                    tableHtml += `
+                        <tr>
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week2RowsCount}">
+                                Week 2 = ${parseFloat(userData.week_2_total_hours).toFixed(2)}
+                            </td>` : ''}
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch ? new Date(punch.clock_in_time).toLocaleString() : 'No Punches'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch && punch.clock_out_time ? new Date(punch.clock_out_time).toLocaleString() : (punch ? 'Active' : '')}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${punch ? `${parseFloat(punch.hours_worked || 0).toFixed(2)} hrs` : '0.00 hrs'}
+                            </td>
+
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week2RowsCount}">
+                                ${parseFloat(userData.week_2_regular_hours || 0).toFixed(2)}
+                            </td>` : ''}
+                            ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week2RowsCount}">
+                                ${parseFloat(userData.week_2_ot_hours || 0).toFixed(2)}
+                            </td>` : ''}
+                        </tr>
+                    `;
+                }
+            });
+        } else {
+            tableHtml += `
+                <tr>
+                    <td colspan="8" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
+                        No clock data found for any user in this pay period.
+                    </td>
+                </tr>
+            `;
+        }
+
+        tableHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        containerElement.innerHTML = tableHtml;
+
+        const exportButton = document.getElementById('exportExcelButton');
+        if (exportButton) {
+            if (data && data.users_clock_data && data.users_clock_data.length > 0) {
+                exportButton.disabled = false;
+                exportButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                exportButton.disabled = true;
+                exportButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    }
+
+    // --- Function to trigger XLSX download using SheetJS ---
+    function exportToXLSX(filename) {
+        const currentData = document.getElementById('clockDataReportContainer').currentReportData;
+
+        if (!currentData || !currentData.users_clock_data) {
+            alert('No report data available to export.');
+            return;
+        }
+
+        let worksheetData = [];
+        let merges = [];
+        let currentRow = 0; // Keep track of the current row index in the worksheet (0-indexed)
+
+        // Add headers (matching screenshot with IN/OUT split)
+        // Note: The structure is Employee (A), Week Total (B), Week Punches (C,D), Week Punches Duration (E), Regular (F), OT (G), Employee Type (H)
+        const headers1 = ["Employee", "Week Total", "Week Punches", "", "Week Punches Duration", "Regular", "OT", "Employee Type"];
+        const headers2 = ["", "", "IN", "OUT", "", "", "", ""]; // Sub-headers; empty for merged cells
+        worksheetData.push(headers1); // Row 0
+        worksheetData.push(headers2); // Row 1
+        currentRow += 2;
+
+        // Define merge ranges for headers (matching screenshot)
+        // Employee: A1:A2
+        merges.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } });
+        // Week Total: B1:B2
+        merges.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } });
+        // Week Punches: C1:D1
+        merges.push({ s: { r: 0, c: 2 }, e: { r: 0, c: 3 } }); // This spans IN and OUT
+        // Week Punches Duration: E1:E2
+        merges.push({ s: { r: 0, c: 4 }, e: { r: 1, c: 4 } });
+        // Regular: F1:F2
+        merges.push({ s: { r: 0, c: 5 }, e: { r: 1, c: 5 } });
+        // OT: G1:G2
+        merges.push({ s: { r: 0, c: 6 }, e: { r: 1, c: 6 } });
+        // Employee Type: H1:H2
+        merges.push({ s: { r: 0, c: 7 }, e: { r: 1, c: 7 } });
+
+
+        currentData.users_clock_data.forEach(userData => {
+            const employeeName = `${userData.first_name} ${userData.last_name}`;
+            const employeeUsername = userData.username;
+            const employeeStatus = userData.current_status + (userData.active_clock_entry ? ` Since: ${new Date(userData.active_clock_entry.clock_in_time).toLocaleString()}` : ' (Clocked Out)');
+            const employeeType = userData.employee_type || 'N/A';
+
+            const week1Total = parseFloat(userData.week_1_total_hours).toFixed(2);
+            const week2Total = parseFloat(userData.week_2_total_hours).toFixed(2);
+            const week1Regular = parseFloat(userData.week_1_regular_hours || 0).toFixed(2);
+            const week1OT = parseFloat(userData.week_1_ot_hours || 0).toFixed(2);
+            const week2Regular = parseFloat(userData.week_2_regular_hours || 0).toFixed(2);
+            const week2OT = parseFloat(userData.week_2_ot_hours || 0).toFixed(2);
+
+            const week1Punches = userData.week_1_entries;
+            const week2Punches = userData.week_2_entries;
+
+            const week1RowsCount = Math.max(1, week1Punches.length); // At least 1 row for week 1
+            const week2RowsCount = Math.max(1, week2Punches.length); // At least 1 row for week 2
+
+            const employeeBlockStartRow = currentRow; // Start row for this employee's entire block
+
+            // --- Generate rows for Week 1 block ---
+            for (let i = 0; i < week1RowsCount; i++) {
+                let row = [];
+                const punch1 = week1Punches[i];
+
+                // Employee Column (will be merged) - Col A (index 0)
+                if (i === 0) {
+                    row.push({ v: employeeName + '\n' + employeeUsername + '\n' + employeeStatus, s: { alignment: { wrapText: true, vertical: 'top' } } });
+                } else {
+                    row.push("");
+                }
+
+                // Week Total (Week 1) - Col B (index 1) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(`Week 1 = ${week1Total}`);
+                } else {
+                    row.push("");
+                }
+
+                // Week Punches: IN - Col C (index 2)
+                row.push(punch1 ? new Date(punch1.clock_in_time).toLocaleString() : (i === 0 && week1Punches.length === 0 ? "No Punches" : ""));
+                // Week Punches: OUT - Col D (index 3)
+                row.push(punch1 && punch1.clock_out_time ? new Date(punch1.clock_out_time).toLocaleString() : (punch1 ? 'Active' : ''));
+                // Week Punches Duration - Col E (index 4)
+                row.push(punch1 ? `${parseFloat(punch1.hours_worked || 0).toFixed(2)}` : (i === 0 && week1Punches.length === 0 ? "0.00" : ""));
+
+                // Regular (Week 1) - Col F (index 5) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(week1Regular);
+                } else {
+                    row.push("");
+                }
+                // OT (Week 1) - Col G (index 6) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(week1OT);
+                } else {
+                    row.push("");
+                }
+
+                // Employee Type Column - Col H (index 7) - will be merged
+                if (i === 0) {
+                    row.push(employeeType);
+                } else {
+                    row.push("");
+                }
+
+                worksheetData.push(row);
+                currentRow++;
+            }
+
+            // Add merges for Week 1's "Week Total", "Week Punches Duration", "Regular", "OT" if week1RowsCount > 1
+            if (week1RowsCount > 1) {
+                merges.push({ s: { r: employeeBlockStartRow, c: 1 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 1 } }); // Week Total (Col B)
+                merges.push({ s: { r: employeeBlockStartRow, c: 4 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 4 } }); // Week Punches Duration (Col E)
+                merges.push({ s: { r: employeeBlockStartRow, c: 5 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 5 } }); // Regular (Col F)
+                merges.push({ s: { r: employeeBlockStartRow, c: 6 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 6 } }); // OT (Col G)
+            }
+
+
+            const week2BlockStartRow = currentRow; // Start row for Week 2's block
+
+            // --- Generate rows for Week 2 block ---
+            for (let i = 0; i < week2RowsCount; i++) {
+                let row = [];
+                const punch2 = week2Punches[i];
+
+                // Employee Column (already merged from top, so empty) - Col A (index 0)
+                row.push("");
+
+                // Week Total (Week 2) - Col B (index 1) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(`Week 2 = ${week2Total}`);
+                } else {
+                    row.push("");
+                }
+
+                // Week Punches: IN - Col C (index 2)
+                row.push(punch2 ? new Date(punch2.clock_in_time).toLocaleString() : (i === 0 && week2Punches.length === 0 ? "No Punches" : ""));
+                // Week Punches: OUT - Col D (index 3)
+                row.push(punch2 && punch2.clock_out_time ? new Date(punch2.clock_out_time).toLocaleString() : (punch2 ? 'Active' : ''));
+                // Week Punches Duration - Col E (index 4)
+                row.push(punch2 ? `${parseFloat(punch2.hours_worked || 0).toFixed(2)}` : (i === 0 && week2Punches.length === 0 ? "0.00" : ""));
+
+                // Regular (Week 2) - Col F (index 5) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(week2Regular);
+                } else {
+                    row.push("");
+                }
+                // OT (Week 2) - Col G (index 6) - will be merged for this week's block
+                if (i === 0) {
+                    row.push(week2OT);
+                } else {
+                    row.push("");
+                }
+
+                // Employee Type Column (already merged from top, so empty) - Col H (index 7)
+                row.push("");
+
+                worksheetData.push(row);
+                currentRow++;
+            }
+
+            // Add merges for Week 2's "Week Total", "Week Punches Duration", "Regular", "OT" if week2RowsCount > 1
+            if (week2RowsCount > 1) {
+                merges.push({ s: { r: week2BlockStartRow, c: 1 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 1 } }); // Week Total (Col B)
+                merges.push({ s: { r: week2BlockStartRow, c: 4 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 4 } }); // Week Punches Duration (Col E)
+                merges.push({ s: { r: week2BlockStartRow, c: 5 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 5 } }); // Regular (Col F)
+                merges.push({ s: { r: week2BlockStartRow, c: 6 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 6 } }); // OT (Col G)
+            }
+
+            // Now, merge the main Employee and Employee Type columns across the total rows for this employee block
+            const totalEmployeeRows = (currentRow - employeeBlockStartRow);
+            if (totalEmployeeRows > 1) {
+                // Employee cell A (col 0)
+                merges.push({ s: { r: employeeBlockStartRow, c: 0 }, e: { r: employeeBlockStartRow + totalEmployeeRows - 1, c: 0 } });
+                // Employee Type cell H (col 7)
+                merges.push({ s: { r: employeeBlockStartRow, c: 7 }, e: { r: employeeBlockStartRow + totalEmployeeRows - 1, c: 7 } });
+            }
+
+            // Add a blank row for separation between employees if desired
+            worksheetData.push(["", "", "", "", "", "", "", ""]);
+            currentRow++; // Account for the blank row
+        });
+
+
+        // Create a new workbook and add the worksheet
+        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+
+        // Apply merges
+        ws['!merges'] = merges;
+
+        // Set column widths (optional, but good for presentation)
+        ws['!cols'] = [
+            { wch: 25 }, // Employee (Col A)
+            { wch: 15 }, // Week Total (Col B)
+            { wch: 20 }, // Week Punches - IN (Col C)
+            { wch: 20 }, // Week Punches - OUT (Col D)
+            { wch: 15 }, // Week Punches Duration (Col E)
+            { wch: 10 }, // Regular (Col F)
+            { wch: 10 }, // OT (Col G)
+            { wch: 15 }  // Employee Type (Col H)
+        ];
+
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Clock Data Report");
+
+        // Write the workbook to a file
+        XLSX.writeFile(wb, filename);
+    }
+
+    // --- Function to fetch and populate the pay period selector dropdown ---
+    async function populatePayPeriodSelector() {
+        const payPeriodSelect = document.getElementById('payPeriodSelector');
+        if (!payPeriodSelect) {
+            console.error("HTML element with ID 'payPeriodSelector' not found.");
+            return;
+        }
+
+        payPeriodSelect.innerHTML = '<option value="">Loading Pay Periods...</option>'; // Set loading state
+
+        try {
+            const response = await fetchWithAuth('/api/clock/pay_periods/');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch pay periods: ${response.statusText}`);
+            }
+            const payPeriods = await response.json();
+
+            payPeriodSelect.innerHTML = '<option value="">Select a Pay Period</option>';
+
+            if (payPeriods.length > 0) {
+                payPeriods.forEach(payPeriod => {
+                    const option = document.createElement('option');
+                    option.value = payPeriod.id;
+                    option.textContent = `${payPeriod.start_date_local} to ${payPeriod.end_date_local}`;
+                    payPeriodSelect.appendChild(option);
+                });
+                // Optionally, pre-select the most recent pay period
+                if (payPeriods[0] && payPeriods[0].id) {
+                    payPeriodSelect.value = payPeriods[0].id;
+                    fetchClockDataForPayPeriod(payPeriods[0].id);
+                }
+
+            } else {
+                payPeriodSelect.innerHTML = '<option value="">No Pay Periods Found</option>';
+                payPeriodSelect.disabled = true; // Disable if no periods are found
+            }
+
+            payPeriodSelect.addEventListener('change', (event) => {
+                const selectedPayPeriodId = event.target.value;
+                const reportContainer = document.getElementById('clockDataReportContainer');
+                const exportButton = document.getElementById('exportExcelButton');
+
+                if (selectedPayPeriodId) {
+                    fetchClockDataForPayPeriod(selectedPayPeriodId);
+                } else {
+                    if (reportContainer) {
+                        reportContainer.innerHTML = '<p class="text-gray-500">Select a pay period to view clock data.</p>';
+                    }
+                    if (exportButton) {
+                        exportButton.disabled = true;
+                        exportButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Error populating pay period selector:", error);
+            payPeriodSelect.innerHTML = '<option value="">Error loading periods</option>';
+            payPeriodSelect.disabled = true; // Disable on error
+        }
+    }
+
+    // --- Function to fetch clock data for a specific pay period and render it ---
+    async function fetchClockDataForPayPeriod(payPeriodId) {
+        const reportContainer = document.getElementById('clockDataReportContainer');
+        const exportButton = document.getElementById('exportExcelButton');
+        if (!reportContainer || !exportButton) {
+            console.error("Required HTML elements not found.");
+            return;
+        }
+        reportContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Loading clock data for the selected pay period...</p>'; // Loading indicator
+        exportButton.disabled = true; // Disable while loading
+        exportButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+        try {
+            const response = await fetchWithAuth(`/api/clock/?pay_period_id=${payPeriodId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch clock data: ${response.statusText}`);
+            }
+            const data = await response.json();
+            console.log("Fetched Clock Data for selected period:", data);
+
+            // Store the fetched data directly on the container element for easier access by XLSX export
+            reportContainer.currentReportData = data;
+
+            renderClockDataReport(reportContainer, data); // Render the fetched data
+
+        } catch (error) {
+            console.error("Error fetching clock data for pay period:", error);
+            reportContainer.innerHTML = `<p class="text-red-600 text-center py-4">Error loading clock data: ${error.message}</p>`;
+            exportButton.disabled = true; // Ensure disabled on error
+            exportButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // --- Initialize the process when the DOM is fully loaded ---
+    document.addEventListener('DOMContentLoaded', () => {
+        populatePayPeriodSelector();
+
+        const exportButton = document.getElementById('exportExcelButton');
+        if (exportButton) {
+            exportButton.addEventListener('click', () => {
+                const payPeriodSelect = document.getElementById('payPeriodSelector');
+                const selectedOption = payPeriodSelect.options[payPeriodSelect.selectedIndex];
+                const payPeriodText = selectedOption.textContent.trim();
+                const filename = `Employee_Clock_Report_${payPeriodText.replace(/[^a-zA-Z0-9_ -]/g, '')}.xlsx`; // Change to .xlsx
+                exportToXLSX(filename); // Call the new XLSX export function
+            });
+        }
+    });
+
+</script>
+{% endblock %}

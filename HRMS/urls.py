@@ -24,12 +24,13 @@ from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
 from paytype.api import register_department as register_department  
 from hrmsauth.views import user_info
+from timeclock.views import ClockDataViewSet
 # from django.contrib.auth import views as auth_views
 # from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = DefaultRouter()
 
-
+router.register(r'clock', ClockDataViewSet, basename='clock')
 
 
 register_department(router)

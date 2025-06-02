@@ -268,9 +268,9 @@
                             class="h-5 w-5 text-primary-300 group-hover:text-white" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                d="M9 17v-5m3 5v-1.5m3 1.5v-3m.5 6.5H9a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-.5z" />
                         </svg>
-                        <span class="font-medium">Groups</span>
+                        <span class="font-medium">Report</span>
                     </div>
                     <svg id="groupsSubmenu-arrow" xmlns="http://www.w3.org/2000/svg"
                         class="h-5 w-5 text-primary-300 transform transition-transform duration-200" fill="none"
@@ -279,28 +279,28 @@
                     </svg>
                 </button>
                 <div id="groupsSubmenu" class="mt-1 ml-8 space-y-1 hidden">
-                    <a href="/groups"
+                    <a href="{% url 'clock_in_out_punch_report' %}"
                         class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-primary-700 transition-all duration-200 group">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 text-primary-300 group-hover:text-white" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>View Groups</span>
+                        <span>Punch Report</span>
                     </a>
-                    <a href="/groups/add"
+
+                    {% comment %} <a href=""
                         class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-primary-700 transition-all duration-200 group">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 text-primary-300 group-hover:text-white" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4v16m8-8H4" />
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <span>Add Group</span>
-                    </a>
+                        <span>Employee Clock Data Report</span>
+                    </a> {% endcomment %}
+
                 </div>
             </div>
 
