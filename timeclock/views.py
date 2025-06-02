@@ -14,6 +14,7 @@ from django.conf import settings
 from datetime import timedelta, date, datetime
 from decimal import Decimal
 import pytz
+from ptobalance.models import PTOBalance
 
 from .models import Clock
 from payperiod.models import PayPeriod  
@@ -298,6 +299,8 @@ class ClockDataViewSet(viewsets.ViewSet):
                 clock_in_time__lte=pay_period.end_date
             ).order_by('clock_in_time') # Order by oldest first for clearer aggregation
 
+            employee_type = PTOBalance.objects.filter(user=user_obj).first().employee_type.name if PTOBalance.objects.filter(user=user_obj).exists() else 'Unknown'
+            
             week_1_entries_qs = user_entries_for_pay_period.filter(
                 clock_in_time__gte=week_1_start_utc,
                 clock_in_time__lte=week_1_end_utc
@@ -310,6 +313,39 @@ class ClockDataViewSet(viewsets.ViewSet):
             week_1_total_hours = week_1_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
             week_2_total_hours = week_2_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
 
+            if employee_type == 'Full Time':
+                if week_1_total_hours > 40:
+                    regular_hours = 40
+                    overtime_hours = week_1_total_hours - 40
+                else:
+                    regular_hours = week_1_total_hours
+                    overtime_hours = Decimal('0.00')
+            elif employee_type == 'Part Time':
+                if week_1_total_hours > 20:
+                    regular_hours = 20
+                    overtime_hours = week_1_total_hours - 20
+                else:
+                    regular_hours = week_1_total_hours
+                    overtime_hours = Decimal('0.00')
+            
+            # same for week 2 
+
+            if employee_type == 'Full Time':
+                if week_2_total_hours > 40:
+                    regular_hours_week_2 = 40
+                    overtime_hours_week_2 = week_2_total_hours - 40
+                else:
+                    regular_hours_week_2 = week_2_total_hours
+                    overtime_hours_week_2 = Decimal('0.00')
+            elif employee_type == 'Part Time':
+                if week_2_total_hours > 20:
+                    regular_hours_week_2 = 20
+                    overtime_hours_week_2 = week_2_total_hours - 20
+                else:
+                    regular_hours_week_2 = week_2_total_hours
+                    overtime_hours_week_2 = Decimal('0.00')
+                 
+     
             # Serialize entries for display (optional, can be removed if only totals are needed)
             week_1_serialized_entries = ClockSerializer(week_1_entries_qs, many=True).data
             week_2_serialized_entries = ClockSerializer(week_2_entries_qs, many=True).data
@@ -332,6 +368,13 @@ class ClockDataViewSet(viewsets.ViewSet):
                 "week_1_total_hours": week_1_total_hours,
                 "week_2_entries": week_2_serialized_entries,
                 "week_2_total_hours": week_2_total_hours,
+                "regular_hours_week_1": regular_hours,
+                "overtime_hours_week_1": overtime_hours,
+                "regular_hours_week_2": regular_hours_week_2,
+                "overtime_hours_week_2": overtime_hours_week_2,
+
+                "employee_type": employee_type,  # Include employee type for context
+
             })
 
         return Response({

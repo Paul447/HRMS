@@ -149,10 +149,10 @@
                             </td>
 
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
-                                ${parseFloat(userData.week_1_regular_hours || 0).toFixed(2)}
+                                ${parseFloat(userData.regular_hours_week_1 || 0).toFixed(2)}
                             </td>` : ''}
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
-                                ${parseFloat(userData.week_1_ot_hours || 0).toFixed(2)}
+                                ${parseFloat(userData.overtime_hours_week_1 || 0).toFixed(2)}
                             </td>` : ''}
 
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${totalRowsForEmployee}">
@@ -182,10 +182,10 @@
                             </td>
 
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week2RowsCount}">
-                                ${parseFloat(userData.week_2_regular_hours || 0).toFixed(2)}
+                                ${parseFloat(userData.regular_hours_week_2 || 0).toFixed(2)}
                             </td>` : ''}
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week2RowsCount}">
-                                ${parseFloat(userData.week_2_ot_hours || 0).toFixed(2)}
+                                ${parseFloat(userData.overtime_hours_week_2 || 0).toFixed(2)}
                             </td>` : ''}
                         </tr>
                     `;
@@ -236,7 +236,7 @@
 
         // Add headers (matching screenshot with IN/OUT split)
         // Note: The structure is Employee (A), Week Total (B), Week Punches (C,D), Week Punches Duration (E), Regular (F), OT (G), Employee Type (H)
-        const headers1 = ["Employee", "Week Total", "Week Punches", "", "Week Punches Duration", "Regular", "OT", "Employee Type"];
+        const headers1 = ["Employee", "Week Total", "Week Punches", "", "Week Punches Duration", "Regular", "OT", "Total Hours"];
         const headers2 = ["", "", "IN", "OUT", "", "", "", ""]; // Sub-headers; empty for merged cells
         worksheetData.push(headers1); // Row 0
         worksheetData.push(headers2); // Row 1
@@ -263,14 +263,14 @@
             const employeeName = `${userData.first_name} ${userData.last_name}`;
             const employeeUsername = userData.username;
             const employeeStatus = userData.current_status + (userData.active_clock_entry ? ` Since: ${new Date(userData.active_clock_entry.clock_in_time).toLocaleString()}` : ' (Clocked Out)');
-            const employeeType = userData.employee_type || 'N/A';
+            const employeeType = userData.week_1_total_hours + userData.week_2_total_hours || 'N/A';
 
             const week1Total = parseFloat(userData.week_1_total_hours).toFixed(2);
             const week2Total = parseFloat(userData.week_2_total_hours).toFixed(2);
-            const week1Regular = parseFloat(userData.week_1_regular_hours || 0).toFixed(2);
-            const week1OT = parseFloat(userData.week_1_ot_hours || 0).toFixed(2);
-            const week2Regular = parseFloat(userData.week_2_regular_hours || 0).toFixed(2);
-            const week2OT = parseFloat(userData.week_2_ot_hours || 0).toFixed(2);
+            const week1Regular = parseFloat(userData.regular_hours_week_1 || 0).toFixed(2);
+            const week1OT = parseFloat(userData.overtime_hours_week_1 || 0).toFixed(2);
+            const week2Regular = parseFloat(userData.regular_hours_week_2 || 0).toFixed(2);
+            const week2OT = parseFloat(userData.overtime_hours_week_2 || 0).toFixed(2);
 
             const week1Punches = userData.week_1_entries;
             const week2Punches = userData.week_2_entries;
