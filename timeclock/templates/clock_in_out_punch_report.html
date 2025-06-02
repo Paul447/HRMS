@@ -93,7 +93,7 @@
                                 OT
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" rowspan="2">
-                                Employee Type
+                                Total Hours
                             </th>
                         </tr>
                         <tr>
@@ -111,7 +111,7 @@
         if (data.users_clock_data.length > 0) {
             data.users_clock_data.forEach(userData => {
                 const employeeName = `${userData.first_name} ${userData.last_name} (${userData.username})`;
-                const employeeType = userData.employee_type || 'N/A'; // Assuming employee_type exists in your data
+                const totalHours = userData.week_1_total_hours + userData.week_2_total_hours || 'N/A'; // Assuming employee_type exists in your data
 
                 const week1Punches = userData.week_1_entries;
                 const week2Punches = userData.week_2_entries;
@@ -156,7 +156,7 @@
                             </td>` : ''}
 
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${totalRowsForEmployee}">
-                                ${employeeType}
+                                ${totalHours}
                             </td>` : ''}
                         </tr>
                     `;
@@ -330,10 +330,10 @@
                 currentRow++;
             }
 
-            // Add merges for Week 1's "Week Total", "Week Punches Duration", "Regular", "OT" if week1RowsCount > 1
+            // Add merges for Week 1's "Week Total", "Regular", "OT" if week1RowsCount > 1
             if (week1RowsCount > 1) {
                 merges.push({ s: { r: employeeBlockStartRow, c: 1 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 1 } }); // Week Total (Col B)
-                merges.push({ s: { r: employeeBlockStartRow, c: 4 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 4 } }); // Week Punches Duration (Col E)
+                // merges.push({ s: { r: employeeBlockStartRow, c: 4 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 4 } }); // REMOVED: Week Punches Duration (Col E)
                 merges.push({ s: { r: employeeBlockStartRow, c: 5 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 5 } }); // Regular (Col F)
                 merges.push({ s: { r: employeeBlockStartRow, c: 6 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 6 } }); // OT (Col G)
             }
@@ -383,10 +383,10 @@
                 currentRow++;
             }
 
-            // Add merges for Week 2's "Week Total", "Week Punches Duration", "Regular", "OT" if week2RowsCount > 1
+            // Add merges for Week 2's "Week Total", "Regular", "OT" if week2RowsCount > 1
             if (week2RowsCount > 1) {
                 merges.push({ s: { r: week2BlockStartRow, c: 1 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 1 } }); // Week Total (Col B)
-                merges.push({ s: { r: week2BlockStartRow, c: 4 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 4 } }); // Week Punches Duration (Col E)
+                // merges.push({ s: { r: week2BlockStartRow, c: 4 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 4 } }); // REMOVED: Week Punches Duration (Col E)
                 merges.push({ s: { r: week2BlockStartRow, c: 5 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 5 } }); // Regular (Col F)
                 merges.push({ s: { r: week2BlockStartRow, c: 6 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 6 } }); // OT (Col G)
             }
