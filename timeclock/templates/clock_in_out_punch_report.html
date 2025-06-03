@@ -499,7 +499,7 @@
                 throw new Error(`Failed to fetch clock data: ${response.statusText}`);
             }
             const data = await response.json();
-            console.log("Fetched Clock Data for selected period:", data);
+            
 
             // Store the fetched data directly on the container element for easier access by XLSX export
             reportContainer.currentReportData = data;

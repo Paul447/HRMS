@@ -105,17 +105,16 @@
         });
         async function getUserData() {
             try {
-                const response = await fetch('/auth/api/user/', {
+                const response = await fetch('/api/user_info/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('access_token') // Add your JWT here
                     }
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('User data:', data);
+                    
                     document.getElementsByClassName('user-name')[0].textContent = data.username || 'User';
                     document.getElementById('user-avatar').textContent = data.username ? data.username.charAt(0)
                         .toUpperCase() : '?';
