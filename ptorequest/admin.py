@@ -20,6 +20,7 @@ class PTORequestsAdmin(admin.ModelAdmin):
         'total_hours',
         'reason',
         'status',
+        'pay_period'
     )
     # Default filters and search fields (will be overridden for non-superusers)
     list_filter = (
