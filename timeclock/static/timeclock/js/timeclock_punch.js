@@ -1,103 +1,127 @@
-// static/timeclock/js/admin_clock_data.js
-// (This is the content from the "Frontend Implementation to Fetch and Display Pay Periods" section)
+// static/js/timeclock_punch.js
 
-// Make sure to adapt this to your actual project structure for api_client.js and uiRenderer.js
-// You might put renderClockDataReport directly in this file if it's specific to this page.
-import { fetchWithAuth } from './api_client.js'; // Adjust path if needed
-// Assuming renderClockDataReport is defined here or imported from uiRenderer.js
-// For simplicity, let's define it here for this example:
+import { getAdminReportDomElements } from './modules/admin_report/adminDomElements.js';
+import { getPayPeriodsAdmin, getClockDataAdmin } from './modules/admin_report/adminApi.js';
+import { renderAdminClockDataReport, updateExportButtonState } from './modules/admin_report/adminUiRenderer.js';
+import { exportAdminReportToXLSX } from './modules/admin_report/excelExporter.js';
+import { showNotification } from './modules/timeclock/notificationService.js'; // Reusing your existing notification service
 
-function renderClockDataReport(containerElement, data) {
-    let html = `
-        <h2 class="text-xl font-bold mb-4">Clock Data for Pay Period: ${data.pay_period.start_date} to ${data.pay_period.end_date}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+// Global variable to store the current report data for export
+let currentReportData = null;
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const DOMElements = getAdminReportDomElements();
+
+    // Initial loading state
+    const loadingHtml = `
+        <div class="flex flex-col justify-center items-center h-24 text-gray-500">
+            <svg class="animate-spin h-8 w-8 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading data...</span>
+        </div>
     `;
+    DOMElements.clockDataReportContainer.innerHTML = loadingHtml;
+    DOMElements.exportExcelButton.disabled = true;
+    DOMElements.exportExcelButton.classList.add('opacity-50', 'cursor-not-allowed');
 
-    if (data.users_clock_data && data.users_clock_data.length > 0) {
-        data.users_clock_data.forEach(userData => {
-            html += `
-                <div class="bg-white p-4 rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-2">${userData.first_name} ${userData.last_name} (${userData.username})</h3>
-                    <p class="text-sm text-gray-600">Status: <span class="${userData.current_status === 'Clocked In' ? 'text-green-600' : 'text-gray-500'} font-medium">${userData.current_status}</span></p>
-                    ${userData.active_clock_entry ? `<p class="text-xs text-gray-500">Clocked In: ${userData.active_clock_entry.clock_in_time}</p>` : ''}
-                    <p class="mt-2 font-bold">Week 1 Hours: ${userData.week_1_total_hours} hours</p>
-                    <p class="font-bold">Week 2 Hours: ${userData.week_2_total_hours} hours</p>
-                    </div>
-            `;
-        });
-    } else {
-        html += '<p>No clock data found for this pay period.</p>';
-    }
+    // Populate the pay period selector and trigger initial data load
+    await populatePayPeriodSelector(DOMElements);
 
-    html += `</div>`;
-    containerElement.innerHTML = html;
-}
+    // Attach event listener to the export button
+    DOMElements.exportExcelButton.addEventListener('click', () => {
+        if (currentReportData) {
+            const selectedOption = DOMElements.payPeriodSelector.options[DOMElements.payPeriodSelector.selectedIndex];
+            const payPeriodText = selectedOption.textContent.trim();
+            const filename = `Employee_Clock_Report_${payPeriodText.replace(/[^a-zA-Z0-9_ -]/g, '')}.xlsx`;
+            exportAdminReportToXLSX(currentReportData, filename);
+        } else {
+            showNotification('No data available to export. Please select a pay period first.', 'warning');
+        }
+    });
+});
 
-async function populatePayPeriodSelector() {
-    const payPeriodSelect = document.getElementById('payPeriodSelector');
-    if (!payPeriodSelect) {
-        console.error("Pay period selector element not found.");
-        return;
-    }
+/**
+ * Fetches and populates the pay period selector dropdown.
+ * @param {Object} DOMElements - Object containing references to all necessary DOM elements.
+ */
+async function populatePayPeriodSelector(DOMElements) {
+    const { payPeriodSelector, clockDataReportContainer, exportExcelButton } = DOMElements;
+
+    payPeriodSelector.innerHTML = '<option value="">Loading Pay Periods...</option>';
 
     try {
-        const response = await fetchWithAuth('/api/clock-data/pay_periods/');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        const payPeriods = await getPayPeriodsAdmin();
+
+        payPeriodSelector.innerHTML = '<option value="">Select a Pay Period</option>';
+
+        if (payPeriods.length > 0) {
+            payPeriods.forEach(payPeriod => {
+                const option = document.createElement('option');
+                option.value = payPeriod.id;
+                option.textContent = `${payPeriod.start_date_local} to ${payPeriod.end_date_local}`;
+                payPeriodSelector.appendChild(option);
+            });
+            // Pre-select the most recent pay period and trigger initial data fetch
+            if (payPeriods[0] && payPeriods[0].id) {
+                payPeriodSelector.value = payPeriods[0].id;
+                await fetchAndRenderAdminClockData(payPeriods[0].id, DOMElements);
+            }
+
+        } else {
+            payPeriodSelector.innerHTML = '<option value="">No Pay Periods Found</option>';
+            payPeriodSelector.disabled = true;
+            clockDataReportContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No pay periods found.</p>';
+            updateExportButtonState(exportExcelButton, null);
         }
-        const payPeriods = await response.json();
 
-        payPeriodSelect.innerHTML = '<option value="">Select a Pay Period</option>';
-
-        payPeriods.forEach(payPeriod => {
-            const option = document.createElement('option');
-            option.value = payPeriod.id;
-            option.textContent = `${payPeriod.start_date} to ${payPeriod.end_date}`;
-            payPeriodSelect.appendChild(option);
-        });
-
-        payPeriodSelect.addEventListener('change', (event) => {
+        // Add change listener after initial population
+        payPeriodSelector.addEventListener('change', async (event) => {
             const selectedPayPeriodId = event.target.value;
             if (selectedPayPeriodId) {
-                fetchClockDataForPayPeriod(selectedPayPeriodId);
+                await fetchAndRenderAdminClockData(selectedPayPeriodId, DOMElements);
             } else {
-                const reportContainer = document.getElementById('clockDataReportContainer');
-                if (reportContainer) {
-                    reportContainer.innerHTML = '<p class="text-gray-500">Select a pay period to view clock data.</p>';
-                }
+                clockDataReportContainer.innerHTML = '<p class="text-gray-500">Select a pay period to view clock data.</p>';
+                currentReportData = null;
+                updateExportButtonState(exportExcelButton, null);
             }
         });
 
     } catch (error) {
-        console.error("Error fetching pay periods:", error);
-        payPeriodSelect.innerHTML = '<option value="">Error loading periods</option>';
+        console.error("Error populating pay period selector:", error);
+        payPeriodSelector.innerHTML = '<option value="">Error loading periods</option>';
+        payPeriodSelector.disabled = true;
+        clockDataReportContainer.innerHTML = `<p class="text-red-600 text-center py-4">Error loading pay periods: ${error.message}</p>`;
+        showNotification(`Error loading pay periods: ${error.message}`, 'error');
+        updateExportButtonState(exportExcelButton, null);
     }
 }
 
-async function fetchClockDataForPayPeriod(payPeriodId) {
-    const reportContainer = document.getElementById('clockDataReportContainer');
-    if (!reportContainer) {
-        console.error("Clock data report container not found.");
-        return;
-    }
-    reportContainer.innerHTML = '<p class="text-gray-500">Loading clock data...</p>';
+/**
+ * Fetches clock data for a specific pay period and renders it.
+ * Manages loading states and updates the export button.
+ * @param {string} payPeriodId - The ID of the pay period.
+ * @param {Object} DOMElements - Object containing references to all necessary DOM elements.
+ */
+async function fetchAndRenderAdminClockData(payPeriodId, DOMElements) {
+    const { clockDataReportContainer, exportExcelButton } = DOMElements;
+
+    clockDataReportContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Loading clock data for the selected pay period...</p>';
+    updateExportButtonState(exportExcelButton, null); // Disable button while loading
+    currentReportData = null; // Clear previous data
 
     try {
-        const response = await fetchWithAuth(`/api/clock-data/?pay_period_id=${payPeriodId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Fetched Clock Data:", data);
+        const data = await getClockDataAdmin(payPeriodId);
+        currentReportData = data; // Store the fetched data globally
 
-        renderClockDataReport(reportContainer, data);
+        renderAdminClockDataReport(clockDataReportContainer, data); // Render the fetched data
+        updateExportButtonState(exportExcelButton, data); // Update button based on new data
 
     } catch (error) {
-        console.error("Error fetching clock data:", error);
-        reportContainer.innerHTML = `<p class="text-red-600">Error loading clock data: ${error.message}</p>`;
+        console.error("Error fetching clock data for pay period:", error);
+        clockDataReportContainer.innerHTML = `<p class="text-red-600 text-center py-4">Error loading clock data: ${error.message}</p>`;
+        showNotification(`Error loading clock data: ${error.message}`, 'error');
+        updateExportButtonState(exportExcelButton, null); // Ensure disabled on error
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    populatePayPeriodSelector();
-});
