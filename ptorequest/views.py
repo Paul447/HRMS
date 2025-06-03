@@ -13,6 +13,8 @@ from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
+from payperiod.models import PayPeriod
+from django.utils import timezone
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
 @method_decorator(csrf_protect, name='dispatch')
@@ -32,7 +34,16 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         """
         # Ensure the request is for the authenticated user and only 'pending' requests initially.
         # This is suitable for a primary 'pending' list.
-        return PTORequests.objects.filter(user=self.request.user, status='pending').order_by('-created_at')
+        # Get the current user's pay period to filter requests accordingly.
+        now = timezone.now()
+        current_pay_period = PayPeriod.get_pay_period_for_date(now)
+        if current_pay_period:
+            return PTORequests.objects.filter(
+                user=self.request.user,
+                status='pending',
+                pay_period=current_pay_period
+            ).order_by('-created_at')
+        # return PTORequests.objects.filter(user=self.request.user, status='pending').order_by('-created_at')
 
     def perform_create(self, serializer):
         """
@@ -71,8 +82,12 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         """
         user = request.user
 
-        approved_requests = PTORequests.objects.filter(user=user, status__iexact='approved').order_by('-created_at')
-        rejected_requests = PTORequests.objects.filter(user=user, status__iexact='rejected').order_by('-created_at')
+        # Get the current pay period for the user
+        now = timezone.now()
+        current_pay_period = PayPeriod.get_pay_period_for_date(now) 
+
+        approved_requests = PTORequests.objects.filter(user=user, status__iexact='approved', pay_period=current_pay_period).order_by('-created_at')
+        rejected_requests = PTORequests.objects.filter(user=user, status__iexact='rejected', pay_period=current_pay_period).order_by('-created_at')
 
         # Serialize the data
         approved_data = self.get_serializer(approved_requests, many=True).data
