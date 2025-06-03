@@ -19,9 +19,12 @@ from ptobalance.models import PTOBalance
 from .models import Clock
 from payperiod.models import PayPeriod  
 from .serializer import ClockSerializer, PayPeriodSerializer
+from ptorequest.serializer import PTORequestsSerializer
+
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from django.contrib.auth.models import User
+from ptorequest.models import PTORequests
 
 
 class ClockInOutAPIView(APIView):
@@ -106,8 +109,10 @@ class UserClockDataAPIView(APIView):
                 },
                 "active_clock_entry": None,
                 "week_1_entries": [],
+                "week_1_pto_entries": [],
                 "week_1_total_hours": Decimal('0.00'),
                 "week_2_entries": [],
+                "week_2_pto_entries": [],
                 "week_2_total_hours": Decimal('0.00'),
             }, status=status.HTTP_200_OK)
 
@@ -146,7 +151,11 @@ class UserClockDataAPIView(APIView):
             clock_in_time__gte=pay_period.start_date, # These are already UTC, so fine
             clock_in_time__lte=pay_period.end_date
         ).order_by('-clock_in_time') # Order by most recent first
-
+        user_pto_requests_for_pay_period = PTORequests.objects.filter(
+            user=user,
+            start_date_time__gte=pay_period.start_date,
+            end_date_time__lte=pay_period.end_date
+        ).order_by('-start_date_time')
         # Check for active clock-in
         active_clock_entry = user_entries_for_pay_period.filter(clock_out_time__isnull=True).first()
         current_status = "Clocked In" if active_clock_entry else "Clocked Out"
@@ -157,19 +166,36 @@ class UserClockDataAPIView(APIView):
             clock_in_time__gte=week_1_start_utc,
             clock_in_time__lte=week_1_end_utc
         )
+        # Filter PTO requests for the same week boundaries
+        week_1_pto_entries_qs = user_pto_requests_for_pay_period.filter(
+            start_date_time__gte=week_1_start_utc,
+            end_date_time__lte=week_1_end_utc
+        )
 
         week_2_entries_qs = user_entries_for_pay_period.filter(
             clock_in_time__gte=week_2_start_utc,
             clock_in_time__lte=week_2_end_utc
         )
+        # Filter PTO requests for the second week boundaries
+        week_2_pto_entries_qs = user_pto_requests_for_pay_period.filter(
+            start_date_time__gte=week_2_start_utc,
+            end_date_time__lte=week_2_end_utc
+        )
 
         # Aggregate total hours for each week
         week_1_total_hours = week_1_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
         week_2_total_hours = week_2_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
+        # Aggregate total PTO hours for each week
+        week_1_pto_total_hours = week_1_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
+        week_2_pto_total_hours = week_2_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
 
         # Serialize entries for display
         week_1_serialized_entries = ClockSerializer(week_1_entries_qs, many=True).data
         week_2_serialized_entries = ClockSerializer(week_2_entries_qs, many=True).data
+
+        week_1_pto_serialized_entries = PTORequestsSerializer(week_1_pto_entries_qs, many=True).data
+        week_2_pto_serialized_entries = PTORequestsSerializer(week_2_pto_entries_qs, many=True).data
+        
         
         # Serialize the active clock entry if it exists
         active_clock_entry_data = ClockSerializer(active_clock_entry).data if active_clock_entry else None
@@ -191,6 +217,10 @@ class UserClockDataAPIView(APIView):
             "week_1_total_hours": week_1_total_hours,
             "week_2_entries": week_2_serialized_entries,
             "week_2_total_hours": week_2_total_hours,
+            "week_1_pto_entries": week_1_pto_serialized_entries,
+            "week_1_pto_total_hours": week_1_pto_total_hours,
+            "week_2_pto_entries": week_2_pto_serialized_entries,
+            "week_2_pto_total_hours": week_2_pto_total_hours,
         }, status=status.HTTP_200_OK)
 
 
@@ -298,6 +328,11 @@ class ClockDataViewSet(viewsets.ViewSet):
                 clock_in_time__gte=pay_period.start_date,
                 clock_in_time__lte=pay_period.end_date
             ).order_by('clock_in_time')
+            user_pto_requests_for_pay_period = PTORequests.objects.filter(
+                user=user_obj,
+                start_date_time__gte=pay_period.start_date,
+                end_date_time__lte=pay_period.end_date
+            ).order_by('start_date_time')
 
             employee_type = PTOBalance.objects.filter(user=user_obj).first().employee_type.name if PTOBalance.objects.filter(user=user_obj).exists() else 'Unknown'
             
@@ -305,13 +340,23 @@ class ClockDataViewSet(viewsets.ViewSet):
                 clock_in_time__gte=week_1_start_utc,
                 clock_in_time__lte=week_1_end_utc
             )
+            week_1_pto_entries_qs = user_pto_requests_for_pay_period.filter(
+                start_date_time__gte=week_1_start_utc,
+                end_date_time__lte=week_1_end_utc
+            )
             week_2_entries_qs = user_entries_for_pay_period.filter(
                 clock_in_time__gte=week_2_start_utc,
                 clock_in_time__lte=week_2_end_utc
             )
+            week_2_pto_entries_qs = user_pto_requests_for_pay_period.filter(
+                start_date_time__gte=week_2_start_utc,
+                end_date_time__lte=week_2_end_utc
+            )
 
             week_1_total_hours = week_1_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
             week_2_total_hours = week_2_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
+            week_1_pto_total_hours = week_1_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
+            week_2_pto_total_hours = week_2_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
 
             # Calculate regular and overtime hours for week 1
             if employee_type == 'Full Time':
@@ -353,6 +398,9 @@ class ClockDataViewSet(viewsets.ViewSet):
                  
             week_1_serialized_entries = ClockSerializer(week_1_entries_qs, many=True).data
             week_2_serialized_entries = ClockSerializer(week_2_entries_qs, many=True).data
+
+            week_1_pto_serialized_entries = PTORequestsSerializer(week_1_pto_entries_qs, many=True).data
+            week_2_pto_serialized_entries = PTORequestsSerializer(week_2_pto_entries_qs, many=True).data
             
             active_clock_entry = user_entries_for_pay_period.filter(clock_out_time__isnull=True).first()
             active_clock_entry_data = ClockSerializer(active_clock_entry).data if active_clock_entry else None
@@ -375,6 +423,10 @@ class ClockDataViewSet(viewsets.ViewSet):
                 "regular_hours_week_2": regular_hours_week_2,
                 "overtime_hours_week_2": overtime_hours_week_2,
                 "employee_type": employee_type,
+                "week_1_pto_entries": week_1_pto_serialized_entries,
+                "week_1_pto_total_hours": week_1_pto_total_hours,
+                "week_2_pto_entries": week_2_pto_serialized_entries,
+                "week_2_pto_total_hours": week_2_pto_total_hours,
             })
 
         return Response({

@@ -114,7 +114,7 @@ async function fetchAndRenderAdminClockData(payPeriodId, DOMElements) {
     try {
         const data = await getClockDataAdmin(payPeriodId);
         currentReportData = data; // Store the fetched data globally
-
+        console.log("Fetched clock data for pay period:", payPeriodId, data);
         renderAdminClockDataReport(clockDataReportContainer, data); // Render the fetched data
         updateExportButtonState(exportExcelButton, data); // Update button based on new data
 
