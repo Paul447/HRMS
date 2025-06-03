@@ -110,7 +110,7 @@
 
         if (data.users_clock_data.length > 0) {
             data.users_clock_data.forEach(userData => {
-                const employeeName = `${userData.first_name} ${userData.last_name} (${userData.username})`;
+                const employeeName = `${userData.first_name} ${userData.last_name} `;
                 const totalHours = userData.week_1_total_hours + userData.week_2_total_hours || 'N/A'; // Assuming employee_type exists in your data
 
                 const week1Punches = userData.week_1_entries;
@@ -129,9 +129,7 @@
                         <tr>
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowspan="${totalRowsForEmployee}">
                                 ${employeeName}
-                                ${userData.current_status === 'Clocked In' ? `
-                                    <div class="text-xs text-green-600 mt-1">Clocked In Since: ${new Date(userData.active_clock_entry.clock_in_time).toLocaleString()}</div>
-                                ` : `<div class="text-xs text-gray-500 mt-1">Clocked Out</div>`}
+
                             </td>` : ''}
 
                             ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${week1RowsCount}">
@@ -222,215 +220,204 @@
     }
 
     // --- Function to trigger XLSX download using SheetJS ---
-    function exportToXLSX(filename) {
-        const currentData = document.getElementById('clockDataReportContainer').currentReportData;
+    async function exportToXLSX(filename) {
+    // Ensure ExcelJS is available
+    if (typeof ExcelJS === 'undefined') {
+        console.error('ExcelJS library not loaded. Include it via CDN or npm.');
+        alert('ExcelJS library is required to export the file.');
+        return;
+    }
 
-        if (!currentData || !currentData.users_clock_data) {
-            alert('No report data available to export.');
-            return;
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Clock Data Report');
+
+    // Set column widths
+    worksheet.columns = [
+        { width: 25 }, // A: Employee
+        { width: 15 }, // B: Week Total
+        { width: 20 }, // C: Week Punches - IN
+        { width: 20 }, // D: Week Punches - OUT
+        { width: 15 }, // E: Week Punches Duration
+        { width: 10 }, // F: Regular
+        { width: 10 }, // G: OT
+        { width: 15 }  // H: Employee Type
+    ];
+
+    // Add headers
+    worksheet.addRow(["Employee", "Week Total", "Week Punches", "", "Week Punches Duration", "Regular", "OT", "Total Hours"]);
+    worksheet.addRow(["", "", "IN", "OUT", "", "", "", ""]);
+
+    // Merge header cells
+    worksheet.mergeCells('A1:A2');
+    worksheet.mergeCells('B1:B2');
+    worksheet.mergeCells('C1:D1');
+    worksheet.mergeCells('E1:E2');
+    worksheet.mergeCells('F1:F2');
+    worksheet.mergeCells('G1:G2');
+    worksheet.mergeCells('H1:H2');
+
+    // Style headers
+    worksheet.getRow(1).eachCell(cell => {
+        cell.font = { bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+    worksheet.getRow(2).eachCell(cell => {
+        cell.font = { bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+
+    let currentRow = 3;
+    let otCellsToHighlight = []; // Track cells for conditional formatting
+
+    const currentData = document.getElementById('clockDataReportContainer').currentReportData;
+    if (!currentData || !currentData.users_clock_data) {
+        console.error('No report data available:', currentData);
+        alert('No report data available to export.');
+        return;
+    }
+
+    currentData.users_clock_data.forEach(userData => {
+        const employeeName = `${userData.first_name} ${userData.last_name}`;
+        const employeeType = (userData.week_1_total_hours + userData.week_2_total_hours) || 'N/A';
+
+        const week1Total = parseFloat(userData.week_1_total_hours || 0).toFixed(2);
+        const week2Total = parseFloat(userData.week_2_total_hours || 0).toFixed(2);
+        const week1Regular = parseFloat(userData.regular_hours_week_1 || 0);
+        const week1OT = parseFloat(userData.overtime_hours_week_1 || 0);
+        const week2Regular = parseFloat(userData.regular_hours_week_2 || 0);
+        const week2OT = parseFloat(userData.overtime_hours_week_2 || 0);
+
+        console.log(`Processing ${employeeName} - Week 1 OT: ${week1OT} (type: ${typeof week1OT}), Week 2 OT: ${week2OT} (type: ${typeof week2OT})`);
+
+        const week1Punches = userData.week_1_entries || [];
+        const week2Punches = userData.week_2_entries || [];
+
+        const week1RowsCount = Math.max(1, week1Punches.length);
+        const week2RowsCount = Math.max(1, week2Punches.length);
+
+        const employeeBlockStartRow = currentRow;
+
+        const shouldHighlightWeek1 = !isNaN(week1OT) && week1OT != 0;
+        const shouldHighlightWeek2 = !isNaN(week2OT) && week2OT != 0;
+
+        if (shouldHighlightWeek1) console.log(`Highlighting OT cell G${currentRow} for ${employeeName}, Week 1 OT: ${week1OT}`);
+        if (shouldHighlightWeek2) console.log(`Highlighting OT cell G${currentRow + week1RowsCount} for ${employeeName}, Week 2 OT: ${week2OT}`);
+
+        // Week 1 block
+        for (let i = 0; i < week1RowsCount; i++) {
+            const punch1 = week1Punches[i];
+            const row = worksheet.addRow([
+                i === 0 ? employeeName : "",
+                i === 0 ? `Week 1 = ${week1Total}` : "",
+                punch1 ? new Date(punch1.clock_in_time).toLocaleString() : (i === 0 && week1Punches.length === 0 ? "No Punches" : ""),
+                punch1 && punch1.clock_out_time ? new Date(punch1.clock_out_time).toLocaleString() : (punch1 ? 'Active' : ''),
+                punch1 ? parseFloat(punch1.hours_worked || 0) : (i === 0 && week1Punches.length === 0 ? 0 : ""), // Store as number
+                i === 0 ? week1Regular : "",
+                i === 0 ? week1OT : "", // Store as number
+                i === 0 ? employeeType : ""
+            ]);
+
+            // Format Week Punches Duration (E) as number with two decimals
+            if (punch1 || (i === 0 && week1Punches.length === 0)) {
+                const durationCell = row.getCell('E');
+                durationCell.numFmt = '0.00';
+            }
+
+            // Highlight only the OT cell (column G) if non-zero
+            if (i === 0 && shouldHighlightWeek1) {
+                const otCell = row.getCell('G');
+                otCell.numFmt = '0.00'; // Ensure number format with two decimals
+                otCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Red
+                otCellsToHighlight.push(`G${currentRow}`);
+            }
+            currentRow++;
         }
 
-        let worksheetData = [];
-        let merges = [];
-        let currentRow = 0; // Keep track of the current row index in the worksheet (0-indexed)
+        if (week1RowsCount > 1) {
+            worksheet.mergeCells(`B${employeeBlockStartRow}:B${employeeBlockStartRow + week1RowsCount - 1}`);
+            worksheet.mergeCells(`F${employeeBlockStartRow}:F${employeeBlockStartRow + week1RowsCount - 1}`);
+            worksheet.mergeCells(`G${employeeBlockStartRow}:G${employeeBlockStartRow + week1RowsCount - 1}`);
+        }
 
-        // Add headers (matching screenshot with IN/OUT split)
-        // Note: The structure is Employee (A), Week Total (B), Week Punches (C,D), Week Punches Duration (E), Regular (F), OT (G), Employee Type (H)
-        const headers1 = ["Employee", "Week Total", "Week Punches", "", "Week Punches Duration", "Regular", "OT", "Total Hours"];
-        const headers2 = ["", "", "IN", "OUT", "", "", "", ""]; // Sub-headers; empty for merged cells
-        worksheetData.push(headers1); // Row 0
-        worksheetData.push(headers2); // Row 1
-        currentRow += 2;
+        const week2BlockStartRow = currentRow;
 
-        // Define merge ranges for headers (matching screenshot)
-        // Employee: A1:A2
-        merges.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } });
-        // Week Total: B1:B2
-        merges.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } });
-        // Week Punches: C1:D1
-        merges.push({ s: { r: 0, c: 2 }, e: { r: 0, c: 3 } }); // This spans IN and OUT
-        // Week Punches Duration: E1:E2
-        merges.push({ s: { r: 0, c: 4 }, e: { r: 1, c: 4 } });
-        // Regular: F1:F2
-        merges.push({ s: { r: 0, c: 5 }, e: { r: 1, c: 5 } });
-        // OT: G1:G2
-        merges.push({ s: { r: 0, c: 6 }, e: { r: 1, c: 6 } });
-        // Employee Type: H1:H2
-        merges.push({ s: { r: 0, c: 7 }, e: { r: 1, c: 7 } });
+        // Week 2 block
+        for (let i = 0; i < week2RowsCount; i++) {
+            const punch2 = week2Punches[i];
+            const row = worksheet.addRow([
+                "",
+                i === 0 ? `Week 2 = ${week2Total}` : "",
+                punch2 ? new Date(punch2.clock_in_time).toLocaleString() : (i === 0 && week2Punches.length === 0 ? "No Punches" : ""),
+                punch2 && punch2.clock_out_time ? new Date(punch2.clock_out_time).toLocaleString() : (punch2 ? 'Active' : ''),
+                punch2 ? parseFloat(punch2.hours_worked || 0) : (i === 0 && week2Punches.length === 0 ? 0 : ""), // Store as number
+                i === 0 ? week2Regular : "",
+                i === 0 ? week2OT : "", // Store as number
+                ""
+            ]);
 
-
-        currentData.users_clock_data.forEach(userData => {
-            const employeeName = `${userData.first_name} ${userData.last_name}`;
-            const employeeUsername = userData.username;
-            const employeeStatus = userData.current_status + (userData.active_clock_entry ? ` Since: ${new Date(userData.active_clock_entry.clock_in_time).toLocaleString()}` : ' (Clocked Out)');
-            const employeeType = userData.week_1_total_hours + userData.week_2_total_hours || 'N/A';
-
-            const week1Total = parseFloat(userData.week_1_total_hours).toFixed(2);
-            const week2Total = parseFloat(userData.week_2_total_hours).toFixed(2);
-            const week1Regular = parseFloat(userData.regular_hours_week_1 || 0).toFixed(2);
-            const week1OT = parseFloat(userData.overtime_hours_week_1 || 0).toFixed(2);
-            const week2Regular = parseFloat(userData.regular_hours_week_2 || 0).toFixed(2);
-            const week2OT = parseFloat(userData.overtime_hours_week_2 || 0).toFixed(2);
-
-            const week1Punches = userData.week_1_entries;
-            const week2Punches = userData.week_2_entries;
-
-            const week1RowsCount = Math.max(1, week1Punches.length); // At least 1 row for week 1
-            const week2RowsCount = Math.max(1, week2Punches.length); // At least 1 row for week 2
-
-            const employeeBlockStartRow = currentRow; // Start row for this employee's entire block
-
-            // --- Generate rows for Week 1 block ---
-            for (let i = 0; i < week1RowsCount; i++) {
-                let row = [];
-                const punch1 = week1Punches[i];
-
-                // Employee Column (will be merged) - Col A (index 0)
-                if (i === 0) {
-                    row.push({ v: employeeName + '\n' + employeeUsername + '\n' + employeeStatus, s: { alignment: { wrapText: true, vertical: 'top' } } });
-                } else {
-                    row.push("");
-                }
-
-                // Week Total (Week 1) - Col B (index 1) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(`Week 1 = ${week1Total}`);
-                } else {
-                    row.push("");
-                }
-
-                // Week Punches: IN - Col C (index 2)
-                row.push(punch1 ? new Date(punch1.clock_in_time).toLocaleString() : (i === 0 && week1Punches.length === 0 ? "No Punches" : ""));
-                // Week Punches: OUT - Col D (index 3)
-                row.push(punch1 && punch1.clock_out_time ? new Date(punch1.clock_out_time).toLocaleString() : (punch1 ? 'Active' : ''));
-                // Week Punches Duration - Col E (index 4)
-                row.push(punch1 ? `${parseFloat(punch1.hours_worked || 0).toFixed(2)}` : (i === 0 && week1Punches.length === 0 ? "0.00" : ""));
-
-                // Regular (Week 1) - Col F (index 5) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(week1Regular);
-                } else {
-                    row.push("");
-                }
-                // OT (Week 1) - Col G (index 6) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(week1OT);
-                } else {
-                    row.push("");
-                }
-
-                // Employee Type Column - Col H (index 7) - will be merged
-                if (i === 0) {
-                    row.push(employeeType);
-                } else {
-                    row.push("");
-                }
-
-                worksheetData.push(row);
-                currentRow++;
+            // Format Week Punches Duration (E) as number with two decimals
+            if (punch2 || (i === 0 && week2Punches.length === 0)) {
+                const durationCell = row.getCell('E');
+                durationCell.numFmt = '0.00';
             }
 
-            // Add merges for Week 1's "Week Total", "Regular", "OT" if week1RowsCount > 1
-            if (week1RowsCount > 1) {
-                merges.push({ s: { r: employeeBlockStartRow, c: 1 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 1 } }); // Week Total (Col B)
-                // merges.push({ s: { r: employeeBlockStartRow, c: 4 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 4 } }); // REMOVED: Week Punches Duration (Col E)
-                merges.push({ s: { r: employeeBlockStartRow, c: 5 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 5 } }); // Regular (Col F)
-                merges.push({ s: { r: employeeBlockStartRow, c: 6 }, e: { r: employeeBlockStartRow + week1RowsCount - 1, c: 6 } }); // OT (Col G)
+            // Highlight only the OT cell (column G) if non-zero
+            if (i === 0 && shouldHighlightWeek2) {
+                const otCell = row.getCell('G');
+                otCell.numFmt = '0.00'; // Ensure number format with two decimals
+                otCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Red
+                otCellsToHighlight.push(`G${currentRow}`);
             }
+            currentRow++;
+        }
 
+        if (week2RowsCount > 1) {
+            worksheet.mergeCells(`B${week2BlockStartRow}:B${week2BlockStartRow + week2RowsCount - 1}`);
+            worksheet.mergeCells(`F${week2BlockStartRow}:F${week2BlockStartRow + week2RowsCount - 1}`);
+            worksheet.mergeCells(`G${week2BlockStartRow}:G${week2BlockStartRow + week2RowsCount - 1}`);
+        }
 
-            const week2BlockStartRow = currentRow; // Start row for Week 2's block
+        // Merge Employee and Employee Type
+        if (currentRow - employeeBlockStartRow > 1) {
+            worksheet.mergeCells(`A${employeeBlockStartRow}:A${currentRow - 1}`);
+            worksheet.mergeCells(`H${employeeBlockStartRow}:H${currentRow - 1}`);
+        }
 
-            // --- Generate rows for Week 2 block ---
-            for (let i = 0; i < week2RowsCount; i++) {
-                let row = [];
-                const punch2 = week2Punches[i];
+        // Add blank row
+        worksheet.addRow(["", "", "", "", "", "", "", ""]);
+        currentRow++;
+    });
 
-                // Employee Column (already merged from top, so empty) - Col A (index 0)
-                row.push("");
-
-                // Week Total (Week 2) - Col B (index 1) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(`Week 2 = ${week2Total}`);
-                } else {
-                    row.push("");
-                }
-
-                // Week Punches: IN - Col C (index 2)
-                row.push(punch2 ? new Date(punch2.clock_in_time).toLocaleString() : (i === 0 && week2Punches.length === 0 ? "No Punches" : ""));
-                // Week Punches: OUT - Col D (index 3)
-                row.push(punch2 && punch2.clock_out_time ? new Date(punch2.clock_out_time).toLocaleString() : (punch2 ? 'Active' : ''));
-                // Week Punches Duration - Col E (index 4)
-                row.push(punch2 ? `${parseFloat(punch2.hours_worked || 0).toFixed(2)}` : (i === 0 && week2Punches.length === 0 ? "0.00" : ""));
-
-                // Regular (Week 2) - Col F (index 5) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(week2Regular);
-                } else {
-                    row.push("");
-                }
-                // OT (Week 2) - Col G (index 6) - will be merged for this week's block
-                if (i === 0) {
-                    row.push(week2OT);
-                } else {
-                    row.push("");
-                }
-
-                // Employee Type Column (already merged from top, so empty) - Col H (index 7)
-                row.push("");
-
-                worksheetData.push(row);
-                currentRow++;
-            }
-
-            // Add merges for Week 2's "Week Total", "Regular", "OT" if week2RowsCount > 1
-            if (week2RowsCount > 1) {
-                merges.push({ s: { r: week2BlockStartRow, c: 1 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 1 } }); // Week Total (Col B)
-                // merges.push({ s: { r: week2BlockStartRow, c: 4 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 4 } }); // REMOVED: Week Punches Duration (Col E)
-                merges.push({ s: { r: week2BlockStartRow, c: 5 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 5 } }); // Regular (Col F)
-                merges.push({ s: { r: week2BlockStartRow, c: 6 }, e: { r: week2BlockStartRow + week2RowsCount - 1, c: 6 } }); // OT (Col G)
-            }
-
-            // Now, merge the main Employee and Employee Type columns across the total rows for this employee block
-            const totalEmployeeRows = (currentRow - employeeBlockStartRow);
-            if (totalEmployeeRows > 1) {
-                // Employee cell A (col 0)
-                merges.push({ s: { r: employeeBlockStartRow, c: 0 }, e: { r: employeeBlockStartRow + totalEmployeeRows - 1, c: 0 } });
-                // Employee Type cell H (col 7)
-                merges.push({ s: { r: employeeBlockStartRow, c: 7 }, e: { r: employeeBlockStartRow + totalEmployeeRows - 1, c: 7 } });
-            }
-
-            // Add a blank row for separation between employees if desired
-            worksheetData.push(["", "", "", "", "", "", "", ""]);
-            currentRow++; // Account for the blank row
+    // Add conditional formatting for specific OT cells (fallback)
+    otCellsToHighlight.forEach(cellRef => {
+        worksheet.addConditionalFormatting({
+            ref: cellRef,
+            rules: [{
+                type: 'cellIs',
+                operator: 'greaterThan',
+                formulae: ['0'],
+                style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFFF0000' } } }
+            }]
         });
+    });
 
+    console.log('Conditional Formatting Applied to:', otCellsToHighlight);
 
-        // Create a new workbook and add the worksheet
-        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-
-        // Apply merges
-        ws['!merges'] = merges;
-
-        // Set column widths (optional, but good for presentation)
-        ws['!cols'] = [
-            { wch: 25 }, // Employee (Col A)
-            { wch: 15 }, // Week Total (Col B)
-            { wch: 20 }, // Week Punches - IN (Col C)
-            { wch: 20 }, // Week Punches - OUT (Col D)
-            { wch: 15 }, // Week Punches Duration (Col E)
-            { wch: 10 }, // Regular (Col F)
-            { wch: 10 }, // OT (Col G)
-            { wch: 15 }  // Employee Type (Col H)
-        ];
-
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Clock Data Report");
-
-        // Write the workbook to a file
-        XLSX.writeFile(wb, filename);
+    // Save file
+    try {
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        console.log('File generated successfully:', filename);
+    } catch (error) {
+        console.error('Error generating XLSX file:', error);
+        alert('Failed to generate XLSX file. Check console for details.');
     }
+}
 
     // --- Function to fetch and populate the pay period selector dropdown ---
     async function populatePayPeriodSelector() {
