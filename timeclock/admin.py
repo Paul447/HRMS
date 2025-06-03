@@ -108,7 +108,7 @@ class ClockAdmin(admin.ModelAdmin):
         entry if they are already actively clocked in.
         """
         if request.method == 'GET':
-            if request.user.is_authenticated:
+            if request.user.is_authenticated and not request.user.is_superuser:
                 # Check for an existing open clock entry for the current user
                 active_clock = Clock.objects.filter(user=request.user, clock_out_time__isnull=True).first()
                 if active_clock:

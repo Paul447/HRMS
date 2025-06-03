@@ -244,13 +244,12 @@ class ClockInOutPunchReportView(TemplateView):
 class ClockDataViewSet(viewsets.ViewSet):
     """
     A ViewSet for superusers to retrieve aggregated clock data for all users
-    within a specified pay period, and to get a list of all available pay periods.
+    within a specified pay period. Normal authenticated users can access their
+    own aggregated clock data for a specified pay period.
     """
-    permission_classes = [IsAuthenticated, IsAdminUser] # Only superusers can access
+    permission_classes = [IsAuthenticated]
 
-    # This method will handle the main GET request for /api/clock-data/
     def list(self, request, *args, **kwargs):
-        # Superuser must provide a pay_period_id as a query parameter
         pay_period_id = request.query_params.get('pay_period_id')
 
         if not pay_period_id:
@@ -269,8 +268,6 @@ class ClockDataViewSet(viewsets.ViewSet):
 
         local_tz = pytz.timezone(settings.TIME_ZONE)
 
-        # Calculate week boundaries within the pay period based on local dates
-        # Convert pay_period start/end to local timezone dates for consistent comparison
         pay_period_start_local_date = timezone.localtime(pay_period.start_date, timezone=local_tz).date()
         pay_period_end_local_date = timezone.localtime(pay_period.end_date, timezone=local_tz).date()
 
@@ -280,24 +277,27 @@ class ClockDataViewSet(viewsets.ViewSet):
         week_2_start_local = pay_period_start_local_date + timedelta(days=7)
         week_2_end_local = pay_period_end_local_date
 
-        # Convert local week boundaries to UTC datetimes for database query
         week_1_start_utc = local_tz.localize(datetime.combine(week_1_start_local, datetime.min.time())).astimezone(pytz.utc)
         week_1_end_utc = local_tz.localize(datetime.combine(week_1_end_local, datetime.max.time())).astimezone(pytz.utc)
 
         week_2_start_utc = local_tz.localize(datetime.combine(week_2_start_local, datetime.min.time())).astimezone(pytz.utc)
         week_2_end_utc = local_tz.localize(datetime.combine(week_2_end_local, datetime.max.time())).astimezone(pytz.utc)
 
-        # Prepare data for all users
         all_users_data = []
-        # Exclude superusers from the list if you only want regular employees
-        users_to_report = User.objects.all() # Or .all() if superusers should also appear
+
+        # Determine which users to report based on permissions
+        if request.user.is_superuser:
+            users_to_report = User.objects.all()
+        else:
+            # Regular users can only see their own data
+            users_to_report = User.objects.filter(id=request.user.id)
 
         for user_obj in users_to_report:
             user_entries_for_pay_period = Clock.objects.filter(
                 user=user_obj,
                 clock_in_time__gte=pay_period.start_date,
                 clock_in_time__lte=pay_period.end_date
-            ).order_by('clock_in_time') # Order by oldest first for clearer aggregation
+            ).order_by('clock_in_time')
 
             employee_type = PTOBalance.objects.filter(user=user_obj).first().employee_type.name if PTOBalance.objects.filter(user=user_obj).exists() else 'Unknown'
             
@@ -313,23 +313,26 @@ class ClockDataViewSet(viewsets.ViewSet):
             week_1_total_hours = week_1_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
             week_2_total_hours = week_2_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
 
+            # Calculate regular and overtime hours for week 1
             if employee_type == 'Full Time':
                 if week_1_total_hours > 40:
-                    regular_hours = 40
-                    overtime_hours = week_1_total_hours - 40
+                    regular_hours_week_1 = 40
+                    overtime_hours_week_1 = week_1_total_hours - 40
                 else:
-                    regular_hours = week_1_total_hours
-                    overtime_hours = Decimal('0.00')
+                    regular_hours_week_1 = week_1_total_hours
+                    overtime_hours_week_1 = Decimal('0.00')
             elif employee_type == 'Part Time':
                 if week_1_total_hours > 20:
-                    regular_hours = 20
-                    overtime_hours = week_1_total_hours - 20
+                    regular_hours_week_1 = 20
+                    overtime_hours_week_1 = week_1_total_hours - 20
                 else:
-                    regular_hours = week_1_total_hours
-                    overtime_hours = Decimal('0.00')
+                    regular_hours_week_1 = week_1_total_hours
+                    overtime_hours_week_1 = Decimal('0.00')
+            else: # Unknown or other types, treat all as regular
+                regular_hours_week_1 = week_1_total_hours
+                overtime_hours_week_1 = Decimal('0.00')
             
-            # same for week 2 
-
+            # Calculate regular and overtime hours for week 2
             if employee_type == 'Full Time':
                 if week_2_total_hours > 40:
                     regular_hours_week_2 = 40
@@ -344,18 +347,17 @@ class ClockDataViewSet(viewsets.ViewSet):
                 else:
                     regular_hours_week_2 = week_2_total_hours
                     overtime_hours_week_2 = Decimal('0.00')
+            else: # Unknown or other types, treat all as regular
+                regular_hours_week_2 = week_2_total_hours
+                overtime_hours_week_2 = Decimal('0.00')
                  
-     
-            # Serialize entries for display (optional, can be removed if only totals are needed)
             week_1_serialized_entries = ClockSerializer(week_1_entries_qs, many=True).data
             week_2_serialized_entries = ClockSerializer(week_2_entries_qs, many=True).data
             
-            # Find active clock entry for this specific user
             active_clock_entry = user_entries_for_pay_period.filter(clock_out_time__isnull=True).first()
             active_clock_entry_data = ClockSerializer(active_clock_entry).data if active_clock_entry else None
             
             current_status = "Clocked In" if active_clock_entry else "Clocked Out"
-
 
             all_users_data.append({
                 "user_id": user_obj.id,
@@ -363,18 +365,16 @@ class ClockDataViewSet(viewsets.ViewSet):
                 "first_name": user_obj.first_name,
                 "last_name": user_obj.last_name,
                 "current_status": current_status,
-                "active_clock_entry": active_clock_entry_data, # Active entry for THIS user
+                "active_clock_entry": active_clock_entry_data,
                 "week_1_entries": week_1_serialized_entries,
                 "week_1_total_hours": week_1_total_hours,
                 "week_2_entries": week_2_serialized_entries,
                 "week_2_total_hours": week_2_total_hours,
-                "regular_hours_week_1": regular_hours,
-                "overtime_hours_week_1": overtime_hours,
+                "regular_hours_week_1": regular_hours_week_1,
+                "overtime_hours_week_1": overtime_hours_week_1,
                 "regular_hours_week_2": regular_hours_week_2,
                 "overtime_hours_week_2": overtime_hours_week_2,
-
-                "employee_type": employee_type,  # Include employee type for context
-
+                "employee_type": employee_type,
             })
 
         return Response({
@@ -388,6 +388,9 @@ class ClockDataViewSet(viewsets.ViewSet):
             },
             "users_clock_data": all_users_data,
         }, status=status.HTTP_200_OK)
+
+    
+
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminUser])
     def pay_periods(self, request):
         """
