@@ -26,7 +26,8 @@ from paytype.api import register_department as register_department
 from hrmsauth.views import user_info
 from timeclock.views import ClockDataViewSet
 # from django.contrib.auth import views as auth_views
-# from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 router = DefaultRouter()
 
@@ -61,8 +62,13 @@ urlpatterns = [
 
     
     # Yaml schema generation
-    # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+
+    # Optional: Swagger UI
+    path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+
+    # Optional: ReDoc UI
+    path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # Need to generate the documentation of apiendpoints
 
 ]
