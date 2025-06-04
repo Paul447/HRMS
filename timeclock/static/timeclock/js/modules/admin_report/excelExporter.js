@@ -180,7 +180,7 @@ export async function exportAdminReportToXLSX(data, filename) {
 
             // Style for PTO type (now column F)
             if (isPTO) {
-                row.getCell('F').font = { color: { argb: 'FF800080' } }; // Purple color for PTO type
+                row.getCell('F').font = { color: { argb: 'FF0000FF' } }; // Purple color for PTO type
             }
 
             // Highlight OT cell (column H) if non-zero
@@ -239,7 +239,7 @@ export async function exportAdminReportToXLSX(data, filename) {
 
             // Style for PTO type (now column F)
             if (isPTO) {
-                row.getCell('F').font = { color: { argb: 'FF800080' } }; // Purple color for PTO type
+                row.getCell('F').font = { color: { argb: 'FF0000FF' } }; // Bright Blue
             }
 
             // Highlight OT cell (column H) if non-zero
