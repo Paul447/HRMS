@@ -42,8 +42,8 @@ export function renderAdminClockDataReport(containerElement, data) {
                         <th scope="col" class="px-6 py-3 border-r border-gray-200" rowspan="2">
                             Week
                         </th>
-                        <th scope="col" class="px-6 py-3 text-center border-b border-gray-200" colspan="3">
-                            Punches
+                        <th scope="col" class="px-6 py-3 text-center border-b border-gray-200" colspan="4">
+                            Time Entries
                         </th>
                         <th scope="col" class="px-6 py-3 border-l border-gray-200" rowspan="2">
                             Regular Hrs
@@ -57,13 +57,16 @@ export function renderAdminClockDataReport(containerElement, data) {
                     </tr>
                     <tr>
                         <th scope="col" class="px-6 py-2 border-r border-gray-200">
-                            IN
+                            IN / Start
                         </th>
                         <th scope="col" class="px-6 py-2 border-r border-gray-200">
-                            OUT
+                            OUT / End
+                        </th>
+                        <th scope="col" class="px-6 py-2 border-r border-gray-200">
+                            Duration
                         </th>
                         <th scope="col" class="px-6 py-2">
-                            Duration
+                            Type
                         </th>
                     </tr>
                 </thead>
@@ -73,56 +76,75 @@ export function renderAdminClockDataReport(containerElement, data) {
     if (data.users_clock_data.length > 0) {
         data.users_clock_data.forEach(userData => {
             const employeeName = `${userData.first_name} ${userData.last_name}`;
-            const totalHoursCombined = (parseFloat(userData.week_1_total_hours || 0) + parseFloat(userData.week_2_total_hours || 0)).toFixed(2);
+            const totalHoursCombined = (parseFloat(userData.week_1_total_hours || 0) + parseFloat(userData.week_2_total_hours || 0) + parseFloat(userData.week_1_pto_total_hours || 0) + parseFloat(userData.week_2_pto_total_hours || 0)).toFixed(2);
 
-            const week1Punches = userData.week_1_entries || [];
-            const week2Punches = userData.week_2_entries || [];
+            // Combine punches and PTO entries for Week 1
+            const week1CombinedEntries = [
+                ...(userData.week_1_entries || []).map(entry => ({ ...entry, type: 'Punch', sortTime: entry.clock_in_time })),
+                ...(userData.week_1_pto_entries || []).map(entry => ({ ...entry, type: entry.pay_types_display.name, sortTime: entry.start_date_time }))
+            ].sort((a, b) => new Date(a.sortTime) - new Date(b.sortTime)); // Sort by start time
 
-            const week1RowsCount = Math.max(1, week1Punches.length);
-            const week2RowsCount = Math.max(1, week2Punches.length);
+            // Combine punches and PTO entries for Week 2
+            const week2CombinedEntries = [
+                ...(userData.week_2_entries || []).map(entry => ({ ...entry, type: 'Punch', sortTime: entry.clock_in_time })),
+                ...(userData.week_2_pto_entries || []).map(entry => ({ ...entry, type: entry.pay_types_display.name, sortTime: entry.start_date_time }))
+            ].sort((a, b) => new Date(a.sortTime) - new Date(b.sortTime)); // Sort by start time
 
-            const totalRowsForEmployee = week1RowsCount + week2RowsCount;
+            const week1MaxRows = Math.max(week1CombinedEntries.length, 1);
+            const week2MaxRows = Math.max(week2CombinedEntries.length, 1);
+
+            const totalRowsForEmployee = week1MaxRows + week2MaxRows;
 
             // --- Week 1 Block ---
-            for (let i = 0; i < week1RowsCount; i++) {
-                const punch = week1Punches[i];
+            for (let i = 0; i < week1MaxRows; i++) {
+                const entry = week1CombinedEntries[i];
+                const isPunch = entry && entry.type === 'Punch';
+                const isPTO = entry && entry.type !== 'Punch';
+
                 tableHtml += `
                     <tr class="bg-white border-b hover:bg-gray-50">
                         ${i === 0 ? `<td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap border-r border-gray-200" rowspan="${totalRowsForEmployee}">
                             ${employeeName}
                         </td>` : ''}
 
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200" rowspan="${week1RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200" rowspan="${week1MaxRows}">
                             <span class="font-semibold text-blue-700">Week 1</span><br>
-                            <span class="text-xs text-gray-500">${parseFloat(userData.week_1_total_hours || 0).toFixed(2)} hrs</span>
+                            <span class="text-xs text-gray-500">Punch: ${parseFloat(userData.week_1_total_hours || 0).toFixed(2)} hrs</span><br>
+                            <span class="text-xs text-gray-500">PTO: ${parseFloat(userData.week_1_pto_total_hours || 0).toFixed(2)} hrs</span>
                         </td>` : ''}
 
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch ? `
-                                <div class="text-gray-900">${formatDate(punch.clock_in_time)}</div>
-                                <div class="text-gray-500 text-xs">${formatOnlyTime(punch.clock_in_time)}</div>
-                            ` : '<span class="text-gray-400">No Punch</span>'}
+                            ${entry ? `
+                                <div class="text-gray-900">${formatDate(isPunch ? entry.clock_in_time : entry.start_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(isPunch ? entry.clock_in_time : entry.start_date_time)}</div>
+                            ` : '<span class="text-gray-400">N/A</span>'}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch && punch.clock_out_time ? `
-                                <div class="text-gray-900">${formatDate(punch.clock_out_time)}</div>
-                                <div class="text-gray-500 text-xs">${formatOnlyTime(punch.clock_out_time)}</div>
-                            ` : (punch ? `<span class="inline-flex items-center text-green-600 font-medium animate-pulse">
+                            ${isPunch && entry.clock_out_time ? `
+                                <div class="text-gray-900">${formatDate(entry.clock_out_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.clock_out_time)}</div>
+                            ` : (isPunch && !entry.clock_out_time ? `<span class="inline-flex items-center text-green-600 font-medium animate-pulse">
                                 <span class="relative flex h-2 w-2 mr-1">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                                 </span>
                                 Active
-                            </span>` : '')}
+                            </span>` : (isPTO && entry.end_date_time ? `
+                                <div class="text-gray-900">${formatDate(entry.end_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.end_date_time)}</div>
+                            ` : '<span class="text-gray-400">N/A</span>'))}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+                            ${entry ? `<span class="font-medium text-gray-900">${parseFloat(isPunch ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} hrs</span>` : '<span class="text-gray-400">0.00 hrs</span>'}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch ? `<span class="font-medium text-gray-900">${parseFloat(punch.hours_worked || 0).toFixed(2)} hrs</span>` : '0.00 hrs'}
+                            ${entry ? `<span class="font-medium ${isPunch ? 'text-gray-900' : 'text-purple-700'}">${entry.type}</span>` : '<span class="text-gray-400">N/A</span>'}
                         </td>
 
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200" rowspan="${week1RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200" rowspan="${week1MaxRows}">
                             <span class="font-semibold">${parseFloat(userData.regular_hours_week_1 || 0).toFixed(2)}</span>
                         </td>` : ''}
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 ${parseFloat(userData.overtime_hours_week_1 || 0) > 0 ? 'text-red-600 font-bold' : ''}" rowspan="${week1RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 ${parseFloat(userData.overtime_hours_week_1 || 0) > 0 ? 'text-red-600 font-bold' : ''}" rowspan="${week1MaxRows}">
                             <span class="font-semibold">${parseFloat(userData.overtime_hours_week_1 || 0).toFixed(2)}</span>
                         </td>` : ''}
 
@@ -134,57 +156,67 @@ export function renderAdminClockDataReport(containerElement, data) {
             }
 
             // --- Week 2 Block ---
-            for (let i = 0; i < week2RowsCount; i++) {
-                const punch = week2Punches[i];
+            for (let i = 0; i < week2MaxRows; i++) {
+                const entry = week2CombinedEntries[i];
+                const isPunch = entry && entry.type === 'Punch';
+                const isPTO = entry && entry.type !== 'Punch';
+
                 tableHtml += `
                     <tr class="bg-white border-b hover:bg-gray-50">
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200" rowspan="${week2RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200" rowspan="${week2MaxRows}">
                             <span class="font-semibold text-blue-700">Week 2</span><br>
-                            <span class="text-xs text-gray-500">${parseFloat(userData.week_2_total_hours || 0).toFixed(2)} hrs</span>
+                            <span class="text-xs text-gray-500">Punch: ${parseFloat(userData.week_2_total_hours || 0).toFixed(2)} hrs</span><br>
+                            <span class="text-xs text-gray-500">PTO: ${parseFloat(userData.week_2_pto_total_hours || 0).toFixed(2)} hrs</span>
                         </td>` : ''}
 
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch ? `
-                                <div class="text-gray-900">${formatDate(punch.clock_in_time)}</div>
-                                <div class="text-gray-500 text-xs">${formatOnlyTime(punch.clock_in_time)}</div>
-                            ` : '<span class="text-gray-400">No Punch</span>'}
+                            ${entry ? `
+                                <div class="text-gray-900">${formatDate(isPunch ? entry.clock_in_time : entry.start_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(isPunch ? entry.clock_in_time : entry.start_date_time)}</div>
+                            ` : '<span class="text-gray-400">N/A</span>'}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch && punch.clock_out_time ? `
-                                <div class="text-gray-900">${formatDate(punch.clock_out_time)}</div>
-                                <div class="text-gray-500 text-xs">${formatOnlyTime(punch.clock_out_time)}</div>
-                            ` : (punch ? `<span class="inline-flex items-center text-green-600 font-medium animate-pulse">
+                            ${isPunch && entry.clock_out_time ? `
+                                <div class="text-gray-900">${formatDate(entry.clock_out_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.clock_out_time)}</div>
+                            ` : (isPunch && !entry.clock_out_time ? `<span class="inline-flex items-center text-green-600 font-medium animate-pulse">
                                 <span class="relative flex h-2 w-2 mr-1">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                                 </span>
                                 Active
-                            </span>` : '')}
+                            </span>` : (isPTO && entry.end_date_time ? `
+                                <div class="text-gray-900">${formatDate(entry.end_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.end_date_time)}</div>
+                            ` : '<span class="text-gray-400">N/A</span>'))}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+                            ${entry ? `<span class="font-medium text-gray-900">${parseFloat(isPunch ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} hrs</span>` : '<span class="text-gray-400">0.00 hrs</span>'}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            ${punch ? `<span class="font-medium text-gray-900">${parseFloat(punch.hours_worked || 0).toFixed(2)} hrs</span>` : '0.00 hrs'}
+                            ${entry ? `<span class="font-medium ${isPunch ? 'text-gray-900' : 'text-purple-700'}">${entry.type}</span>` : '<span class="text-gray-400">N/A</span>'}
                         </td>
 
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200" rowspan="${week2RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200" rowspan="${week2MaxRows}">
                             <span class="font-semibold">${parseFloat(userData.regular_hours_week_2 || 0).toFixed(2)}</span>
                         </td>` : ''}
-                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 ${parseFloat(userData.overtime_hours_week_2 || 0) > 0 ? 'text-red-600 font-bold' : ''}" rowspan="${week2RowsCount}">
+                        ${i === 0 ? `<td class="px-6 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 ${parseFloat(userData.overtime_hours_week_2 || 0) > 0 ? 'text-red-600 font-bold' : ''}" rowspan="${week2MaxRows}">
                             <span class="font-semibold">${parseFloat(userData.overtime_hours_week_2 || 0).toFixed(2)}</span>
                         </td>` : ''}
-                        </tr>
+                    </tr>
                 `;
             }
             // Add a separator row between employees for better readability
             tableHtml += `
                 <tr class="bg-gray-50">
-                    <td colspan="8" class="h-4"></td>
+                    <td colspan="9" class="h-4"></td>
                 </tr>
             `;
         });
     } else {
         tableHtml += `
                 <tr>
-                    <td colspan="8" class="px-6 py-12 text-center text-gray-600">
+                    <td colspan="9" class="px-6 py-12 text-center text-gray-600">
                         <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H3z" />
                         </svg>

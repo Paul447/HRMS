@@ -157,3 +157,16 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         validated_data.pop('pay_types_display', None)
 
         return super().update(instance, validated_data)
+
+class PTORequestsListSerializerPunchReport(serializers.ModelSerializer):
+    queryset = PTORequests.objects.filter(status='approved').order_by('-start_date_time')
+    pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
+
+    class Meta:
+        model = PTORequests
+        fields = [
+            'start_date_time',
+            'end_date_time',
+            'total_hours',
+            'pay_types_display',
+        ]
