@@ -1,4 +1,4 @@
-// static/js/modules/admin_report/excelExporter.js
+import { formatDate, formatOnlyTime } from '../timeclock/utils.js';
 
 /**
  * Exports the provided clock data to an XLSX file using ExcelJS.
@@ -7,7 +7,6 @@
  * @param {string} filename - The desired filename for the exported Excel file.
  */
 export async function exportAdminReportToXLSX(data, filename) {
-    // Check if ExcelJS is loaded globally (from CDN in your HTML)
     if (typeof ExcelJS === 'undefined') {
         console.error('ExcelJS library not loaded. Include it via CDN or npm.');
         alert('ExcelJS library is required to export the file.');
@@ -17,27 +16,27 @@ export async function exportAdminReportToXLSX(data, filename) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Clock Data Report');
 
-    // Set column widths for the new merged structure
+    // Set column widths
     worksheet.columns = [
         { width: 25 }, // A: Employee
         { width: 15 }, // B: Week
         { width: 22 }, // C: IN / Start
         { width: 22 }, // D: OUT / End
         { width: 15 }, // E: Duration
-        { width: 15 }, // F: Type (Moved)
+        { width: 15 }, // F: Type
         { width: 12 }, // G: Regular Hrs
         { width: 12 }, // H: OT Hrs
-        { width: 15 }  // I: Total Hrs (Combined)
+        { width: 15 }  // I: Total Hrs
     ];
 
-    // Add headers for the simplified structure with Type moved
+    // Add headers
     worksheet.addRow([
         "Employee",
         "Week",
         "IN / Start",
         "OUT / End",
         "Duration",
-        "Type", // Moved
+        "Type",
         "Regular Hrs",
         "OT Hrs",
         "Total Hrs"
@@ -50,7 +49,7 @@ export async function exportAdminReportToXLSX(data, filename) {
         cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFE0E0E0' } // Light gray background
+            fgColor: { argb: 'FFE0E0E0' } // Light gray
         };
         cell.border = {
             top: { style: 'thin' },
@@ -60,218 +59,239 @@ export async function exportAdminReportToXLSX(data, filename) {
         };
     });
 
-    let currentRow = 2; // Start data from the second row since headers are on row 1
+    let currentRow = 2;
 
-    if (!data || !data.users_clock_data || data.users_clock_data.length === 0) {
-        worksheet.addRow(['', '', '', '', '', '', '', '', '']); // Add an empty row to show the message
+    if (!data?.users_clock_data?.length) {
+        worksheet.addRow(['', '', '', '', '', '', '', '', '']);
         worksheet.mergeCells(`A${currentRow}:I${currentRow}`);
         worksheet.getCell(`A${currentRow}`).value = 'No time entries found for this pay period.';
         worksheet.getCell(`A${currentRow}`).alignment = { horizontal: 'center', vertical: 'middle' };
         worksheet.getCell(`A${currentRow}`).font = { italic: true, color: { argb: 'FF808080' } };
-        worksheet.getRow(currentRow).height = 40; // Give it some height
+        worksheet.getRow(currentRow).height = 40;
         console.warn('No report data available to export.');
+        try {
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        } catch (error) {
+            console.error('Error generating XLSX file:', error);
+            alert('Failed to generate XLSX file. Check console for details.');
+        }
         return;
     }
 
     data.users_clock_data.forEach(userData => {
-        const employeeName = `${userData.first_name} ${userData.last_name}`;
-        const totalHoursCombined = (
-            parseFloat(userData.week_1_total_hours || 0) +
-            parseFloat(userData.week_2_total_hours || 0) +
-            parseFloat(userData.week_1_pto_total_hours || 0) +
-            parseFloat(userData.week_2_pto_total_hours || 0)
+        const employeeName = `${userData?.first_name || ''} ${userData?.last_name || ''}`.trim() || 'Unknown Employee';
+        const totalHoursCombined = Number(
+            (Number(userData?.week_1_total_hours || 0) +
+             Number(userData?.week_2_total_hours || 0) +
+             Number(userData?.week_1_pto_total_hours || 0) +
+             Number(userData?.week_2_pto_total_hours || 0) +
+             Number(userData?.week_1_holiday_total_hours || 0) +
+             Number(userData?.week_2_holiday_total_hours || 0))
         ).toFixed(2);
 
-        // --- Prepare combined entries for Week 1 ---
+        // Combine punches, holidays, and PTO entries for Week 1
         const week1CombinedEntries = [
-            ...(userData.week_1_entries || []).map(entry => ({
+            ...(userData?.week_1_entries || []).map(entry => ({
                 isPunch: true,
+                isHoliday: false,
                 type: 'Punch',
                 start: entry.clock_in_time,
                 end: entry.clock_out_time,
-                duration: parseFloat(entry.hours_worked || 0),
+                duration: Number(entry.hours_worked || 0),
                 sortTime: entry.clock_in_time
             })),
-            ...(userData.week_1_pto_entries || []).map(entry => ({
+            ...(userData?.week_1_holiday_entries || []).map(entry => ({
                 isPunch: false,
-                type: entry.pay_types_display.name,
+                isHoliday: true,
+                type: 'Holiday',
+                start: entry.clock_in_time,
+                end: entry.clock_out_time,
+                duration: Number(entry.hours_worked || 0),
+                sortTime: entry.clock_in_time
+            })),
+            ...(userData?.week_1_pto_entries || []).map(entry => ({
+                isPunch: false,
+                isHoliday: false,
+                type: entry?.pay_types_display?.name || 'PTO',
                 start: entry.start_date_time,
                 end: entry.end_date_time,
-                duration: parseFloat(entry.total_hours || 0),
+                duration: Number(entry.total_hours || 0),
                 sortTime: entry.start_date_time
             }))
-        ].sort((a, b) => new Date(a.sortTime) - new Date(b.sortTime));
+        ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
 
-        // --- Prepare combined entries for Week 2 ---
+        // Combine punches, holidays, and PTO entries for Week 2
         const week2CombinedEntries = [
-            ...(userData.week_2_entries || []).map(entry => ({
+            ...(userData?.week_2_entries || []).map(entry => ({
                 isPunch: true,
+                isHoliday: false,
                 type: 'Punch',
                 start: entry.clock_in_time,
                 end: entry.clock_out_time,
-                duration: parseFloat(entry.hours_worked || 0),
+                duration: Number(entry.hours_worked || 0),
                 sortTime: entry.clock_in_time
             })),
-            ...(userData.week_2_pto_entries || []).map(entry => ({
+            ...(userData?.week_2_holiday_entries || []).map(entry => ({
                 isPunch: false,
-                type: entry.pay_types_display.name,
+                isHoliday: true,
+                type: 'Holiday',
+                start: entry.clock_in_time,
+                end: entry.clock_out_time,
+                duration: Number(entry.hours_worked || 0),
+                sortTime: entry.clock_in_time
+            })),
+            ...(userData?.week_2_pto_entries || []).map(entry => ({
+                isPunch: false,
+                isHoliday: false,
+                type: entry?.pay_types_display?.name || 'PTO',
                 start: entry.start_date_time,
                 end: entry.end_date_time,
-                duration: parseFloat(entry.total_hours || 0),
+                duration: Number(entry.total_hours || 0),
                 sortTime: entry.start_date_time
             }))
-        ].sort((a, b) => new Date(a.sortTime) - new Date(b.sortTime));
-
+        ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
 
         const week1RowsCount = Math.max(1, week1CombinedEntries.length);
         const week2RowsCount = Math.max(1, week2CombinedEntries.length);
         const employeeTotalRows = week1RowsCount + week2RowsCount;
+        const employeeBlockStartRow = currentRow;
 
-        const employeeBlockStartRow = currentRow; // Row where this employee's block starts
-
-        // --- Week 1 Data ---
+        // Week 1 Data
         for (let i = 0; i < week1RowsCount; i++) {
             const entry = week1CombinedEntries[i];
-            const isPunch = entry && entry.isPunch;
-            const isPTO = entry && !entry.isPunch;
+            const isPunch = entry?.isPunch;
+            const isHoliday = entry?.isHoliday;
+            const isPTO = entry && !isPunch && !isHoliday;
 
-            let inOutFormatted = '';
-            let outEndFormatted = '';
+            let inOutFormatted = 'N/A';
+            let outEndFormatted = 'N/A';
             let durationValue = 0;
             let typeValue = 'N/A';
 
             if (entry) {
                 typeValue = entry.type;
-                inOutFormatted = `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}`;
+                inOutFormatted = entry.start ? `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}` : 'N/A';
                 durationValue = entry.duration;
-
-                if (isPunch) {
-                    if (entry.end) {
-                        outEndFormatted = `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}`;
-                    } else {
-                        outEndFormatted = 'Active'; // For active punches
-                    }
+                if (isPunch || isHoliday) {
+                    outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'Active';
                 } else if (isPTO) {
-                    outEndFormatted = `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}`;
+                    outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'N/A';
                 }
-            } else {
-                // Handle cases where there are no entries for a week (placeholder row)
-                inOutFormatted = 'N/A';
-                outEndFormatted = 'N/A';
             }
 
             const row = worksheet.addRow([
-                i === 0 ? employeeName : "", // Employee name only on the first row of their block
-                i === 0 ? `Week 1 (P: ${parseFloat(userData.week_1_total_hours || 0).toFixed(2)} / PTO: ${parseFloat(userData.week_1_pto_total_hours || 0).toFixed(2)})` : "",
+                i === 0 ? employeeName : "",
+                i === 0 ? `Week 1 (P: ${Number(userData?.week_1_total_hours || 0).toFixed(2)} / PTO: ${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} / H: ${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
                 durationValue,
-                typeValue, // Moved
-                i === 0 ? parseFloat(userData.regular_hours_week_1 || 0) : "",
-                i === 0 ? parseFloat(userData.overtime_hours_week_1 || 0) : "",
-                i === 0 ? parseFloat(totalHoursCombined) : ""
+                typeValue,
+                i === 0 ? Number(userData?.regular_hours_week_1 || 0) : "",
+                i === 0 ? Number(userData?.overtime_hours_week_1 || 0) : "",
+                i === 0 ? totalHoursCombined : ""
             ]);
 
-            // Apply number format to duration and hour totals
-            row.getCell('E').numFmt = '0.00'; // Duration is now E
+            // Apply number format
+            row.getCell('E').numFmt = '0.00';
             row.getCell('G').numFmt = '0.00';
             row.getCell('H').numFmt = '0.00';
             row.getCell('I').numFmt = '0.00';
 
-            // Style for PTO type (now column F)
+            // Style for Type column (F)
             if (isPTO) {
-                row.getCell('F').font = { color: { argb: 'FF0000FF' } }; // Purple color for PTO type
+                row.getCell('F').font = { color: { argb: 'FF800080' } }; // Purple for PTO
+            } else if (isHoliday) {
+                row.getCell('F').font = { color: { argb: 'FF008000' } }; // Green for Holiday
+                row.getCell('A').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F3E6' } }; // Light green row
             }
 
-            // Highlight OT cell (column H) if non-zero
-            if (i === 0 && parseFloat(userData.overtime_hours_week_1 || 0) > 0) {
-                row.getCell('H').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light Red
+            // Highlight OT cell (H) if non-zero
+            if (i === 0 && Number(userData?.overtime_hours_week_1 || 0) > 0) {
+                row.getCell('H').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
             }
+
             currentRow++;
         }
 
-        // --- Week 2 Data ---
+        // Week 2 Data
         for (let i = 0; i < week2RowsCount; i++) {
             const entry = week2CombinedEntries[i];
-            const isPunch = entry && entry.isPunch;
-            const isPTO = entry && !entry.isPunch;
+            const isPunch = entry?.isPunch;
+            const isHoliday = entry?.isHoliday;
+            const isPTO = entry && !isPunch && !isHoliday;
 
-            let inOutFormatted = '';
-            let outEndFormatted = '';
+            let inOutFormatted = 'N/A';
+            let outEndFormatted = 'N/A';
             let durationValue = 0;
             let typeValue = 'N/A';
 
             if (entry) {
                 typeValue = entry.type;
-                inOutFormatted = `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}`;
+                inOutFormatted = entry.start ? `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}` : 'N/A';
                 durationValue = entry.duration;
-
-                if (isPunch) {
-                    if (entry.end) {
-                        outEndFormatted = `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}`;
-                    } else {
-                        outEndFormatted = 'Active'; // For active punches
-                    }
+                if (isPunch || isHoliday) {
+                    outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'Active';
                 } else if (isPTO) {
-                    outEndFormatted = `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}`;
+                    outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'N/A';
                 }
-            } else {
-                inOutFormatted = 'N/A';
-                outEndFormatted = 'N/A';
             }
 
             const row = worksheet.addRow([
-                "", // Employee name is merged
-                i === 0 ? `Week 2 (P: ${parseFloat(userData.week_2_total_hours || 0).toFixed(2)} / PTO: ${parseFloat(userData.week_2_pto_total_hours || 0).toFixed(2)})` : "",
+                "",
+                i === 0 ? `Week 2 (P: ${Number(userData?.week_2_total_hours || 0).toFixed(2)} / PTO: ${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} / H: ${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
                 durationValue,
-                typeValue, // Moved
-                i === 0 ? parseFloat(userData.regular_hours_week_2 || 0) : "",
-                i === 0 ? parseFloat(userData.overtime_hours_week_2 || 0) : "",
-                "" // Total hours already in the first row of the employee block
+                typeValue,
+                i === 0 ? Number(userData?.regular_hours_week_2 || 0) : "",
+                i === 0 ? Number(userData?.overtime_hours_week_2 || 0) : "",
+                ""
             ]);
 
-            // Apply number format to duration and hour totals
-            row.getCell('E').numFmt = '0.00'; // Duration is now E
+            // Apply number format
+            row.getCell('E').numFmt = '0.00';
             row.getCell('G').numFmt = '0.00';
             row.getCell('H').numFmt = '0.00';
 
-            // Style for PTO type (now column F)
+            // Style for Type column (F)
             if (isPTO) {
-                row.getCell('F').font = { color: { argb: 'FF0000FF' } }; // Bright Blue
+                row.getCell('F').font = { color: { argb: 'FF800080' } }; // Purple for PTO
+            } else if (isHoliday) {
+                row.getCell('F').font = { color: { argb: 'FF008000' } }; // Green for Holiday
+                row.getCell('A').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F3E6' } }; // Light green row
             }
 
-            // Highlight OT cell (column H) if non-zero
-            if (i === 0 && parseFloat(userData.overtime_hours_week_2 || 0) > 0) {
-                row.getCell('H').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light Red
+            // Highlight OT cell (H) if non-zero
+            if (i === 0 && Number(userData?.overtime_hours_week_2 || 0) > 0) {
+                row.getCell('H').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
             }
+
             currentRow++;
         }
 
-        // --- Merge cells after all rows for the employee are added ---
+        // Merge cells
         if (employeeTotalRows > 1) {
-            // Merge Employee column (A)
             worksheet.mergeCells(`A${employeeBlockStartRow}:A${currentRow - 1}`);
-            // Merge Total Hours column (I)
             worksheet.mergeCells(`I${employeeBlockStartRow}:I${currentRow - 1}`);
         }
-
-        // Merge Week column (B) for Week 1
         if (week1RowsCount > 1) {
             worksheet.mergeCells(`B${employeeBlockStartRow}:B${employeeBlockStartRow + week1RowsCount - 1}`);
-            worksheet.mergeCells(`G${employeeBlockStartRow}:G${employeeBlockStartRow + week1RowsCount - 1}`); // Regular Hrs Week 1
-            worksheet.mergeCells(`H${employeeBlockStartRow}:H${employeeBlockStartRow + week1RowsCount - 1}`); // OT Hrs Week 1
+            worksheet.mergeCells(`G${employeeBlockStartRow}:G${employeeBlockStartRow + week1RowsCount - 1}`);
+            worksheet.mergeCells(`H${employeeBlockStartRow}:H${employeeBlockStartRow + week1RowsCount - 1}`);
         }
-
-        // Merge Week column (B) for Week 2
         if (week2RowsCount > 1) {
             worksheet.mergeCells(`B${employeeBlockStartRow + week1RowsCount}:B${currentRow - 1}`);
-            worksheet.mergeCells(`G${employeeBlockStartRow + week1RowsCount}:G${currentRow - 1}`); // Regular Hrs Week 2
-            worksheet.mergeCells(`H${employeeBlockStartRow + week1RowsCount}:H${currentRow - 1}`); // OT Hrs Week 2
+            worksheet.mergeCells(`G${employeeBlockStartRow + week1RowsCount}:G${currentRow - 1}`);
+            worksheet.mergeCells(`H${employeeBlockStartRow + week1RowsCount}:H${currentRow - 1}`);
         }
 
-        // Add blank row for separation between employees
+        // Add separator row
         worksheet.addRow([]);
         currentRow++;
     });
@@ -290,20 +310,4 @@ export async function exportAdminReportToXLSX(data, filename) {
         console.error('Error generating XLSX file:', error);
         alert('Failed to generate XLSX file. Check console for details.');
     }
-}
-
-// Helper functions (assuming these are available in your utils.js or defined here)
-// Make sure to define these or import them if they are from another module.
-function formatDate(isoString) {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    // Example: "Jun 03"
-    return date.toLocaleDateString('en-US', {year: 'numeric', month: 'numeric', day: '2-digit', weekday: 'short' });
-}
-
-function formatOnlyTime(isoString) {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    // Example: "06:00 AM"
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
 }
