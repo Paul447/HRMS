@@ -95,6 +95,7 @@ def user_info(request):
     return Response({
         'id': user.id,
         'username': user.username,
+        'is_superuser': user.is_superuser,
     })
 
 # -----------------------------

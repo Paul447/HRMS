@@ -239,3 +239,15 @@ class UserClockOnShiftView(ListAPIView):
         Retrieves clock data for users currently on shift.
         """
         return Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')
+class OnShiftFrontendView(TemplateView):
+    """
+    A frontend view to display users currently on shift.
+    """
+    template_name = 'onshift.html'
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get_context_data(self, **kwargs):
+
+        return super().get_context_data(**kwargs)
+
+
