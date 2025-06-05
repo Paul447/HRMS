@@ -305,5 +305,5 @@ function formatOnlyTime(isoString) {
     if (!isoString) return '';
     const date = new Date(isoString);
     // Example: "06:00 AM"
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
 }

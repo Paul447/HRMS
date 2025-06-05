@@ -81,7 +81,13 @@ def get_user_weekly_summary(user, pay_period, week_boundaries_utc):
 
         week_entries_qs = user_entries_for_pay_period.filter(
             clock_in_time__gte=week_start_utc,
-            clock_in_time__lte=week_end_utc
+            clock_in_time__lte=week_end_utc,
+            is_holiday=False  # Exclude holidays from the clock entries
+        )
+        week_entries_qs_holiday = user_entries_for_pay_period.filter(
+            clock_in_time__gte=week_start_utc,
+            clock_in_time__lte=week_end_utc,
+            is_holiday=True  # Include holidays separately if needed
         )
         week_pto_entries_qs = user_pto_requests_for_pay_period.filter(
             start_date_time__gte=week_start_utc,
@@ -91,6 +97,7 @@ def get_user_weekly_summary(user, pay_period, week_boundaries_utc):
 
         total_hours = week_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
         pto_total_hours = week_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
+        holiday_total_hours = week_entries_qs_holiday.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
 
         # Calculate regular and overtime hours based on employee type and defined limits
         max_regular_hours = Decimal('0.00')
@@ -110,6 +117,8 @@ def get_user_weekly_summary(user, pay_period, week_boundaries_utc):
             overtime_hours = Decimal('0.00')
 
         results[f"week_{week_num}_entries"] = ClockSerializer(week_entries_qs, many=True).data
+        results[f"week_{week_num}_holiday_entries"] = ClockSerializer(week_entries_qs_holiday, many=True).data
+        results[f"week_{week_num}_holiday_total_hours"] = holiday_total_hours
         results[f"week_{week_num}_total_hours"] = total_hours
         results[f"regular_hours_week_{week_num}"] = regular_hours
         results[f"overtime_hours_week_{week_num}"] = overtime_hours

@@ -8,13 +8,12 @@ from django.core.exceptions import ValidationError
 from django.db.models import Sum, Q
 from django.db.models.functions import Cast
 from django.db.models import DateField
+
 # Assuming PayPeriod is defined in payperiod/models.py
-# Make sure your 'payperiod' app is correctly configured and in INSTALLED_APPS
 from payperiod.models import PayPeriod
 
 # Assuming Holiday is defined in holiday/models.py or a similar path
-# Make sure your 'holiday' app is correctly configured and in INSTALLED_APPS
-from holiday.models import Holiday # <--- Import your Holiday model here
+from holiday.models import Holiday
 
 class Clock(models.Model):
     """
@@ -23,7 +22,7 @@ class Clock(models.Model):
     Handles timezone conversions and splitting of shifts spanning across midnights.
     """
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, # Use AUTH_USER_MODEL for a more flexible user reference
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='clocks',
         verbose_name="Employee"
@@ -49,7 +48,7 @@ class Clock(models.Model):
         help_text="Automatically calculated total hours worked for this entry."
     )
     pay_period = models.ForeignKey(
-        'payperiod.PayPeriod', # Use string reference for consistency
+        'payperiod.PayPeriod',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -65,9 +64,8 @@ class Clock(models.Model):
 
     class Meta:
         verbose_name = "Clock Entry"
-        # verbose_plural = "Clock Entries" # This should be `verbose_name_plural`
-        verbose_name_plural = "Clock Entries" # Corrected
-        ordering = ['-clock_in_time'] # Order by most recent clock in first
+        verbose_name_plural = "Clock Entries"
+        ordering = ['-clock_in_time']
 
     def __str__(self):
         """
@@ -86,118 +84,114 @@ class Clock(models.Model):
         if self.clock_in_time and self.clock_out_time and self.clock_out_time < self.clock_in_time:
             raise ValidationError("Clock out time cannot be before clock in time.")
 
-    def save(self, *args, **kwargs):
-        """
-        Overrides the default save method to automate PayPeriod assignment,
-        trigger hours calculation, and determine holiday status when appropriate.
-        Uses a 'calculate_hours' flag to prevent infinite recursion during split shifts.
-        """
-        calculate_hours_flag = kwargs.pop('calculate_hours', True)
+    # --- New Helper Methods for Modularity ---
 
+    def _ensure_timezone_aware(self):
+        """Ensures clock_in_time is timezone-aware."""
         if self.clock_in_time and timezone.is_naive(self.clock_in_time):
             self.clock_in_time = timezone.make_aware(self.clock_in_time, timezone.get_current_timezone())
 
-        # Assign PayPeriod
+    def _assign_pay_period(self):
+        """Assigns the correct PayPeriod based on clock_in_time."""
         if self.clock_in_time and not self.pay_period:
             self.pay_period = PayPeriod.get_pay_period_for_date(self.clock_in_time)
             if not self.pay_period:
                 print(f"Warning: No PayPeriod found for {self.clock_in_time}. Please create one.")
 
-        # --- Determine if it's a holiday ---
-        # Only check if clock_in_time is available and if is_holiday hasn't been explicitly set
+    def _determine_holiday_status(self):
+        """Determines if the clock entry's clock_in_time falls on a holiday."""
         if self.clock_in_time:
-            # Convert clock_in_time to the project's local timezone for date comparison
             local_clock_in_date = timezone.localtime(self.clock_in_time).date()
-            # Check if there's a Holiday entry for this date
             self.is_holiday = Holiday.objects.filter(date=local_clock_in_date).exists()
-        # --- End Holiday Logic ---
 
-        original_hours_worked = self.hours_worked
-        original_clock_out_time = self.clock_out_time
-        original_is_holiday = self.is_holiday # Keep track of original holiday status
+    def _calculate_simple_hours(self, local_start, local_end):
+        """Calculates hours for a shift within the same day."""
+        delta = local_end - local_start
+        return round(delta.total_seconds() / 3600, 2)
 
-        super().save(*args, **kwargs)
-
-        if self.clock_in_time and self.clock_out_time and calculate_hours_flag:
-            self._calculate_and_assign_hours()
-
-            # Save again if hours_worked, clock_out_time, or is_holiday changed during the process
-            if self.hours_worked != original_hours_worked or \
-               self.clock_out_time != original_clock_out_time or \
-               self.is_holiday != original_is_holiday: # Check for holiday change
-                update_fields = ['hours_worked', 'clock_out_time', 'is_holiday'] # Include is_holiday
-                self.save(update_fields=update_fields, calculate_hours=False)
-
-
-    def _calculate_and_assign_hours(self):
+    def _handle_split_shift(self, local_clock_in_time, local_clock_out_time):
         """
-        Calculates hours worked for the current clock entry.
-        Handles DST and splits shifts that span across midnights.
-        Updates the current instance's hours_worked and potentially clock_out_time.
-        IMPORTANT: This method ONLY modifies the instance attributes; it DOES NOT call self.save().
-        The calling save() method is responsible for persisting these changes.
-        """
-        if not self.clock_in_time or not self.clock_out_time:
-            self.hours_worked = None
-            return
-
-        local_tz = pytz.timezone(settings.TIME_ZONE)
-
-        local_clock_in_time = self.clock_in_time.astimezone(local_tz)
-        local_clock_out_time = self.clock_out_time.astimezone(local_tz)
-
-        spans_midnight = local_clock_in_time.date() != local_clock_out_time.date()
-
-        if spans_midnight:
-            self._split_shift_across_midnight(local_clock_in_time, local_clock_out_time)
-        else:
-            delta = local_clock_out_time - local_clock_in_time
-            self.hours_worked = round(delta.total_seconds() / 3600, 2)
-
-
-    def _split_shift_across_midnight(self, local_clock_in_time, local_clock_out_time):
-        """
-        Splits a single Clock entry that spans across midnight (e.g., Tuesday 6 PM to Wednesday 6 AM).
-        The current instance is modified to represent the portion on the first day.
-        A new Clock instance is created for the portion on the subsequent day.
-        IMPORTANT: This method ONLY modifies the current instance's attributes; it DOES NOT call self.save()
-        for the current instance. It DOES create a new instance for the subsequent day's portion.
+        Splits a single Clock entry that spans across midnight.
+        Modifies current instance for the first day and creates a new one for the next.
         """
         local_tz = pytz.timezone(settings.TIME_ZONE)
 
-        # --- Calculate First Day's Portion ---
+        # First Day's Portion (modifies current self)
         next_day_start_naive = datetime.combine(local_clock_in_time.date() + timedelta(days=1), time(0, 0, 0))
         next_day_start_local = local_tz.normalize(local_tz.localize(next_day_start_naive))
-
         first_day_end_local = next_day_start_local - timedelta(microseconds=1)
 
-        first_day_duration = first_day_end_local - local_clock_in_time
-        first_day_hours = round(first_day_duration.total_seconds() / 3600, 2)
-
-        # Update the current Clock instance to be the first day's portion
         self.clock_out_time = first_day_end_local.astimezone(pytz.utc)
-        self.hours_worked = first_day_hours
-        # The `is_holiday` status for this part of the shift is determined by its clock-in date.
-        # This has already been set in the main `save` method before `_calculate_and_assign_hours` was called.
+        self.hours_worked = self._calculate_simple_hours(local_clock_in_time, first_day_end_local)
 
-        # --- Create Subsequent Day's Portion ---
+        # Subsequent Day's Portion (creates new Clock instance)
         subsequent_day_start_naive = datetime.combine(local_clock_out_time.date(), time(0, 0, 0))
         subsequent_day_start_local = local_tz.normalize(local_tz.localize(subsequent_day_start_naive))
 
-        subsequent_day_duration = local_clock_out_time - subsequent_day_start_local
-        subsequent_day_hours = round(subsequent_day_duration.total_seconds() / 3600, 2)
-
         subsequent_day_pay_period = PayPeriod.get_pay_period_for_date(subsequent_day_start_local)
-
-        # Determine `is_holiday` for the new entry based on its clock-in date (which is the subsequent day)
         is_subsequent_day_holiday = Holiday.objects.filter(date=subsequent_day_start_local.date()).exists()
 
         new_clock_entry = Clock(
             user=self.user,
             clock_in_time=subsequent_day_start_local.astimezone(pytz.utc),
             clock_out_time=local_clock_out_time.astimezone(pytz.utc),
-            hours_worked=subsequent_day_hours,
+            hours_worked=self._calculate_simple_hours(subsequent_day_start_local, local_clock_out_time),
             pay_period=subsequent_day_pay_period,
-            is_holiday=is_subsequent_day_holiday, # Set holiday status for the new entry
+            is_holiday=is_subsequent_day_holiday,
         )
         new_clock_entry.save(calculate_hours=False) # Prevent re-calculation on new entry's save
+
+    def _process_hours_calculation(self):
+        """
+        Centralizes the logic for calculating hours, handling timezone conversions
+        and triggering split shift logic if necessary.
+        """
+        if not self.clock_in_time or not self.clock_out_time:
+            self.hours_worked = None
+            return
+
+        local_tz = pytz.timezone(settings.TIME_ZONE)
+        local_clock_in_time = self.clock_in_time.astimezone(local_tz)
+        local_clock_out_time = self.clock_out_time.astimezone(local_tz)
+
+        spans_midnight = local_clock_in_time.date() != local_clock_out_time.date()
+
+        if spans_midnight:
+            self._handle_split_shift(local_clock_in_time, local_clock_out_time)
+        else:
+            self.hours_worked = self._calculate_simple_hours(local_clock_in_time, local_clock_out_time)
+
+    # --- Overridden Save Method ---
+
+    def save(self, *args, **kwargs):
+        """
+        Overrides the default save method to orchestrate the assignment of
+        pay periods, holiday status, and hours calculation.
+        """
+        # Pop the custom flag to prevent it from being passed to super().save()
+        calculate_hours_flag = kwargs.pop('calculate_hours', True)
+
+        # 1. Prepare/Set Initial Attributes
+        self._ensure_timezone_aware()
+        self._assign_pay_period()
+        self._determine_holiday_status()
+
+        # Store original values to check if fields actually changed after potential calculation
+        original_hours_worked = self.hours_worked
+        original_clock_out_time = self.clock_out_time
+        original_is_holiday = self.is_holiday
+
+        # 2. Perform the initial save to ensure the object has a primary key
+        # and other fields are persisted before potentially creating new objects.
+        super().save(*args, **kwargs)
+
+        # 3. Calculate Hours if appropriate (and not a recursive call)
+        if self.clock_in_time and self.clock_out_time and calculate_hours_flag:
+            self._process_hours_calculation()
+
+            # 4. Save again if any derived fields changed during processing
+            if self.hours_worked != original_hours_worked or \
+               self.clock_out_time != original_clock_out_time or \
+               self.is_holiday != original_is_holiday:
+                # Use update_fields to save only the changed fields, improving efficiency
+                self.save(update_fields=['hours_worked', 'clock_out_time', 'is_holiday'], calculate_hours=False)
