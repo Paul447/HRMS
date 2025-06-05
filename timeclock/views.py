@@ -12,7 +12,7 @@ import pytz
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
-from .serializer import ClockSerializer, PayPeriodSerializer
+from .serializer import ClockSerializer, PayPeriodSerializer,UserOnShiftClockSerializer
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from django.contrib.auth.models import User
@@ -216,3 +216,26 @@ class ClockDataViewSet(viewsets.ViewSet):
 
         serializer = PayPeriodSerializer(pay_periods, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserClockOnShiftView(ListAPIView):
+    """
+    A view to retrieve the clock-in/out data for users currently on shift.
+    Also provides a custom action to get a detailed punch report for a specific user.
+    """
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    serializer_class = UserOnShiftClockSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        List all users currently on shift (i.e., those who have clocked in but not out).
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_queryset(self):
+        """
+        Retrieves clock data for users currently on shift.
+        """
+        return Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')

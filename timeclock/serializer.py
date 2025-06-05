@@ -5,6 +5,7 @@ from payperiod.models import PayPeriod
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
+from department.models import Department
 
 class PayPeriodSerializer(serializers.ModelSerializer):
     # Display local dates for better readability in the API response
@@ -57,3 +58,22 @@ class ClockSerializerForPunchReport(serializers.ModelSerializer):
         model = Clock
         fields = '__all__' # Or specify fields like ['id', 'user', 'clock_in_time', 'clock_out_time', 'hours_worked', 'pay_period']
         read_only_fields = ['hours_worked'] # Assuming hours_worked is calculated and not set directly by client
+
+# Import the department model to include department details in the serializer
+
+
+class UserOnShiftClockSerializer(serializers.ModelSerializer):
+    """
+    Serializer for displaying a user's current clock entry if they are on shift.
+    """
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    department = serializers.CharField(source='user.userprofile.department.name', read_only=True)
+    clock_in_time_local = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Clock
+        fields = ['id', 'user', 'user_username', 'department', 'clock_in_time', 'clock_in_time_local']
+        read_only_fields = ['user']
+
+    def get_clock_in_time_local(self, obj):
+        return timezone.localtime(obj.clock_in_time).strftime('%a %m/%d %H:%M %p') if obj.clock_in_time else None
