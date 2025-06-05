@@ -72,7 +72,8 @@ export function formatOnlyTime(isoString) {
         const options = {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true
+            // hour24:true, 
+            hourCycle: 'h23' // Use 24-hour format
         };
         return date.toLocaleString(navigator.language, options);
     } catch (e) {

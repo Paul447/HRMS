@@ -21,8 +21,9 @@ class ClockAdmin(admin.ModelAdmin):
         'hours_worked',
         'pay_period_display',
         'status_display',
+        'is_holiday',
     )
-    list_filter = ('user', 'pay_period',) # Allow filtering by user and associated pay period
+    list_filter = ('user', 'pay_period', 'is_holiday') # Allow filtering by user and associated pay period
     search_fields = ('user__username', 'user__first_name', 'user__last_name',) # Search by user's name
     readonly_fields = ('hours_worked', 'pay_period',) # These fields are automatically calculated/assigned
 

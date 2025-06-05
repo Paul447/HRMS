@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'department',
     'paytype',
     'payperiod',
+    'holiday',
 
 ]
 SPECTACULAR_SETTINGS = {
