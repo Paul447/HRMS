@@ -1,21 +1,16 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from django.views.generic import TemplateView
 from django.utils import timezone
 from django.conf import settings
-from datetime import datetime
 import pytz
-
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
-from .serializer import ClockSerializer, PayPeriodSerializerForClockPunchReport,UserOnShiftClockSerializer
-from rest_framework.decorators import action
-from rest_framework import viewsets
-from django.contrib.auth.models import User
+from .serializer import ClockSerializer, PayPeriodSerializerForClockPunchReport
 from decimal import Decimal
 from rest_framework.permissions import BasePermission
 
@@ -146,40 +141,5 @@ class UserClockDataFrontendView(TemplateView):
 
 
 
-class UserClockOnShiftView(ListAPIView):
-    """
-    A view to retrieve the clock-in/out data for users currently on shift.
-    Also provides a custom action to get a detailed punch report for a specific user.
-    """
-    permission_classes = [IsAuthenticated, IsSuperuser]
-    serializer_class = UserOnShiftClockSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        List all users currently on shift (i.e., those who have clocked in but not out).
-        """
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def get_queryset(self):
-        """
-        Retrieves clock data for users currently on shift.
-        """
-        return Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')
-
-
-
-
-class OnShiftFrontendView(TemplateView):
-    """
-    A frontend view to display users currently on shift.
-    """
-    template_name = 'onshift.html'
-    permission_classes = [IsAuthenticated, IsSuperuser]
-
-    def get_context_data(self, **kwargs):
-
-        return super().get_context_data(**kwargs)
 
 

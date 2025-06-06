@@ -1,28 +1,10 @@
 # serializers.py
 from rest_framework import serializers
 from .models import Clock
-from payperiod.models import PayPeriod  
 from django.utils import timezone
-from decimal import Decimal
 from django.contrib.auth import get_user_model
-from department.models import Department
-from payperiod.serializer import PayPeriodSerializer  # Adjust import based on your project structure
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport  # Adjust import based on your project structure
-# class PayPeriodSerializer(serializers.ModelSerializer):
-#     # Display local dates for better readability in the API response
-#     start_date_local = serializers.SerializerMethodField()
-#     end_date_local = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = PayPeriod
-#         fields = ['id', 'start_date', 'end_date', 'start_date_local', 'end_date_local']
-#         read_only_fields = ['start_date', 'end_date'] # Pay periods are created via admin or management command
-
-#     def get_start_date_local(self, obj):
-#         return timezone.localtime(obj.start_date).strftime(' %B %d, %Y - %I:%M %p ')
-
-#     def get_end_date_local(self, obj):
-#         return timezone.localtime(obj.end_date).strftime('%B %d, %Y - %I:%M %p ')
 
 
 class ClockSerializer(serializers.ModelSerializer):
@@ -63,19 +45,3 @@ class ClockSerializerForPunchReport(serializers.ModelSerializer):
 # Import the department model to include department details in the serializer
 
 
-class UserOnShiftClockSerializer(serializers.ModelSerializer):
-    """
-    Serializer for displaying a user's current clock entry if they are on shift.
-    """
-    first_name = serializers.CharField(source='user.first_name', read_only=True)
-    last_name = serializers.CharField(source='user.last_name', read_only=True)
-    department = serializers.CharField(source='user.userprofile.department.name', read_only=True)
-    clock_in_time_local = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Clock
-        fields = ['user', 'first_name', 'last_name', 'department', 'clock_in_time', 'clock_in_time_local']
-        read_only_fields = ['user']
-
-    def get_clock_in_time_local(self, obj):
-        return timezone.localtime(obj.clock_in_time).strftime('%a %m/%d %H:%M %p') if obj.clock_in_time else None

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 'payperiod',
 'holiday',
 'punchreport',
+'onshift',
 
 ]
 SPECTACULAR_SETTINGS = {
@@ -215,7 +216,7 @@ STATICFILES_DIRS = [BASE_DIR / "hrmsauth" / "static", BASE_DIR / "ptorequest" / 
 "static" , BASE_DIR / "timeclock" / "static", BASE_DIR / "paytype" / "static", BASE_DIR / "department" / "static",
 BASE_DIR / "payfrequency" / "static", BASE_DIR / "employeetype" / "static", BASE_DIR / "yearofexperience" / "static",
 BASE_DIR / "accuralrates" / "static" , BASE_DIR / "ptobalance" / "static", BASE_DIR / "holiday" / "static", 
-BASE_DIR / "punchreport" / "static"]
+BASE_DIR / "punchreport" / "static", BASE_DIR / "onshift" / "static"]
 
 
 # Default primary key field type

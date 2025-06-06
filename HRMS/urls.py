@@ -54,12 +54,13 @@ urlpatterns = [
     path('auth/ptorequest/', include('ptorequest.url')),
     path('auth/clock/', include('timeclock.url')),
     path('auth/punchreport/', include('punchreport.url')),
+    path('auth/onshift/', include('onshift.url')),
 
     path('api/', include(router.urls)),
     path('api/user_info/', user_info, name='user_info'),
     path('admin/', admin.site.urls),
     path('api/clock/', include('timeclock.api')),  # API for time clock functionality
-    
+    path('api/onshift/', include('onshift.api')),  # API for on-shift functionality
 
     
     # Yaml schema generation

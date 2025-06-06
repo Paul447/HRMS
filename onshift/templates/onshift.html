@@ -73,7 +73,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const fetchOnShiftUsers = () => {
-            fetch('/api/clock/on-shift/')
+            fetch('/api/onshift/on-shift/')
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('users-on-shift-table-body');
