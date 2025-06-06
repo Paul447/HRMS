@@ -30,7 +30,7 @@ class ClockAdmin(admin.ModelAdmin):
     # Organize fields in the add/change form
     fieldsets = (
         (None, {
-            'fields': ('user', 'clock_in_time', 'clock_out_time',)
+            'fields': ('user', 'clock_in_time', 'clock_out_time','is_holiday',)
         }),
         ('Calculated Information (Auto-filled)', { # Clearer title
             'fields': ('hours_worked', 'pay_period',),
