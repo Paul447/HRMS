@@ -7,7 +7,7 @@
     <title>{% block title %}Admin Portal{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -114,10 +114,17 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     document.getElementsByClassName('user-name')[0].textContent = data.username || 'User';
                     document.getElementById('user-avatar').textContent = data.username ? data.username.charAt(0)
                         .toUpperCase() : '?';
+
+                    if (data.is_superuser) {
+                        document.getElementById('onShiftReportLink').classList.remove('hidden');
+                    } else {
+                        document.getElementById('onShiftReportLink').classList.add('hidden');
+                    }
+
 
                 } else {
                     console.error('Failed to fetch user data');
@@ -289,8 +296,8 @@
                         </svg>
                         <span>Punch Report</span>
                     </a>
-                    
-                    <a href="{% url 'on_shift_report' %}"
+
+                    <a href="{% url 'on_shift_report' %}" id ="onShiftReportLink"
                         class="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-primary-700 transition-all duration-200 group">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 text-primary-300 group-hover:text-white" fill="none"
@@ -300,7 +307,7 @@
                         </svg>
                         <span>On Shift</span>
                     </a>
-                    
+
 
                 </div>
             </div>

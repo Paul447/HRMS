@@ -66,13 +66,14 @@ class UserOnShiftClockSerializer(serializers.ModelSerializer):
     """
     Serializer for displaying a user's current clock entry if they are on shift.
     """
-    user_username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
     department = serializers.CharField(source='user.userprofile.department.name', read_only=True)
     clock_in_time_local = serializers.SerializerMethodField()
 
     class Meta:
         model = Clock
-        fields = ['id', 'user', 'user_username', 'department', 'clock_in_time', 'clock_in_time_local']
+        fields = ['user', 'first_name', 'last_name', 'department', 'clock_in_time', 'clock_in_time_local']
         read_only_fields = ['user']
 
     def get_clock_in_time_local(self, obj):
