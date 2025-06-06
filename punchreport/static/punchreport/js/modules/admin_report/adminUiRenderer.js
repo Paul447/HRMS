@@ -1,4 +1,4 @@
-import { formatDate, formatOnlyTime } from '../timeclock/utils.js';
+import { formatDate, formatOnlyTime } from '../punchreport/utils.js';
 
 /**
  * Renders the aggregated clock data report as an HTML table.

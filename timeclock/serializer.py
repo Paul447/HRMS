@@ -6,22 +6,23 @@ from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from department.models import Department
+from payperiod.serializer import PayPeriodSerializer  # Adjust import based on your project structure
+from payperiod.serializer import PayPeriodSerializerForClockPunchReport  # Adjust import based on your project structure
+# class PayPeriodSerializer(serializers.ModelSerializer):
+#     # Display local dates for better readability in the API response
+#     start_date_local = serializers.SerializerMethodField()
+#     end_date_local = serializers.SerializerMethodField()
 
-class PayPeriodSerializer(serializers.ModelSerializer):
-    # Display local dates for better readability in the API response
-    start_date_local = serializers.SerializerMethodField()
-    end_date_local = serializers.SerializerMethodField()
+#     class Meta:
+#         model = PayPeriod
+#         fields = ['id', 'start_date', 'end_date', 'start_date_local', 'end_date_local']
+#         read_only_fields = ['start_date', 'end_date'] # Pay periods are created via admin or management command
 
-    class Meta:
-        model = PayPeriod
-        fields = ['id', 'start_date', 'end_date', 'start_date_local', 'end_date_local']
-        read_only_fields = ['start_date', 'end_date'] # Pay periods are created via admin or management command
+#     def get_start_date_local(self, obj):
+#         return timezone.localtime(obj.start_date).strftime(' %B %d, %Y - %I:%M %p ')
 
-    def get_start_date_local(self, obj):
-        return timezone.localtime(obj.start_date).strftime(' %B %d, %Y - %I:%M %p ')
-
-    def get_end_date_local(self, obj):
-        return timezone.localtime(obj.end_date).strftime('%B %d, %Y - %I:%M %p ')
+#     def get_end_date_local(self, obj):
+#         return timezone.localtime(obj.end_date).strftime('%B %d, %Y - %I:%M %p ')
 
 
 class ClockSerializer(serializers.ModelSerializer):
@@ -31,7 +32,7 @@ class ClockSerializer(serializers.ModelSerializer):
     clock_in_time_local = serializers.SerializerMethodField()
     clock_out_time_local = serializers.SerializerMethodField()
     # Serialize the related PayPeriod using its serializer
-    pay_period_details = PayPeriodSerializer(source='pay_period', read_only=True)
+    pay_period_details = PayPeriodSerializerForClockPunchReport(source='pay_period', read_only=True)
 
     class Meta:
         model = Clock

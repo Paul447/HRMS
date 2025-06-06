@@ -1,6 +1,6 @@
 // static/js/modules/admin_report/adminApi.js
 
-import { smartFetch } from '../timeclock/apiService.js'; // Assuming apiService is one level up
+import { smartFetch } from '../punchreport/apiService.js'; // Assuming apiService is one level up
 
 /**
  * Fetches a list of available pay periods from the API.

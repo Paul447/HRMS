@@ -1,4 +1,4 @@
-import { formatDate, formatOnlyTime } from '../timeclock/utils.js';
+import { formatDate, formatOnlyTime } from '../punchreport/utils.js';
 
 /**
  * Exports the provided clock data to an XLSX file using ExcelJS.

@@ -24,7 +24,7 @@ from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
 from paytype.api import register_department as register_department  
 from hrmsauth.views import user_info
-from timeclock.views import ClockDataViewSet
+from punchreport.views import ClockDataViewSet
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -53,6 +53,7 @@ urlpatterns = [
     path('auth/ptobalance/', include('ptobalance.url')),
     path('auth/ptorequest/', include('ptorequest.url')),
     path('auth/clock/', include('timeclock.url')),
+    path('auth/punchreport/', include('punchreport.url')),
 
     path('api/', include(router.urls)),
     path('api/user_info/', user_info, name='user_info'),
