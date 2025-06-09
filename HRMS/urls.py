@@ -29,6 +29,7 @@ from punchreport.views import ClockDataViewSet
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from adminorganizer.admin.admin_site import hrms_admin_site
 
 router = DefaultRouter()
 
@@ -60,7 +61,7 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
     path('api/user_info/', user_info, name='user_info'),
-    path('admin/', admin.site.urls),
+    path('admin/', hrms_admin_site.urls),
     path('api/clock/', include('timeclock.api')),  # API for time clock functionality
     path('api/onshift/', include('onshift.api')),  # API for on-shift functionality
 

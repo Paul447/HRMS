@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 'holiday',
 'punchreport',
 'onshift',
+'adminorganizer',
 
 
 ]
