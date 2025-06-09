@@ -86,21 +86,21 @@ class PTORequests(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "PTO Request"
-        verbose_name_plural = "PTO Requests"
+        verbose_name = "Time off Request"
+        verbose_name_plural = "Time off Requests"
         ordering = ['-start_date_time']
 
     def __str__(self):
         local_start = timezone.localtime(self.start_date_time).strftime('%Y-%m-%d %H:%M')
         local_end = timezone.localtime(self.end_date_time).strftime('%Y-%m-%d %H:%M')
-        return f"{self.user.username} ({self.department_name.name}) - PTO: {local_start} to {local_end} ({self.total_hours or 0} hrs)"
+        return f"{self.user.username} ({self.department_name.name}) - Time off: {local_start} to {local_end} ({self.total_hours or 0} hrs)"
 
     def clean(self):
         if self.start_date_time and self.end_date_time:
             if self.end_date_time < self.start_date_time:
                 raise ValidationError("End date and time cannot be before start date and time.")
             if (self.end_date_time - self.start_date_time).total_seconds() <= 0:
-                raise ValidationError("PTO request must have a positive duration.")
+                raise ValidationError("Time off request must have a positive duration.")
 
     def save(self, *args, **kwargs):
         process_pto_logic = kwargs.pop('process_pto_logic', True)
