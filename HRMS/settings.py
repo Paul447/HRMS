@@ -55,7 +55,6 @@ INSTALLED_APPS = [
 'hrmsauth',
 'department',
 'leavetype',
-'paytype',
 'payperiod',
 'holiday',
 'punchreport',
