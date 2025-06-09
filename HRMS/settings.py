@@ -54,11 +54,13 @@ INSTALLED_APPS = [
 'drf_spectacular',
 'hrmsauth',
 'department',
+'leavetype',
 'paytype',
 'payperiod',
 'holiday',
 'punchreport',
 'onshift',
+
 
 ]
 SPECTACULAR_SETTINGS = {

@@ -23,6 +23,7 @@ from ptobalance.api import register as register_ptobalance
 from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
 from paytype.api import register_department as register_department  
+from leavetype.api import register as register_leavetype
 from hrmsauth.views import user_info
 from punchreport.views import ClockDataViewSet
 # from django.contrib.auth import views as auth_views
@@ -34,7 +35,8 @@ router = DefaultRouter()
 router.register(r'clock', ClockDataViewSet, basename='clock')
 
 
-register_department(router)
+# register_department(router)
+register_leavetype(router)
 
 register_userprofile(router)
 
