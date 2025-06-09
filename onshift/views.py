@@ -3,11 +3,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView
+from rest_framework import generics
+from rest_framework import filters
 from rest_framework.decorators import action
 from timeclock.models import Clock
 from rest_framework.permissions import BasePermission
 from .serializer import UserOnShiftClockSerializer
-
+from django_filters.rest_framework import DjangoFilterBackend
+from .filter import OnsShiftClockFilter  # Import your custom filter
 
 class IsSuperuser(BasePermission):
     """
@@ -18,27 +21,27 @@ class IsSuperuser(BasePermission):
 
 # Create your views here.
 
-class UserClockOnShiftView(ListAPIView):
+class UserClockOnShiftView(generics.ListAPIView):
     """
     A view to retrieve the clock-in/out data for users currently on shift.
-    Also provides a custom action to get a detailed punch report for a specific user.
     """
     permission_classes = [IsAuthenticated, IsSuperuser]
     serializer_class = UserOnShiftClockSerializer
+    filter_backends = [DjangoFilterBackend] # Keep DjangoFilterBackend
+    # === CRITICAL CHANGE: Use filterset_class instead of filterset_fields ===
+    filterset_class = OnsShiftClockFilter # <--- POINT TO YOUR CUSTOM FILTERSET
+    # The default ordering for the queryset will now be respected,
+    # as there's no OrderingFilter to override it.
+    queryset = Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')
 
     def list(self, request, *args, **kwargs):
         """
         List all users currently on shift (i.e., those who have clocked in but not out).
         """
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        filtered_queryset = self.filter_queryset(queryset)
+        serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def get_queryset(self):
-        """
-        Retrieves clock data for users currently on shift.
-        """
-        return Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')
 
 
 

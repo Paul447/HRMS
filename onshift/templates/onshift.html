@@ -1,140 +1,243 @@
 {% extends "dashboard.html" %}
+{% load static %}
 
 {% block content %}
-    <div class="container mx-auto p-6 lg:p-8">
-        <h2 class="text-4xl font-extrabold mb-8 text-gray-900 text-center">Onshift Overview</h2>
+<div class="container mx-auto p-4 lg:p-6"> {# Reduced overall container padding #}
+    <h2 class="text-3xl font-extrabold mb-6 text-gray-900 text-center">Onshift Overview</h2> {# Slightly smaller heading, reduced margin #}
 
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            User
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Department
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Clock In Time (Local)
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="users-on-shift-table-body" class="bg-white divide-y divide-gray-200">
-                    {% if users_on_shift %}
-                        {% for user in users_on_shift %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
-                                                {{ user.username|first|upper }}
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ user.username }}</div>
-                                            {% if user.id %}
-                                                <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ user.department|default:'N/A' }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ user.clock_in_time_local }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        <i class="fas fa-circle text-green-500 text-xs mr-1 animate-pulse"></i> Active
-                                    </span>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-gray-500 text-lg">
-                                No users are currently clocked in.
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-            <div id="no-users-message" class="hidden px-6 py-12 text-center text-gray-500 text-lg bg-white rounded-b-lg">
-                No users are currently clocked in.
+    {# === Filter Controls === #}
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4"> {# Reduced padding, softer shadow, reduced margin-bottom #}
+        <h3 class="text-lg font-semibold mb-3 text-gray-800">Filter Users</h3> {# Smaller heading, reduced margin #}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3"> {# Tighter horizontal and vertical gaps #}
+            {# First Name Filter #}
+            <div>
+                <label for="firstNameFilter" class="block text-sm font-medium text-gray-700">First Name</label>
+                <input type="text" id="firstNameFilter" placeholder="e.g., John"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500"> {# Ensured text-sm #}
             </div>
+            {# Last Name Filter #}
+            <div>
+                <label for="lastNameFilter" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <input type="text" id="lastNameFilter" placeholder="e.g., Doe"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            {# Department Name Filter #}
+            <div>
+                <label for="departmentNameFilter" class="block text-sm font-medium text-gray-700">Department</label>
+                <input type="text" id="departmentNameFilter" placeholder="e.g., Sales"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+        </div>
+        <div class="mt-4 flex justify-end"> {# Reduced margin-top #}
+            <button id="applyFiltersBtn"
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"> {# Slightly reduced padding, added transition #}
+                Apply Filters
+            </button>
+            <button id="clearFiltersBtn"
+                class="ml-3 inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"> {# Slightly reduced padding, added transition #}
+                Clear Filters
+            </button>
         </div>
     </div>
 
-{% load static %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden"> {# Softer shadow #}
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col"
+                        class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> {# Reduced padding #}
+                        User
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> {# Reduced padding #}
+                        Department
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> {# Reduced padding #}
+                        Clock In Time (Local)
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> {# Reduced padding #}
+                        Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="users-on-shift-table-body" class="bg-white divide-y divide-gray-200">
+                {# Initial loading message #}
+                <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-base"> {# Reduced padding, adjusted font size #}
+                        <i class="fas fa-spinner fa-spin mr-2"></i> Loading on-shift users...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="status-message" class="hidden px-4 py-8 text-center text-gray-500 text-base bg-white rounded-b-lg"> {# Reduced padding, adjusted font size #}
+            {# Messages will be inserted here #}
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const fetchOnShiftUsers = () => {
-            fetch('/api/onshift/on-shift/')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('users-on-shift-table-body');
-                    const noUsersMessage = document.getElementById('no-users-message');
-                    tableBody.innerHTML = ''; // Clear existing rows
+        const tableBody = document.getElementById('users-on-shift-table-body');
+        const statusMessageDiv = document.getElementById('status-message');
 
-                    if (data && data.length > 0) {
-                        noUsersMessage.classList.add('hidden'); // Hide the message
-                        data.forEach(user => {
-                            const row = `
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
-                                                    ${user.first_name.charAt(0).toUpperCase()}
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">${user.first_name + ' ' + user.last_name}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">${user.department || 'N/A'}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">${user.clock_in_time_local}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-<span class="inline-flex items-center text-green-600 font-medium animate-pulse">
-                                <span class="relative flex h-2 w-2 mr-1">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                </span>
-                                Active
-                            </span>
-                                    </td>
-                                </tr>
-                            `;
-                            tableBody.innerHTML += row;
-                        });
-                    } else {
-                        noUsersMessage.classList.remove('hidden'); // Show the message
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching on-shift users:', error);
-                    const tableBody = document.getElementById('users-on-shift-table-body');
-                    const noUsersMessage = document.getElementById('no-users-message');
-                    tableBody.innerHTML = ''; // Clear rows
-                    noUsersMessage.classList.remove('hidden'); // Show the message
-                    noUsersMessage.innerHTML = `<p class="text-red-500 text-xl font-medium">
-                                                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-                                                    Error loading on-shift users. Please try again.
-                                                </p>`;
-                });
+        const firstNameFilter = document.getElementById('firstNameFilter');
+        const lastNameFilter = document.getElementById('lastNameFilter');
+        const departmentNameFilter = document.getElementById('departmentNameFilter');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+        let currentFilters = {
+            firstName: '',
+            lastName: '',
+            departmentName: '',
         };
 
+        const showLoading = () => {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-base">
+                        <i class="fas fa-spinner fa-spin mr-2"></i> Loading on-shift users...
+                    </td>
+                </tr>
+            `;
+            statusMessageDiv.classList.add('hidden');
+        };
+
+        const showNoUsersMessage = () => {
+            tableBody.innerHTML = '';
+            statusMessageDiv.classList.remove('hidden');
+            statusMessageDiv.innerHTML = `
+                <p class="text-gray-500 text-base">No users are currently clocked in matching your criteria.</p>
+            `;
+        };
+
+        const showErrorMessage = (message = 'Error loading on-shift users. Please try again.') => {
+            tableBody.innerHTML = '';
+            statusMessageDiv.classList.remove('hidden');
+            statusMessageDiv.innerHTML = `
+                <p class="text-red-500 text-lg font-medium"> {# Slightly smaller error font #}
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                    ${message}
+                </p>
+            `;
+        };
+
+        const fetchOnShiftUsers = async () => {
+            showLoading();
+
+            try {
+                const queryParams = new URLSearchParams();
+
+                if (currentFilters.firstName) {
+                    queryParams.append('user__first_name', currentFilters.firstName);
+                }
+                if (currentFilters.lastName) {
+                    queryParams.append('user__last_name', currentFilters.lastName);
+                }
+                if (currentFilters.departmentName) {
+                    queryParams.append('user__userprofile__department__name', currentFilters.departmentName);
+                }
+
+                const apiUrl = `/api/onshift/on-shift/?${queryParams.toString()}`;
+
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error("You don't have permission to view this data.");
+                    } else if (response.status === 401) {
+                        throw new Error("Authentication required. Please log in.");
+                    }
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    tableBody.innerHTML = '';
+                    data.forEach(clockEntry => {
+                        const userName = `${clockEntry.first_name || ''} ${clockEntry.last_name || ''}`.trim();
+                        const userInitial = clockEntry.first_name ? clockEntry.first_name.charAt(0).toUpperCase() : '?';
+                        const departmentName = clockEntry.department || 'N/A';
+                        const clockInLocal = clockEntry.clock_in_time_local || 'N/A';
+
+                        const row = `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap"> {# Reduced padding #}
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8"> {# Smaller avatar #}
+                                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-base"> {# Smaller avatar font #}
+                                                ${userInitial}
+                                            </div>
+                                        </div>
+                                        <div class="ml-3"> {# Reduced margin-left #}
+                                            <div class="text-sm font-medium text-gray-900">${userName}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap"> {# Reduced padding #}
+                                    <div class="text-sm text-gray-900">${departmentName}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap"> {# Reduced padding #}
+                                    <div class="text-sm text-gray-900">${clockInLocal}</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap"> {# Reduced padding #}
+                                    <span class="inline-flex items-center text-green-600 font-medium animate-pulse">
+                                        <span class="relative flex h-2 w-2 mr-1">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                        </span>
+                                        Active
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.insertAdjacentHTML('beforeend', row);
+                    });
+                    statusMessageDiv.classList.add('hidden');
+                } else {
+                    showNoUsersMessage();
+                }
+            } catch (error) {
+                console.error('Error fetching on-shift users:', error);
+                showErrorMessage(error.message);
+            }
+        };
+
+        applyFiltersBtn.addEventListener('click', () => {
+            currentFilters.firstName = firstNameFilter.value.trim();
+            currentFilters.lastName = lastNameFilter.value.trim();
+            currentFilters.departmentName = departmentNameFilter.value.trim();
+            fetchOnShiftUsers();
+        });
+
+        clearFiltersBtn.addEventListener('click', () => {
+            firstNameFilter.value = '';
+            lastNameFilter.value = '';
+            departmentNameFilter.value = '';
+            currentFilters = {
+                firstName: '',
+                lastName: '',
+                departmentName: ''
+            };
+            fetchOnShiftUsers();
+        });
+
+        document.querySelectorAll('.filters input').forEach(input => {
+            input.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    applyFiltersBtn.click();
+                }
+            });
+        });
+
         fetchOnShiftUsers();
-        // setInterval(fetchOnShiftUsers, 30000); // Refresh every 30 seconds if needed
     });
 </script>
 {% endblock %}
