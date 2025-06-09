@@ -21,7 +21,7 @@ import { fetchAndPopulateDropdown } from './modules/ptorequest/dropdownHandler.j
 document.addEventListener('DOMContentLoaded', async function() {
     const {
         departmentSelect,
-        payTypeSelect,
+        leaveTypeSelect,
         form,
         submitButton,
         submitButtonText,
@@ -71,14 +71,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // In update mode, populate dropdowns and then form data
         await fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
-        await fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
+        await fetchAndPopulateDropdown('/api/departmentleavetype/', leaveTypeSelect, 'Select Leave Type', 'id', 'name');
         await populateFormForUpdate(ptoRequestId, form, pageTitle, formHeading, formParagraph, submitButtonText, clearFormButton, showLoadingState, hideLoadingState, showNotification);
         updateUIMode(ptoRequestId, pageTitle, formHeading, formParagraph, submitButtonText, clearFormButton);
     } else {
         
         // In create mode, just populate dropdowns
         fetchAndPopulateDropdown('/api/department/', departmentSelect, 'Select your Department', 'id', 'name');
-        fetchAndPopulateDropdown('/api/departmentpaytype/', payTypeSelect, 'Select Pay Type', 'id', 'name');
+        fetchAndPopulateDropdown('/api/departmentleavetype/', leaveTypeSelect, 'Select Leave Type', 'id', 'name');
     }
 
     // --- Form Submission Handling ---
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         const payload = {
             department_name: form.department_name.value,
-            pay_types: form.pay_types.value,
+            leave_type: form.leave_type.value,
             start_date_time: form.start_date_time.value,
             end_date_time: form.end_date_time.value,
             reason: form.reason.value

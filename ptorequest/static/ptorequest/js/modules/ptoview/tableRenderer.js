@@ -50,7 +50,7 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
         let rowHtml = `
             <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">${index + 1}</td>
             <td class="py-4 px-6">${request.department_name_display ? request.department_name_display.name : 'N/A'}</td>
-            <td class="py-4 px-6">${request.pay_types_display ? request.pay_types_display.name : 'N/A'}</td>
+            <td class="py-4 px-6">${request.leave_type_display ? request.leave_type_display.name : 'N/A'}</td>
             <td class="py-4 px-6 date-col">${startDate}</td>
             <td class="py-4 px-6 date-col">${endDate}</td>
             <td class="py-4 px-6">${request.total_hours || 'N/A'}</td>

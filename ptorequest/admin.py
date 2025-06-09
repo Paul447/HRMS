@@ -14,7 +14,7 @@ class PTORequestsAdmin(admin.ModelAdmin):
     list_display = (
         'user',
         'department_name',
-        'pay_types',
+        'leave_type',
         'formatted_start_date_time',
         'formatted_end_date_time',
         'total_hours',

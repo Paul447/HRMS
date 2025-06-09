@@ -11,7 +11,7 @@ import { fetchAndPopulateDropdown } from './dropdownHandler.js';
 export function getDomElements() {
     return {
         departmentSelect: document.getElementById('department_name'),
-        payTypeSelect: document.getElementById('pay_types'),
+        leaveTypeSelect: document.getElementById('leave_type'),
         form: document.getElementById('ptoRequestForm'),
         submitButton: document.getElementById('submitButton'),
         submitButtonText: document.getElementById('submitButtonText'),
@@ -113,7 +113,7 @@ export async function populateFormForUpdate(id, form, pageTitle, formHeading, fo
 
         // Populate form fields
         form.department_name.value = ptoRequest.department_name_display.id;
-        form.pay_types.value = ptoRequest.pay_types_display.id;
+        form.leave_type.value = ptoRequest.leave_type_display.id;
         form.start_date_time.value = ptoRequest.start_date_time ? ptoRequest.start_date_time.slice(0, 16) : '';
         form.end_date_time.value = ptoRequest.end_date_time ? ptoRequest.end_date_time.slice(0, 16) : '';
         form.reason.value = ptoRequest.reason || '';

@@ -16,7 +16,7 @@ class DepartmentBasedLeaveTypeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        department_data = rep.pop('pay_type', {})
+        department_data = rep.pop('leave_type', {})
         rep.update(department_data)
         return rep
     

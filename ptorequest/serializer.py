@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from .models import PTORequests
 import pytz
-from paytype.models import PayType
+from leavetype.models import LeaveType
 from department.models import Department, UserProfile
-from paytype.models import DepartmentBasedPayType
+from leavetype.models import DepartmentBasedLeaveType
 
 class DepartmentSerializer(serializers.ModelSerializer):
     """
@@ -13,12 +13,12 @@ class DepartmentSerializer(serializers.ModelSerializer):
         model = Department
         fields = ['id', 'name']
 
-class PayTypeSerializer(serializers.ModelSerializer):
+class LeaveTypeSerializer(serializers.ModelSerializer):
     """
-    Serializer for the PayType model, used for display purposes.
+    Serializer for the LeaveType model, used for display purposes.
     """
     class Meta:
-        model = PayType
+        model = LeaveType
         fields = ['id', 'name']
 
 class PTORequestsSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class PTORequestsSerializer(serializers.ModelSerializer):
     """
     # Read-only fields for displaying related object names
     department_name_display = DepartmentSerializer(source='department_name', read_only=True)
-    pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
+    leave_type_display = LeaveTypeSerializer(source='leave_type', read_only=True)
 
     # Write-only fields for accepting primary keys for related objects
     department_name = serializers.PrimaryKeyRelatedField(
@@ -37,9 +37,9 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         queryset=Department.objects.none(),
         write_only=True
     )
-    pay_types = serializers.PrimaryKeyRelatedField(
+    leave_type = serializers.PrimaryKeyRelatedField(
         # Queryset set to none initially, will be dynamically filtered in __init__
-        queryset=PayType.objects.none(),
+        queryset=LeaveType.objects.none(),
         write_only=True
     )
 
@@ -49,8 +49,8 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             'id',
             'department_name',
             'department_name_display',
-            'pay_types',
-            'pay_types_display',
+            'leave_type',
+            'leave_type_display',
             'start_date_time',
             'end_date_time',
             'reason',
@@ -61,7 +61,7 @@ class PTORequestsSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         """
-        Dynamically filters the 'department_name' and 'pay_types' querysets
+        Dynamically filters the 'department_name' and 'leave_type' querysets
         based on the authenticated user's associated departments.
         """
         super().__init__(*args, **kwargs)
@@ -75,15 +75,15 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             # Filter departments available for the user
             self.fields['department_name'].queryset = Department.objects.filter(id__in=user_department_ids)
 
-            # Filter pay types linked to the user's departments
-            linked_pay_type_ids = DepartmentBasedPayType.objects.filter(
+            # Filter leave types linked to the user's departments
+            linked_leave_type_ids = DepartmentBasedLeaveType.objects.filter(
                 department__in=user_department_ids
-            ).values_list('pay_type', flat=True)
-            self.fields['pay_types'].queryset = PayType.objects.filter(id__in=linked_pay_type_ids)
+            ).values_list('leave_type', flat=True)
+            self.fields['leave_type'].queryset = LeaveType.objects.filter(id__in=linked_leave_type_ids)
         else:
             # If no user or not authenticated, restrict choices to nothing or handle as per policy
             self.fields['department_name'].queryset = Department.objects.none()
-            self.fields['pay_types'].queryset = PayType.objects.none()
+            self.fields['leave_type'].queryset = LeaveType.objects.none()
 
     def _normalize_datetime(self, dt_obj):
         """
@@ -143,7 +143,7 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         """
         # Remove display fields as they are not model fields
         validated_data.pop('department_name_display', None)
-        validated_data.pop('pay_types_display', None)
+        validated_data.pop('leave_type_display', None)
 
         return super().create(validated_data)
 
@@ -154,13 +154,13 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         """
         # Remove display fields as they are not model fields
         validated_data.pop('department_name_display', None)
-        validated_data.pop('pay_types_display', None)
+        validated_data.pop('leave_type_display', None)
 
         return super().update(instance, validated_data)
 
 class PTORequestsListSerializerPunchReport(serializers.ModelSerializer):
     queryset = PTORequests.objects.filter(status='approved').order_by('-start_date_time')
-    pay_types_display = PayTypeSerializer(source='pay_types', read_only=True)
+    leave_type_display = LeaveTypeSerializer(source='leave_type', read_only=True)
 
     class Meta:
         model = PTORequests
@@ -168,5 +168,5 @@ class PTORequestsListSerializerPunchReport(serializers.ModelSerializer):
             'start_date_time',
             'end_date_time',
             'total_hours',
-            'pay_types_display',
+            'leave_type_display',
         ]

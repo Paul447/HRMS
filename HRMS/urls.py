@@ -35,7 +35,7 @@ router = DefaultRouter()
 router.register(r'clock', ClockDataViewSet, basename='clock')
 
 
-# register_department(router)
+register_department(router)
 register_leavetype(router)
 
 register_userprofile(router)

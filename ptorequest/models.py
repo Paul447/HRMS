@@ -8,10 +8,13 @@ from django.core.exceptions import ValidationError
 
 # Assuming PayPeriod is defined in payperiod/models.py
 from payperiod.models import PayPeriod
+from leavetype.models import LeaveType  # Assuming LeaveType is defined in leavetype/models.py
+# Refactor the code accordingly to the leavetype/models.py structure
 # Assuming Department is defined in department/models.py
 from department.models import Department
-# Assuming PayType is defined in paytype/models.py
-from paytype.models import PayType
+
+
+
 from django.contrib.auth.models import User
 
 class PTORequests(models.Model):
@@ -34,11 +37,12 @@ class PTORequests(models.Model):
         related_name='pto_requests',
         verbose_name="Department"
     )
-    pay_types = models.ForeignKey(
-        PayType,
+    leave_type = models.ForeignKey(
+        LeaveType,
         on_delete=models.CASCADE,
         related_name='pto_requests',
-        verbose_name="Pay Type"
+        verbose_name="Leave Type",
+        default=None,
     )
     start_date_time = models.DateTimeField(
         null=False,
@@ -210,7 +214,7 @@ class PTORequests(models.Model):
             new_pto_entry = PTORequests(
                 user=self.user,
                 department_name=self.department_name,
-                pay_types=self.pay_types,
+                leave_type=self.leave_type,
                 start_date_time=next_segment_start_local.astimezone(pytz.utc),
                 end_date_time=current_daily_segment_end_local.astimezone(pytz.utc),
                 total_hours=daily_segment_hours,
@@ -304,7 +308,7 @@ class PTORequests(models.Model):
             new_pto_entry = PTORequests(
                 user=self.user,
                 department_name=self.department_name,
-                pay_types=self.pay_types,
+                leave_type=self.leave_type,
                 start_date_time=next_segment_start_local.astimezone(pytz.utc),
                 end_date_time=next_segment_end_local.astimezone(pytz.utc),
                 total_hours=next_segment_hours,
