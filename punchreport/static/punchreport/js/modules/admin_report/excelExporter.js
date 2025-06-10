@@ -118,7 +118,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_1_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.pay_types_display?.name || 'PTO',
+                type: entry?.leave_type_display?.name || 'PTO',
                 start: entry.start_date_time,
                 end: entry.end_date_time,
                 duration: Number(entry.total_hours || 0),
@@ -149,7 +149,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_2_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.pay_types_display?.name || 'PTO',
+                type: entry?.leave_type_display?.name || 'PTO',
                 start: entry.start_date_time,
                 end: entry.end_date_time,
                 duration: Number(entry.total_hours || 0),
@@ -187,7 +187,7 @@ export async function exportAdminReportToXLSX(data, filename) {
 
             const row = worksheet.addRow([
                 i === 0 ? employeeName : "",
-                i === 0 ? `Week 1 (P: ${Number(userData?.week_1_total_hours || 0).toFixed(2)} / PTO: ${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} / H: ${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)})` : "",
+                i === 0 ? `Week 1 (P: ${Number(userData?.week_1_total_hours || 0).toFixed(2)} / TO: ${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} / Hol: ${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
                 durationValue,
@@ -244,7 +244,7 @@ export async function exportAdminReportToXLSX(data, filename) {
 
             const row = worksheet.addRow([
                 "",
-                i === 0 ? `Week 2 (P: ${Number(userData?.week_2_total_hours || 0).toFixed(2)} / PTO: ${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} / H: ${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)})` : "",
+                i === 0 ? `Week 2 (P: ${Number(userData?.week_2_total_hours || 0).toFixed(2)} / TO: ${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} / HOL: ${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
                 durationValue,
