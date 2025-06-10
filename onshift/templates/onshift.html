@@ -1,5 +1,19 @@
 {% extends "dashboard.html" %}
 {% load static %}
+{% block title %}Onshift Overview{% endblock %}
+
+{% block page_title %}Onshift Overview{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">Onshift Overview</span>
+    </div>
+</li>
+{% endblock %}
 
 {% block content %}
 <div class="container mx-auto p-4 lg:p-6"> {# Reduced overall container padding #}

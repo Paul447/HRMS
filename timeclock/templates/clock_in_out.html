@@ -2,34 +2,41 @@
 
 {% block title %}Clock In/Out{% endblock %}
 
+{% block page_title %}Time Clock{% endblock %} {# Set the specific page title #}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">Clock In/Out</span>
+    </div>
+</li>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg overflow-hidden">
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg-2 overflow-hidden border border-secondary-200">
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Time Tracking Dashboard</h1>
-        <p class="text-gray-600 text-lg">Manage your work hours efficiently.</p>
-        <div class="w-24 h-1.5 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+        <h1 class="text-4xl font-extrabold text-secondary-900 mb-3 animate-fade-in-up">Time Tracking Dashboard</h1>
+        <p class="text-secondary-600 text-lg animate-fade-in-up animate-delay-100">Manage your work hours efficiently.</p>
+        <div class="w-24 h-1.5 bg-primary-600 mx-auto mt-4 rounded-full animate-fade-in-up animate-delay-200"></div>
     </div>
 
-    <div id="payPeriodCard" class="bg-blue-50 rounded-lg p-6 mb-8 border border-blue-100 shadow-sm animate-fade-in">
-        <div class="text-center text-gray-500">Loading pay period data...</div>
+    <div id="payPeriodCard" class="bg-primary-50 rounded-lg p-6 mb-8 border border-primary-100 shadow-lg-2 animate-on-load">
+        <div class="text-center text-secondary-500">Loading pay period data...</div>
     </div>
 
     <div id="clockInOutCard"
-        class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 mb-8 shadow-xl border border-gray-200 text-center animate-fade-in delay-100">
-        <div class="text-center text-gray-500">Loading clock status...</div>
+        class="bg-gradient-to-r from-secondary-50 to-secondary-100 rounded-xl p-8 mb-8 shadow-xl-2 border border-secondary-200 text-center animate-on-load animate-delay-100">
+        <div class="text-center text-secondary-500">Loading clock status...</div>
     </div>
 
-    <div id="timeEntriesSection" class="space-y-8 animate-fade-in delay-200">
-        <div class="text-center text-gray-500">Loading time entries...</div>
+    <div id="timeEntriesSection" class="space-y-8 animate-on-load animate-delay-200">
+        <div class="text-center text-secondary-500">Loading time entries...</div>
     </div>
 </div>
 
 {% load static %}
-<script>
-    // This hidden input provides the CSRF token to your JavaScript.
-    // It's crucial for secure POST requests in Django.
-    // Ensure this is only rendered once per page load.
-    document.write('<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />');
-</script>
 <script type="module" src="{% static 'timeclock/js/timeclock_main.js' %}"></script>
 {% endblock %}

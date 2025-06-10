@@ -1,0 +1,61 @@
+/* Custom scrollbar for better aesthetics, especially in webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: theme('colors.secondary.100');
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: theme('colors.primary.400');
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.primary.500');
+}
+
+/* Specific for sidebar scrollbar */
+aside::-webkit-scrollbar-track {
+    background: theme('colors.primary.950');
+}
+
+aside::-webkit-scrollbar-thumb {
+    background: theme('colors.primary.700');
+    border: 1px solid theme('colors.primary.600');
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.primary.600');
+}
+
+/* Base styles for fade-in animations on load */
+.animate-on-load {
+    opacity: 0;
+    transform: translateY(20px);
+    animation-fill-mode: forwards;
+}
+
+/* Delay animation for successive elements */
+.animate-delay-100 {
+    animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+    animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+    animation-delay: 0.3s;
+}
+
+/* Styles for skeleton loading effect */
+.skeleton-loading {
+    background: linear-gradient(90deg, theme('colors.secondary.100') 25%, theme('colors.secondary.200') 50%, theme('colors.secondary.100') 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s infinite linear;
+    border-radius: 0.25rem;
+}
