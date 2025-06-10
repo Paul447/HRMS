@@ -1,3 +1,4 @@
+# Punch Report Views.py
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
@@ -13,7 +14,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission
 from payperiod.models import PayPeriod
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
-from timeclock.utils import get_pay_period_week_boundaries, get_user_weekly_summary
+from .utils import get_pay_period_week_boundaries, get_user_weekly_summary
 
 # Create your views here.
 class IsSuperuser(BasePermission):

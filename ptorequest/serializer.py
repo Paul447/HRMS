@@ -157,10 +157,13 @@ class PTORequestsSerializer(serializers.ModelSerializer):
         validated_data.pop('leave_type_display', None)
 
         return super().update(instance, validated_data)
+    
+
+
 
 class PTORequestsListSerializerPunchReport(serializers.ModelSerializer):
     queryset = PTORequests.objects.filter(status='approved').order_by('-start_date_time')
-    leave_type_display = LeaveTypeSerializer(source='leave_type', read_only=True)
+    leave_type_display = serializers.CharField(source='leave_type.name', read_only=True)
 
     class Meta:
         model = PTORequests

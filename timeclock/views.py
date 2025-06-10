@@ -10,7 +10,8 @@ import pytz
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
-from .serializer import ClockSerializer, PayPeriodSerializerForClockPunchReport
+from .serializer import ClockSerializer
+from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from decimal import Decimal
 from rest_framework.permissions import BasePermission
 
@@ -78,23 +79,10 @@ class UserClockDataAPIView(APIView):
         local_tz = pytz.timezone(settings.TIME_ZONE)
         today_local_datetime = timezone.localtime(timezone.now(), timezone=local_tz)
         today_local_date = today_local_datetime.date() # Keep as date object for comparisons
-
-        # --- IMPORTANT: Date Formatting for API Response ---
-        # Define a helper function or format dates directly within the response structure.
-        # This function will format a date object to "Day, Mon Date" (e.g., "Sun, Jun 1")
-        # using the locale of the server or a specific locale if desired.
         def format_date_for_display(date_obj):
             if not date_obj:
                 return None
-            # strftime supports the format you want directly
-            # %a: Weekday as locale's abbreviated name.
-            # %b: Month as locale's abbreviated name.
-            # %d: Day of the month as a zero-padded decimal number.
-            # To get "1" instead of "01" (if that's desired), you'd use #d on Linux, but it's not portable.
-            # For strict "Sun, Jun 1" format, %d is fine as leading zero usually isn't an issue on single digits
-            # and is often preferred for consistency.
-            # If you specifically need '1' instead of '01' on all systems, you'd need a custom formatter.
-            # For now, %d is standard and widely supported.
+
             return date_obj.strftime("%a, %b %d")
 
         print(f"Today's date (local): {today_local_date.strftime('%a, %b %d')}")
@@ -148,24 +136,24 @@ class UserClockDataAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class CurrentPayPeriodAPIView(ListAPIView):
-    """
-    API endpoint to retrieve the current active pay period.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = PayPeriodSerializerForClockPunchReport
+# class CurrentPayPeriodAPIView(ListAPIView):
+#     """
+#     API endpoint to retrieve the current active pay period.
+#     """
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = PayPeriodSerializerForClockPunchReport
 
-    def get_queryset(self):
-        current_pay_period = PayPeriod.get_pay_period_for_date(timezone.now())
-        return PayPeriod.objects.filter(pk=current_pay_period.pk) if current_pay_period else PayPeriod.objects.none()
+#     def get_queryset(self):
+#         current_pay_period = PayPeriod.get_pay_period_for_date(timezone.now())
+#         return PayPeriod.objects.filter(pk=current_pay_period.pk) if current_pay_period else PayPeriod.objects.none()
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"message": "No active pay period found for current date."}, status=status.HTTP_200_OK)
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+#         if not queryset.exists():
+#             return Response({"message": "No active pay period found for current date."}, status=status.HTTP_200_OK)
         
-        serializer = self.get_serializer(queryset.first())
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#         serializer = self.get_serializer(queryset.first())
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserClockDataFrontendView(TemplateView):
