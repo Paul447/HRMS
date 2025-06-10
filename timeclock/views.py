@@ -135,27 +135,6 @@ class UserClockDataAPIView(APIView):
             **user_data # Unpack user_data directly into the response
         }, status=status.HTTP_200_OK)
 
-
-# class CurrentPayPeriodAPIView(ListAPIView):
-#     """
-#     API endpoint to retrieve the current active pay period.
-#     """
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = PayPeriodSerializerForClockPunchReport
-
-#     def get_queryset(self):
-#         current_pay_period = PayPeriod.get_pay_period_for_date(timezone.now())
-#         return PayPeriod.objects.filter(pk=current_pay_period.pk) if current_pay_period else PayPeriod.objects.none()
-
-#     def list(self, request, *args, **kwargs):
-#         queryset = self.get_queryset()
-#         if not queryset.exists():
-#             return Response({"message": "No active pay period found for current date."}, status=status.HTTP_200_OK)
-        
-#         serializer = self.get_serializer(queryset.first())
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class UserClockDataFrontendView(TemplateView):
     template_name = 'clock_in_out.html'
     permission_classes = [IsAuthenticated]
