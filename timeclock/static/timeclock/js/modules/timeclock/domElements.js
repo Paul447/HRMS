@@ -32,8 +32,11 @@ export function getDomElements() {
     return {
         payPeriodCard: document.getElementById('payPeriodCard'),
         clockInOutCard: document.getElementById('clockInOutCard'),
-        timeEntriesSection: document.getElementById('timeEntriesSection'),
+        // REMOVED: timeEntriesSection: document.getElementById('timeEntriesSection'),
+        // ADDED: New specific elements for week 1 and week 2
+        timeEntriesSectionWeek1: document.getElementById('timeEntriesSectionWeek1'),
+        timeEntriesSectionWeek2: document.getElementById('timeEntriesSectionWeek2'),
         // Store the CSRF token value directly for easier access
-        csrftokenInput: { value: getCsrfToken() }
+        csrftokenInput: { value: getCsrfToken() } // This now directly holds the value
     };
 }

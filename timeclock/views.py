@@ -76,37 +76,74 @@ class UserClockDataAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
         local_tz = pytz.timezone(settings.TIME_ZONE)
-        today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
+        today_local_datetime = timezone.localtime(timezone.now(), timezone=local_tz)
+        today_local_date = today_local_datetime.date() # Keep as date object for comparisons
+
+        # --- IMPORTANT: Date Formatting for API Response ---
+        # Define a helper function or format dates directly within the response structure.
+        # This function will format a date object to "Day, Mon Date" (e.g., "Sun, Jun 1")
+        # using the locale of the server or a specific locale if desired.
+        def format_date_for_display(date_obj):
+            if not date_obj:
+                return None
+            # strftime supports the format you want directly
+            # %a: Weekday as locale's abbreviated name.
+            # %b: Month as locale's abbreviated name.
+            # %d: Day of the month as a zero-padded decimal number.
+            # To get "1" instead of "01" (if that's desired), you'd use #d on Linux, but it's not portable.
+            # For strict "Sun, Jun 1" format, %d is fine as leading zero usually isn't an issue on single digits
+            # and is often preferred for consistency.
+            # If you specifically need '1' instead of '01' on all systems, you'd need a custom formatter.
+            # For now, %d is standard and widely supported.
+            return date_obj.strftime("%a, %b %d")
+
+        print(f"Today's date (local): {today_local_date.strftime('%a, %b %d')}")
 
         pay_period = PayPeriod.get_pay_period_for_date(timezone.now())
 
         if not pay_period:
+            # Format week_boundaries for the empty response as well
             return Response({
                 "message": "No active pay period found for today.",
                 "current_status": "No Pay Period",
                 "pay_period": None,
                 "week_number": None,
-                "week_boundaries": {"week_1_start": None, "week_1_end": None, "week_2_start": None, "week_2_end": None},
+                "week_boundaries": {
+                    "week_1_start": None, "week_1_end": None,
+                    "week_2_start": None, "week_2_end": None
+                },
                 "active_clock_entry": None,
                 "week_1_entries": [], "week_1_total_hours": Decimal('0.00'),
                 "week_2_entries": [], "week_2_total_hours": Decimal('0.00'),
             }, status=status.HTTP_200_OK)
 
+        # week_boundaries will contain date objects (or None) for 'local' and 'utc' keys
         week_boundaries = get_pay_period_week_boundaries(pay_period, local_tz)
 
         week_number = None
-        if week_boundaries["local"]["week_1_start"] <= today_local_date <= week_boundaries["local"]["week_1_end"]:
+        # Use date objects for comparison, not formatted strings
+        if week_boundaries["local"]["week_1_start"] and \
+           week_boundaries["local"]["week_1_start"] <= today_local_date <= week_boundaries["local"]["week_1_end"]:
             week_number = 1
-        elif week_boundaries["local"]["week_2_start"] <= today_local_date <= week_boundaries["local"]["week_2_end"]:
+        elif week_boundaries["local"]["week_2_start"] and \
+             week_boundaries["local"]["week_2_start"] <= today_local_date <= week_boundaries["local"]["week_2_end"]:
             week_number = 2
 
         user_data = get_user_weekly_summary(user, pay_period, week_boundaries["utc"])
-        
+
+        # Format week_boundaries for the final API response
+        formatted_week_boundaries = {
+            "week_1_start": format_date_for_display(week_boundaries["local"]["week_1_start"]),
+            "week_1_end": format_date_for_display(week_boundaries["local"]["week_1_end"]),
+            "week_2_start": format_date_for_display(week_boundaries["local"]["week_2_start"]),
+            "week_2_end": format_date_for_display(week_boundaries["local"]["week_2_end"]),
+        }
+
         return Response({
             "message": "User clock data retrieved successfully.",
             "pay_period": PayPeriodSerializerForClockPunchReport(pay_period).data,
             "week_number": week_number,
-            "week_boundaries": week_boundaries["local"],
+            "week_boundaries": formatted_week_boundaries, # Use the formatted boundaries here
             **user_data # Unpack user_data directly into the response
         }, status=status.HTTP_200_OK)
 
