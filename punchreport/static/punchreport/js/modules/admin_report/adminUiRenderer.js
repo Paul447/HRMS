@@ -131,7 +131,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_1_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type_display?.name || 'PTO',
+                    type: entry?.leave_type_display || 'Hello',
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -147,7 +147,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_2_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type_display?.name || 'PTO',
+                    type: entry?.leave_type_display || 'Hello',
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));

@@ -16,6 +16,7 @@ from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 
 
 # from .serializer import (
@@ -88,16 +89,17 @@ class LogoutView(APIView):
     pass 
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def user_info(request):
-    user = request.user
-    return Response({
-        'id': user.id,
-        'username': user.username,
-        'is_authenticated': user.is_authenticated,
-        'is_superuser': user.is_superuser,
-    })
+class UserInfoViewSet(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):  # routers use `list` for GET /user-info/
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'is_authenticated': user.is_authenticated,
+            'is_superuser': user.is_superuser,
+        })
 
 # -----------------------------
 # Permissions

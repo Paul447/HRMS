@@ -35,7 +35,7 @@ class ClockInOutPunchReportView(TemplateView):
     def get_context_data(self, **kwargs):
         return super().get_context_data(**kwargs)
 
-class ClockDataViewSet(viewsets.ViewSet):
+class PunchReportViewSet(viewsets.ViewSet):
     """
     A ViewSet for superusers to retrieve aggregated clock data for all users
     within a specified pay period. Normal authenticated users can access their
@@ -86,19 +86,19 @@ class ClockDataViewSet(viewsets.ViewSet):
             "users_clock_data": all_users_data,
         }, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminUser])
-    def pay_periods(self, request):
-        """
-        Retrieves a list of all available pay periods up to and including today's date.
-        """
-        local_tz = pytz.timezone(settings.TIME_ZONE)
-        today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
-        end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
-        end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
+    # @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminUser])
+    # def pay_periods(self, request):
+    #     """
+    #     Retrieves a list of all available pay periods up to and including today's date.
+    #     """
+    #     local_tz = pytz.timezone(settings.TIME_ZONE)
+    #     today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
+    #     end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
+    #     end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
 
-        pay_periods = PayPeriod.objects.filter(
-            start_date__lte=end_of_today_utc
-        ).order_by('-start_date')
+    #     pay_periods = PayPeriod.objects.filter(
+    #         start_date__lte=end_of_today_utc
+    #     ).order_by('-start_date')
 
-        serializer = PayPeriodSerializerForClockPunchReport(pay_periods, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     serializer = PayPeriodSerializerForClockPunchReport(pay_periods, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)

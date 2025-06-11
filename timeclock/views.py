@@ -3,10 +3,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
+from rest_framework.viewsets import ViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin
 from django.views.generic import TemplateView
 from django.utils import timezone
 from django.conf import settings
 import pytz
+from rest_framework import viewsets
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
@@ -25,20 +28,22 @@ class IsSuperuser(BasePermission):
         return request.user and request.user.is_superuser
 
 
-class ClockInOutAPIView(APIView):
+class ClockInOutCreate(CreateModelMixin, GenericViewSet):
     """
     API endpoint for users to clock in and clock out.
     Handles the creation of new clock entries or updates existing open entries.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = ClockSerializer
+    queryset = Clock.objects.none()  # since you won't be listing/querying anything
 
-    def post(self, request, *args, **kwargs): # TODO add a IP based restriction for time clocking in/out and sperate the timecard and time clocking in/out views # TODO Create a IP address Table to store IP addresses for clocking in/out and also store the location from which the user clocks in/out
+    def create(self, request, *args, **kwargs):
         user = request.user
         active_clock_entry = Clock.objects.filter(user=user, clock_out_time__isnull=True).first()
 
         if active_clock_entry:
             active_clock_entry.clock_out_time = timezone.now()
-            active_clock_entry.save() # Model's save handles hours and pay_period
+            active_clock_entry.save()
             message = "Successfully clocked out."
             http_status = status.HTTP_200_OK
         else:
@@ -59,7 +64,7 @@ class ClockInOutAPIView(APIView):
             )
             message = "Successfully clocked in."
             http_status = status.HTTP_201_CREATED
-            
+
         serializer = ClockSerializer(active_clock_entry)
         return Response({
             "message": message,
@@ -67,14 +72,15 @@ class ClockInOutAPIView(APIView):
         }, status=http_status)
 
 
-class UserClockDataAPIView(APIView):
+
+class UserClockDataAPIView(ViewSet):
     """
     API endpoint to retrieve a user's clock data for the current pay period,
     including current status and aggregated weekly hours.
     """
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         user = request.user
         local_tz = pytz.timezone(settings.TIME_ZONE)
         today_local_datetime = timezone.localtime(timezone.now(), timezone=local_tz)

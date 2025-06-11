@@ -154,7 +154,7 @@
                     queryParams.append('user__userprofile__department__name', currentFilters.departmentName);
                 }
 
-                const apiUrl = `/api/onshift/on-shift/?${queryParams.toString()}`;
+                const apiUrl = `/api/clock/on-shift/?${queryParams.toString()}`;
 
                 const response = await fetch(apiUrl, {
                     headers: {

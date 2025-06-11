@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TokenObtainPairView,  LogoutView, FrontendLoginView , DashboardView, user_info
+from .views import TokenObtainPairView,  LogoutView, FrontendLoginView , DashboardView
 
 
 urlpatterns = [

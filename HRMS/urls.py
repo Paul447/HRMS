@@ -24,34 +24,41 @@ from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
 
 from leavetype.api import register as register_leavetype
-from hrmsauth.views import user_info
-from punchreport.views import ClockDataViewSet
+from hrmsauth.views import UserInfoViewSet
+from punchreport.views import PunchReportViewSet 
+from payperiod.views import PayPeriodUptoTodayViewSet
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from adminorganizer.admin.admin_site import hrms_admin_site
-
+from timeclock.views import UserClockDataAPIView, ClockInOutCreate
+from leavetype.views import DepartmentBasedLeaveTypeViewSet
+from department.views import UserProfileViewSet
+from ptorequest.views import PTORequestsViewSet
+from ptobalance.views import PTOBalanceViewSet
+from onshift.views import UserClockOnShiftViewSet
 router = DefaultRouter()
 
-router.register(r'clock', ClockDataViewSet, basename='clock')
+# router.register(r'clock', ClockDataViewSet, basename='clock')
+router.register(r'user_info', UserInfoViewSet, basename='user_info')
+router.register(r'punch-report', PunchReportViewSet, basename='punch_report')
+router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_upto_today')
+router.register(r'departmentleavetype', DepartmentBasedLeaveTypeViewSet, basename='departmentleavetype')
+router.register(r'department', UserProfileViewSet, basename='userprofile')
+router.register(r'pto-requests', PTORequestsViewSet, basename='pto-requests')
+router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
 
-
-
-register_leavetype(router)
-
-register_userprofile(router)
-
-
-
-register_ptorequest(router)
-
-register_ptobalance(router)
-
-
+clock_router = DefaultRouter()
+clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')
+clock_router.register(r'clock-in-out', ClockInOutCreate, basename='clock_in_out_post')
+clock_router.register(r'on-shift', UserClockOnShiftViewSet, basename='on_shift')
 
 
 
 urlpatterns = [
+
+
+    # Auth Custom Admin Site URLS 
     path('auth/', include('hrmsauth.url')),
     path('auth/ptobalance/', include('ptobalance.url')),
     path('auth/ptorequest/', include('ptorequest.url')),
@@ -60,20 +67,16 @@ urlpatterns = [
     path('auth/onshift/', include('onshift.url')),
 
     path('api/', include(router.urls)),
-    path('api/user_info/', user_info, name='user_info'),
+    path('api/clock/', include(clock_router.urls)),  # API for clock functionality
+
+
+    # Admin URLs
     path('admin/', hrms_admin_site.urls),
-    path('api/clock/', include('timeclock.api')),  # API for time clock functionality
-    path('api/onshift/', include('onshift.api')),  # API for on-shift functionality
 
-    
-    # Yaml schema generation
+    # Yaml schema generation # Api Documentation Related URLS
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-
-    # Optional: Swagger UI
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-
-    # Optional: ReDoc UI
     path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    # Need to generate the documentation of apiendpoints
+
 
 ]
