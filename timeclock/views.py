@@ -32,7 +32,7 @@ class ClockInOutAPIView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs): # TODO add a IP based restriction for time clocking in/out and sperate the timecard and time clocking in/out views # TODO Create a IP address Table to store IP addresses for clocking in/out and also store the location from which the user clocks in/out
         user = request.user
         active_clock_entry = Clock.objects.filter(user=user, clock_out_time__isnull=True).first()
 
@@ -143,7 +143,7 @@ class UserClockDataFrontendView(TemplateView):
         return super().get_context_data(**kwargs)
 
 
-
+# TODO: Add the comment field in the clock model and allow users to add comments when clocking in/out, which will let the user know about what is the status.
 
 
 

@@ -132,3 +132,10 @@ class TimeoffDetailsView(TemplateView):
             return redirect(reverse('frontend_login'))
 
         return super().dispatch(request, *args, **kwargs)
+    
+
+# TODO Add the Leave Management Where the Admin can Approve or Reject the PTO Requests, Also make it enable to do the filter so, only let the user admin view the leave of this and upcomming pay period, Filter according to the department, don't show the leave automatically let the user search for it. Also let superuser view the balance on the type of the leave they have asked for.
+# TODO Create the view which return the Leave Balance of all the employees, and make it filterable by the department, show the currently running balance of the user. 
+# TODO Let the normal user view only his/her own leave requests, based on the pay period, and also let the user filter the leave request based on the pay period, check for the intial parameter in the URL if there is no parameter then show the current pay period leave requests, if there is a parameter then show the leave requests for that pay period.
+# TODO Let the SuperUser edit the leave request comment box to add the comment for the leave request.
+# TODO Create the logic for leave request approval and rejection, if rejection don't do anything, if approved, create the logic to deduct the leave balance from the user on the basis of the leave type, and also update the leave request status to approved,
