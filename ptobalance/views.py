@@ -8,12 +8,13 @@ from django.conf import settings
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.shortcuts import redirect
+from rest_framework import status
 
 # Create your views here.
 
 class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PTOBalanceSerializer
     permission_classes = [IsAuthenticated]
+    serializer_class = PTOBalanceSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -25,7 +26,8 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'detail': 'PTO balance not found.'}, status=404)
 
         serializer = self.get_serializer(queryset.first())
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class PTOBalanceView(TemplateView):
