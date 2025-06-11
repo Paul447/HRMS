@@ -28,13 +28,19 @@ class YearOfExperienceSerializer(serializers.ModelSerializer):
         model = YearOfExperience
         fields = ['years_of_experience']
 
-class PTOBalanaceSerializer(serializers.ModelSerializer):
-    employee_type = EmployeeTypeSerializer(read_only=True)
-    pay_frequency = PayFrequencySerializer(read_only=True)
-    accrual_rate = AccuralRateSerializer(read_only = True)
-    user = UserSerializer(read_only = True)
-    year_of_experience = YearOfExperienceSerializer(read_only = True)
+class PTOBalanceSerializer(serializers.ModelSerializer):
+    employee_type = serializers.ReadOnlyField(source='employee_type.name')
+    pay_frequency = serializers.ReadOnlyField(source='pay_frequency.frequency')
+    accrual_rate = serializers.ReadOnlyField(source='accrual_rate.accrual_rate')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
+    year_of_experience = serializers.ReadOnlyField(source='year_of_experience.years_of_experience')
+
     class Meta:
         model = PTOBalance
-        fields = ['employee_type', 'pay_frequency', 'accrual_rate', 'user', 'year_of_experience', 'pto_balance']
-    
+        fields = [
+            'first_name', 'last_name',
+            'employee_type', 'pay_frequency',
+            'accrual_rate', 'year_of_experience',
+            'pto_balance'
+        ]

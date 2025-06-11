@@ -66,39 +66,8 @@
     </div>
 
 </div>
-<script>
-    // JavaScript for any dynamic functionality can be added here
-    document.addEventListener('DOMContentLoaded', () => {
-        // Example: Initialize tooltips, dropdowns, etc.
-        fetch('/api/ptobalance/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            credentials: "include"
-        })
-        .then(response => {
-            if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .then(data => {
-                const pto = data[0];
-                document.getElementById('employee-type').textContent = pto.employee_type.name;
-                document.getElementById('pay-frequency').textContent = pto.pay_frequency.frequency;
-                document.getElementById('accrual-rate').textContent = pto.accrual_rate.accrual_rate;
-                document.getElementById('pto-balance').textContent = pto.pto_balance;
-                document.getElementById('username').textContent = pto.user.username;
-                document.getElementById('years-of-experience').textContent = pto.year_of_experience.years_of_experience;
-            }) 
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    });
-  
 
-</script>
+{% load static %}
+<script src="{% static 'ptobalance/js/main.js' %}" type="module" defer></script>
+
 {% endblock %}
