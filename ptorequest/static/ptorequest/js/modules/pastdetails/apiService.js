@@ -67,7 +67,7 @@ export async function smartFetch(url, options = {}, isRetry = false) {
  */
 export async function fetchPayPeriods() {
     try {
-        const response = await smartFetch('/api/pay-period/', {
+        const response = await smartFetch('/api/future-pay-period/', {
             method: 'GET',
         });
         if (!response.ok) {

@@ -52,15 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Normalize today for comparison
 
-            // Filter for past pay periods (end_date strictly before today)
-            const pastPayPeriods = payPeriods.filter(period => {
-                const endDate = new Date(period.end_date);
-                endDate.setHours(0, 0, 0, 0);
-                return endDate < now;
-            });
+            /// Don't filter — return all pay periods
+            const pastPayPeriods = payPeriods;
 
             // Sort past pay periods by end_date in descending order (most recent first)
-            pastPayPeriods.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+            // pastPayPeriods.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
 
             payPeriodSelect.innerHTML = ''; // Clear loading option
 

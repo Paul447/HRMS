@@ -14,6 +14,7 @@ from django.conf import settings
 class PayPeriodUptoTodayViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = PayPeriodSerializerForClockPunchReport
+    queryset = PayPeriod.objects.all()
 
     def get_queryset(self):
         local_tz = pytz.timezone(settings.TIME_ZONE)
@@ -23,3 +24,11 @@ class PayPeriodUptoTodayViewSet(viewsets.ReadOnlyModelViewSet):
 
         return PayPeriod.objects.filter(start_date__lte=end_of_today_utc).order_by('-start_date')
 
+class PayPeriodViewSetForFutureTimeOffRequest(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PayPeriodSerializerForClockPunchReport
+    queryset = PayPeriod.objects.all().order_by('start_date')
+
+
+
+        # return PayPeriod.objects.filter(start_date__gte=start_of_tomorrow_utc).order_by('start_date')

@@ -19,14 +19,10 @@ from django.urls import path
 from django.urls import include
 from rest_framework.routers import DefaultRouter
 from hrmsauth.views import *
-from ptobalance.api import register as register_ptobalance
-from ptorequest.api import register as register_ptorequest
 from department.api import register_userprofile as register_userprofile
-
-from leavetype.api import register as register_leavetype
 from hrmsauth.views import UserInfoViewSet
 from punchreport.views import PunchReportViewSet 
-from payperiod.views import PayPeriodUptoTodayViewSet
+from payperiod.views import PayPeriodUptoTodayViewSet,PayPeriodViewSetForFutureTimeOffRequest
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -37,17 +33,22 @@ from department.views import UserProfileViewSet
 from ptorequest.views import PTORequestsViewSet , GetPTORequestsFromPastPayPeriodViewSet
 from ptobalance.views import PTOBalanceViewSet
 from onshift.views import UserClockOnShiftViewSet
+from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
 router = DefaultRouter()
 
 # router.register(r'clock', ClockDataViewSet, basename='clock')
 router.register(r'user_info', UserInfoViewSet, basename='user_info')
 router.register(r'punch-report', PunchReportViewSet, basename='punch_report')
 router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_upto_today')
+router.register(r'future-pay-period', PayPeriodViewSetForFutureTimeOffRequest, basename='future_pay_period')
 router.register(r'departmentleavetype', DepartmentBasedLeaveTypeViewSet, basename='departmentleavetype')
 router.register(r'department', UserProfileViewSet, basename='userprofile')
 router.register(r'pto-requests', PTORequestsViewSet, basename='pto-requests')
 router.register(r'past-pto-requests', GetPTORequestsFromPastPayPeriodViewSet, basename='past-ptorequests')
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
+router.register(r'all-departments', DepartmentReturnView, basename='all_departments')
+router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, basename='time_off_requests')
+
 
 clock_router = DefaultRouter()
 clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')

@@ -59,7 +59,9 @@ INSTALLED_APPS = [
     "holiday",
     "punchreport",
     "onshift",
+    "timeoff_management",
     "adminorganizer",
+    
     "django_filters",
 ]
 SPECTACULAR_SETTINGS = {
@@ -76,18 +78,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # YOUR CUSTOM MIDDLEWARE ORDER IS CRITICAL
-    # 1. Handle cookie -> header injection (before AuthenticationMiddleware)
-    # "HRMS.jwt_middleware.middleware.JWTAuthFromCookieMiddleware",
+
     'HRMS.jwt_auth_middleware.logout_middleware.LogoutMiddleware',          # Must run early to handle logout path
     'HRMS.jwt_auth_middleware.auth_status_middleware.AuthStatusMiddleware', # Sets up auth header for DRF
     'HRMS.jwt_auth_middleware.token_refresh_middleware.TokenRefreshMiddleware', # 
-    # 2. Redirect logged-in users from login/reg pages (after AuthenticationMiddleware)
-    # "HRMS.middleware.login_redirect.LoginRedirectMiddleware",
-    # 3. Handle 401 refresh for HTML requests (after view, before response sent)
-    # "HRMS.middleware.token_refresh_on_401.TokenRefreshOn401Middleware",
-    # 4. Handle logout specific logic (can be anywhere after auth, as it overrides response)
-    # "HRMS.middleware.logout_handler.LogoutHandlerMiddleware",
+
 ]
 MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
 CORS_ALLOW_ALL_ORIGINS = True

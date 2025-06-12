@@ -6,12 +6,8 @@ from .serializer import PTORequestsSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.views.generic import TemplateView
-from django.conf import settings
-from django.urls import reverse
-from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
@@ -115,6 +111,7 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
         # if instance.pay_period and instance.pay_period.end_date < now.date():
         #     raise ValidationError({"detail": "Cannot delete requests from past pay periods."})
         instance.delete()
+        # TODO : Need to remove the logic of viewing all of the details by the pay period from this because it is still in here,, Also View the pending request in the history because, noting should be hidden.
 
     @action(detail=False, methods=['get'], url_path='approved-and-rejected')
     def approved_and_rejected(self, request):
@@ -225,7 +222,7 @@ class GetPastPTORequestsView(TemplateView, LoginRequiredMixin):
 
 
 # TODO Add the Leave Management Where the Admin can Approve or Reject the PTO Requests, Also make it enable to do the filter so, only let the user admin view the leave of this and upcomming pay period, Filter according to the department, don't show the leave automatically let the user search for it. Also let superuser view the balance on the type of the leave they have asked for.
-# TODO Create the view which return the Leave Balance of all the employees, and make it filterable by the department, show the currently running balance of the user. 
-# Working on this # TODO Let the normal user view only his/her own leave requests, based on the pay period, and also let the user filter the leave request based on the pay period, check for the intial parameter in the URL if there is no parameter then show the current pay period leave requests, if there is a parameter then show the leave requests for that pay period.
+# TODO Create the view which return the Leave Balance of all the employees, and make it filterable by the department, show the currently running balance of the user.
+# Working on this # Refactor --> Create the tooltip to view the entire reason of the request. # DONE Let the normal user view only his/her own leave requests, based on the pay period, and also let the user filter the leave request based on the pay period, check for the intial parameter in the URL if there is no parameter then show the current pay period leave requests, if there is a parameter then show the leave requests for that pay period.
 # TODO Let the SuperUser edit the leave request comment box to add the comment for the leave request.
 # TODO Create the logic for leave request approval and rejection, if rejection don't do anything, if approved, create the logic to deduct the leave balance from the user on the basis of the leave type, and also update the leave request status to approved,
