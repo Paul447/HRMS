@@ -9,6 +9,7 @@ from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from django.shortcuts import redirect
 from rest_framework import status
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -30,17 +31,12 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 
-class PTOBalanceView(TemplateView):
+class PTOBalanceView(LoginRequiredMixin, TemplateView):
     template_name = 'ptobalance_view.html'
-    def dispatch(self, request, *args, **kwargs):
-        access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
+    login_url = 'frontend_login' 
 
-        if not access_token:
-            return redirect(reverse('frontend_login'))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-        try:
-            AccessToken(access_token).verify()
-        except TokenError:
-            return redirect(reverse('frontend_login'))
-
-        return super().dispatch(request, *args, **kwargs)
+        return context
+        

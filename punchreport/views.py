@@ -15,6 +15,7 @@ from rest_framework.permissions import BasePermission
 from payperiod.models import PayPeriod
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from .utils import get_pay_period_week_boundaries, get_user_weekly_summary
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 class IsSuperuser(BasePermission):
@@ -24,7 +25,7 @@ class IsSuperuser(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
         
-class ClockInOutPunchReportView(TemplateView):
+class ClockInOutPunchReportView(TemplateView, LoginRequiredMixin):
     """
     A view to render the clock in/out punch report page.
     This is a frontend view that will be served to users.
@@ -85,20 +86,3 @@ class PunchReportViewSet(viewsets.ViewSet):
             "week_boundaries": week_boundaries["local"],
             "users_clock_data": all_users_data,
         }, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsAdminUser])
-    # def pay_periods(self, request):
-    #     """
-    #     Retrieves a list of all available pay periods up to and including today's date.
-    #     """
-    #     local_tz = pytz.timezone(settings.TIME_ZONE)
-    #     today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
-    #     end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
-    #     end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
-
-    #     pay_periods = PayPeriod.objects.filter(
-    #         start_date__lte=end_of_today_utc
-    #     ).order_by('-start_date')
-
-    #     serializer = PayPeriodSerializerForClockPunchReport(pay_periods, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
