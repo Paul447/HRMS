@@ -34,7 +34,7 @@ from adminorganizer.admin.admin_site import hrms_admin_site
 from timeclock.views import UserClockDataAPIView, ClockInOutCreate
 from leavetype.views import DepartmentBasedLeaveTypeViewSet
 from department.views import UserProfileViewSet
-from ptorequest.views import PTORequestsViewSet
+from ptorequest.views import PTORequestsViewSet , GetPTORequestsFromPastPayPeriodViewSet
 from ptobalance.views import PTOBalanceViewSet
 from onshift.views import UserClockOnShiftViewSet
 router = DefaultRouter()
@@ -46,6 +46,7 @@ router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_u
 router.register(r'departmentleavetype', DepartmentBasedLeaveTypeViewSet, basename='departmentleavetype')
 router.register(r'department', UserProfileViewSet, basename='userprofile')
 router.register(r'pto-requests', PTORequestsViewSet, basename='pto-requests')
+router.register(r'past-pto-requests', GetPTORequestsFromPastPayPeriodViewSet, basename='past-ptorequests')
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
 
 clock_router = DefaultRouter()

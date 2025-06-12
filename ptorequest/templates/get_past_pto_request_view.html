@@ -1,0 +1,240 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Time Off Requests{% endblock %}
+{% block page_title %}Manage Time Off Requests{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">My Requests</span>
+    </div>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Filter Past PTO Requests</h2>
+        <div class="flex items-center space-x-4">
+            <label for="payPeriodSelect" class="block text-sm font-medium text-gray-700">Select Pay Period:</label>
+            <select id="payPeriodSelect" name="pay_period_id"
+                class="mt-1 block w-full md:w-1/3 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <option value="">Current Pay Period</option>
+            </select>
+            <button id="filterButton"
+                class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Apply Filter
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Past PTO Request Details</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="ptoRequestsTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Department
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Leave Type
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Start Date/Time
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            End Date/Time
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Hours
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Reason
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="ptoRequestsTableBody">
+                    <tr id="noRequestsMessage" class="hidden">
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No past
+                            PTO requests found for the selected pay period.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const payPeriodSelect = document.getElementById('payPeriodSelect');
+        const filterButton = document.getElementById('filterButton');
+        const ptoRequestsTableBody = document.getElementById('ptoRequestsTableBody');
+        const noRequestsMessage = document.getElementById('noRequestsMessage');
+
+        // Centralized smartFetch function
+        async function smartFetch(url, options = {}, isRetry = false) {
+            try {
+                const response = await fetch(url, options);
+
+                // Handle 401 Unauthorized errors and retry once
+                if (response.status === 401 && !isRetry) {
+                    console.warn(`[smartFetch] Received 401 for ${url}. Retrying with potentially new token.`);
+                    // In a real application, you'd typically have logic here
+                    // to refresh the authentication token before retrying the fetch.
+                    // For this example, we're just retrying.
+                    return await smartFetch(url, options, true);
+                }
+
+                return response;
+
+            } catch (error) {
+                console.error(`[smartFetch] Network or other fetch error for ${url}:`, error);
+                throw error; // Re-throw to be caught by specific fetch functions
+            }
+        }
+
+        async function getPayPeriodsAdmin() {
+            try {
+                const response = await smartFetch('/api/pay-period/', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Important for sending cookies/sessions
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(
+                        `Failed to fetch pay periods: ${errorData.detail || errorData.message || response.statusText}`
+                    );
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Error in getPayPeriodsAdmin:", error);
+                throw error;
+            }
+        }
+
+        async function populatePayPeriods() {
+            payPeriodSelect.innerHTML = ''; // Clear existing options
+
+            try {
+                const payPeriods = await getPayPeriodsAdmin();
+
+                // Add a default "Current Pay Period" option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "Current Pay Period";
+                payPeriodSelect.appendChild(defaultOption);
+
+                if (payPeriods.length > 0) {
+                    payPeriods.forEach(period => {
+                        const option = document.createElement('option');
+                        option.value = period.id;
+                        option.textContent = `${period.start_date_local} to ${period.end_date_local}`;
+                        payPeriodSelect.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.textContent = "No past pay periods available";
+                    option.disabled = true;
+                    payPeriodSelect.appendChild(option);
+                }
+            } catch (error) {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Failed to load pay periods";
+                option.disabled = true;
+                payPeriodSelect.appendChild(option);
+            }
+        }
+
+        async function fetchPtoRequests(payPeriodId = null) {
+            ptoRequestsTableBody.innerHTML = ''; // Clear previous requests
+            noRequestsMessage.classList.add('hidden'); // Hide no requests message row
+
+            let url = '/api/past-pto-requests/';
+            if (payPeriodId) {
+                url += `?pay_period_id=${payPeriodId}`;
+            }
+
+            try {
+                const response = await smartFetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                renderPtoRequests(data);
+
+            } catch (error) {
+                console.error('Error fetching PTO requests:', error);
+                // Display an error row in the table
+                ptoRequestsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-red-500 text-center">
+                            Failed to load PTO requests. Please try again later.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderPtoRequests(requests) {
+            if (requests.length === 0) {
+                noRequestsMessage.classList.remove('hidden'); // Show no requests message row
+                return;
+            }
+
+            requests.forEach(request => {
+                const row = document.createElement('tr');
+                const statusClass = request.status === 'approved' ? 'text-green-600' :
+                                    request.status === 'pending' ? 'text-yellow-600' :
+                                    'text-red-600';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${request.department_name_display.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${request.leave_type_display.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(request.start_date_time).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(request.end_date_time).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${request.total_hours}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-900">${request.reason}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${statusClass} capitalize">${request.status}</td>
+                `;
+                ptoRequestsTableBody.appendChild(row);
+            });
+        }
+
+        // Event Listeners
+        filterButton.addEventListener('click', () => {
+            const selectedPayPeriodId = payPeriodSelect.value;
+            fetchPtoRequests(selectedPayPeriodId === "" ? null : selectedPayPeriodId);
+        });
+
+        // Initial load of PTO requests for the current pay period and populate pay periods when the page loads
+        populatePayPeriods();
+        fetchPtoRequests(); // Call without payPeriodId to get current pay period by default
+    });
+</script>
+{% endblock %}

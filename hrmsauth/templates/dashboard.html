@@ -126,7 +126,8 @@
 
             <a href="/auth/dashboard"
                 class="flex items-center space-x-3 py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white shadow-text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -137,7 +138,8 @@
             <a href="{% url 'clock_in_out' %}"
                 class="flex items-center space-x-3 py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white shadow-text-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110">
+                    stroke="currentColor"
+                    class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -149,7 +151,8 @@
                     class="w-full flex items-center justify-between py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white shadow-text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2 focus:ring-offset-primary-900"
                     aria-expanded="false" aria-controls="userDetailsSubmenu">
                     <div class="flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm-6-9a4 4 0 100-8 4 4 0 000 8zm6 11v-1a6 6 0 00-6-6H6a6 6 0 00-6 6v1h18z" />
@@ -183,8 +186,8 @@
                     aria-expanded="false" aria-controls="timeOffSubmenu">
                     <div class="flex items-center space-x-3">
                         <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
+                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zm7-7l-2 2m0 0l-2-2m2 2V12" />
                         </svg>
@@ -220,6 +223,17 @@
                         </svg>
                         <span>Leave Request</span>
                     </a>
+                    <a href="{% url 'past_ptorequests' %}"
+                        class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-primary-400 group-hover:text-white" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Leave History</span>
+                    </a>
+
                 </div>
             </div>
 
@@ -229,8 +243,8 @@
                     aria-expanded="false" aria-controls="groupsSubmenu">
                     <div class="flex items-center space-x-3">
                         <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
+                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 17v-5m3 5v-1.5m3 1.5v-3m.5 6.5H9a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-.5z" />
                         </svg>
@@ -267,13 +281,14 @@
                 </div>
             </div>
 
-            
+
 
             <form action="{% url 'logout' %}" method="POST" class="w-full">
                 {% csrf_token %}
                 <button type="submit"
                     class="flex items-center space-x-3 mt-6 border-t border-primary-800 py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group w-full text-left text-primary-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2 focus:ring-offset-primary-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -288,7 +303,8 @@
 
         <header
             class="flex items-center justify-between bg-white shadow-lg px-4 py-3 md:px-8 sticky top-0 z-10 border-b border-secondary-100 shadow-inner-sm">
-            <button class="md:hidden text-primary-600 hover:text-primary-800 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200"
+            <button
+                class="md:hidden text-primary-600 hover:text-primary-800 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200"
                 onclick="toggleSidebar()" aria-label="Toggle sidebar">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
@@ -320,7 +336,7 @@
                 <div class="flex items-center space-x-2 cursor-pointer group">
                     <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-lg shadow-md group-hover:ring-2 group-hover:ring-primary-400 transition-all duration-200"
                         id="user-avatar">
-                        </div>
+                    </div>
                     <div class="hidden md:block">
                         <p class="text-base font-medium text-secondary-700 user-name" id="user-name"></p>
                     </div>
@@ -394,10 +410,12 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-lg-2 p-8 text-center border border-secondary-200 shadow-inner-sm animate-on-load animate-delay-300">
+            <div
+                class="bg-white rounded-lg shadow-lg-2 p-8 text-center border border-secondary-200 shadow-inner-sm animate-on-load animate-delay-300">
                 <h3 class="text-3xl font-bold text-primary-700 mb-4 animate-fade-in-up">Welcome to Your Admin Control
                     Panel!</h3>
-                <p class="text-secondary-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animate-delay-100">
+                <p
+                    class="text-secondary-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animate-delay-100">
                     This powerful portal provides you with comprehensive tools to manage users, track time off, organize
                     groups, and set permissions. Get started by exploring the navigation on the left.
                 </p>
@@ -413,11 +431,14 @@
                     © 2025 DPS HR Portal. All rights reserved.
                 </div>
                 <div class="flex space-x-4">
-                    <a href="#" class="hover:text-primary-600 transition-colors duration-200 font-medium">Privacy
+                    <a href="#"
+                        class="hover:text-primary-600 transition-colors duration-200 font-medium">Privacy
                         Policy</a>
-                    <a href="#" class="hover:text-primary-600 transition-colors duration-200 font-medium">Terms of
+                    <a href="#" class="hover:text-primary-600 transition-colors duration-200 font-medium">Terms
+                        of
                         Service</a>
-                    <a href="#" class="hover:text-primary-600 transition-colors duration-200 font-medium">Contact
+                    <a href="#"
+                        class="hover:text-primary-600 transition-colors duration-200 font-medium">Contact
                         Us</a>
                 </div>
             </div>

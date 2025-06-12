@@ -1,8 +1,9 @@
 // static/ptorequest/js/pto_list.js
 
-import { fetchPTORequests, deletePTORequest, fetchApprovedAndRejectedRequests, fetchPAYPeriods } from './modules/ptoview/apiService.js';
+import { fetchPTORequests, deletePTORequest, fetchApprovedAndRejectedRequests } from './modules/ptoview/apiService.js';
 import { showToast, toggleLoading, toggleNoRequestsMessage, toggleErrorMessage, checkURLForMessages } from './modules/ptoview/uiHelpers.js';
 import { renderRequests } from './modules/ptoview/tableRenderer.js';
+// Removed: import { sortRequests, updateSortIndicators } from './modules/sorter.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements for Pending Requests
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const noRequestsMessage = document.getElementById('noRequestsMessage');
     const errorMessage = document.getElementById('errorMessage');
     const loadingRow = document.getElementById('loadingRow');
+    // Removed: const tableHeaders = document.querySelectorAll('th[data-sort]'); // Only for pending table
 
     // DOM Elements for Approved Requests
     const approvedRequestsList = document.getElementById('approvedRequestsList');
@@ -23,9 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorRejectedMessage = document.getElementById('errorRejectedMessage');
     const loadingRejectedRow = document.getElementById('loadingRejectedRow');
 
-    // Pay Period Selector
-    const payPeriodSelector = document.getElementById('payPeriodSelector');
-
     // Modal Elements
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -33,8 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // State Variables
     let allPendingRequests = [];
+    // Removed: let currentSortColumn = null;
+    // Removed: let currentSortDirection = 'asc';
     let requestIdToDelete = null;
-    let currentSelectedPayPeriodId = null; // Stores the ID of the currently selected pay period
 
     /**
      * Orchestrates fetching and rendering *pending* requests.
@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ptoRequestsList.innerHTML = ''; // Clear existing content
 
         try {
-            allPendingRequests = await fetchPTORequests(currentSelectedPayPeriodId);
+            allPendingRequests = await fetchPTORequests();
+            // Directly render without sorting
             renderRequests(
                 allPendingRequests,
                 ptoRequestsList,
@@ -64,77 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    /**
-     * Orchestrates fetching and rendering Pay Periods.
-     * Sets the default selected pay period in the dropdown.
-     */
-    async function loadAndRenderPayPeriods() {
-        payPeriodSelector.innerHTML = '<option value="">Loading Pay Periods...</option>'; // Reset loading state
-        try {
-            const payPeriods = await fetchPAYPeriods();
-            const now = new Date(); // Current date for comparison
-
-            if (payPeriods.length > 0) {
-                // Sort pay periods by end_date in descending order (most recent first)
-                payPeriods.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
-
-                let optionsHtml = '<option value="">All Pay Periods</option>'; // Option to view "All Pay Periods"
-                let defaultPayPeriodFound = false;
-
-                payPeriods.forEach(period => {
-                    const startDate = new Date(period.start_date);
-                    const endDate = new Date(period.end_date);
-                    const periodDisplay = `Pay Period: ${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-                    optionsHtml += `<option value="${period.id}">${periodDisplay}</option>`;
-
-                    // Check if this is the 'current' pay period based on today's date
-                    // Note: Backend uses timezone.now(), ensure consistency if strict comparison is needed
-                    if (now >= startDate && now <= endDate) {
-                        // Mark the ID of the current pay period
-                        // This will be used as the default if no specific ID is selected
-                        // and 'All Pay Periods' is not explicitly chosen.
-                        if (currentSelectedPayPeriodId === null) { // Only set if not already set from URL/previous interaction
-                            currentSelectedPayPeriodId = period.id;
-                            defaultPayPeriodFound = true;
-                        }
-                    }
-                });
-                payPeriodSelector.innerHTML = optionsHtml;
-
-                // Set the selected value in the dropdown
-                if (currentSelectedPayPeriodId !== null) {
-                    // If a specific pay period ID was previously selected (e.g., from URL or user interaction)
-                    // or if a current pay period was found and set as default, select it.
-                    payPeriodSelector.value = currentSelectedPayPeriodId;
-                } else {
-                    // If no specific pay period was selected and no current pay period found,
-                    // default to "All Pay Periods"
-                    payPeriodSelector.value = '';
-                    currentSelectedPayPeriodId = null; // Explicitly null for "All"
-                }
-
-                // If `currentSelectedPayPeriodId` was set to a specific period because it's "current"
-                // but the user's initial preference is "All", this logic ensures "All" remains.
-                // This scenario can be tricky: if the backend *always* returns current for no filter,
-                // then the UI needs to be smart about what it *sends* vs *shows*.
-                // For simplicity, `currentSelectedPayPeriodId` now directly controls the filter.
-                // When `payPeriodSelector.value` is '', `currentSelectedPayPeriodId` becomes null,
-                // and the API calls will omit the pay_period_id, causing the backend to use its default (current pay period).
-                // So, effectively, if the user selects "All Pay Periods", the backend's "current pay period" filter will apply.
-
-            } else {
-                payPeriodSelector.innerHTML = '<option value="">No Pay Periods Available</option>';
-                payPeriodSelector.disabled = true; // Disable if no periods
-                currentSelectedPayPeriodId = null;
-            }
-        } catch (error) {
-            console.error('Error loading pay periods:', error);
-            payPeriodSelector.innerHTML = '<option value="">Error loading pay periods</option>';
-            payPeriodSelector.disabled = true; // Disable on error
-            showToast('Failed to load pay periods. Please try again.', 'error');
-            currentSelectedPayPeriodId = null; // Ensure no period is selected on error
-        }
-    }
+    // Removed: function applySortingAndRenderPending() { ... }
+    // The sorting logic is now removed.
 
     /**
      * Fetches and renders approved/rejected requests.
@@ -151,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rejectedRequestsList.innerHTML = '';
 
         try {
-            const data = await fetchApprovedAndRejectedRequests(currentSelectedPayPeriodId);
+            const data = await fetchApprovedAndRejectedRequests();
             const approvedRequests = data.approved_requests || [];
             const rejectedRequests = data.rejected_requests || [];
 
@@ -180,14 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleLoading(loadingApprovedRow, false);
             toggleLoading(loadingRejectedRow, false);
         }
-    }
-
-    /**
-     * Re-fetches and renders all request tables based on the current selected pay period.
-     */
-    function refreshAllRequests() {
-        loadAndRenderPendingRequests();
-        loadAndRenderApprovedRejectedRequests();
     }
 
     /**
@@ -243,14 +167,22 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmationModal.classList.add('hidden');
     }
 
-    // Event listener for pay period selector change
-    payPeriodSelector.addEventListener('change', function() {
-        // Update currentSelectedPayPeriodId based on the dropdown selection
-        // If "All Pay Periods" is selected, this.value will be an empty string,
-        // which correctly translates to `null` for API calls to trigger backend default.
-        currentSelectedPayPeriodId = this.value === '' ? null : this.value;
-        refreshAllRequests();
-    });
+    // --- Event Listeners ---
+
+    // Removed: Table header sort listeners
+    // tableHeaders.forEach(header => {
+    //     header.addEventListener('click', function() {
+    //         const sortColumn = this.dataset.sort;
+    //         if (currentSortColumn === sortColumn) {
+    //             currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    //         } else {
+    //             currentSortColumn = sortColumn;
+    //             currentSortDirection = 'asc'; // Default to ascending when changing column
+    //         }
+    //         updateSortIndicators(tableHeaders, currentSortColumn, currentSortDirection);
+    //         applySortingAndRenderPending();
+    //     });
+    // });
 
     // Confirmation Modal button listeners
     confirmDeleteBtn.addEventListener('click', confirmDeletion);
@@ -263,11 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initial load sequence
-    loadAndRenderPayPeriods().then(() => {
-        // After pay periods are loaded and the initial default selection is made,
-        // then load requests using the determined `currentSelectedPayPeriodId`.
-        refreshAllRequests();
-        checkURLForMessages(); // Check for URL messages (e.g., from a redirect after a successful request)
-    });
+    // Initial load and URL message check
+    loadAndRenderPendingRequests();
+    loadAndRenderApprovedRejectedRequests(); // Call new function to load approved/rejected data
+    checkURLForMessages();
 });
