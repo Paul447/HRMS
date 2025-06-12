@@ -30,6 +30,8 @@ class PTORequestsSerializer(serializers.ModelSerializer):
     # Read-only fields for displaying related object names
     department_name_display = DepartmentSerializer(source='department_name', read_only=True)
     leave_type_display = LeaveTypeSerializer(source='leave_type', read_only=True)
+    pay_period_start_date = serializers.DateTimeField(source='pay_period.start_date', read_only=True, default_timezone=pytz.timezone('America/Chicago'))
+    pay_period_end_date = serializers.DateTimeField(source='pay_period.end_date', read_only=True, default_timezone=pytz.timezone('America/Chicago'))
 
     # Write-only fields for accepting primary keys for related objects
     department_name = serializers.PrimaryKeyRelatedField(
@@ -56,6 +58,9 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             'reason',
             'total_hours',
             'status',
+            'pay_period_start_date',
+            'pay_period_end_date',
+
         ]
         read_only_fields = ['id', 'status', 'total_hours'] # total_hours is calculated, not directly set by client
 

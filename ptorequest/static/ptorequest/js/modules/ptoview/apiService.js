@@ -1,4 +1,4 @@
-// static/ptorequest/js/modules/apiService.js
+// static/ptorequest/js/modules/ptoview/apiService.js
 
 /**
  * Gets a CSRF token from cookies.
@@ -38,7 +38,7 @@ async function smartFetch(url, options = {}, isRetry = false) {
 }
 
 /**
- * Fetches PTO requests from the API.
+ * Fetches PTO requests from the API (specifically pending ones based on your current endpoint usage).
  * @returns {Promise<Array>} A promise that resolves to an array of PTO request objects.
  */
 export async function fetchPTORequests() {
@@ -61,8 +61,8 @@ export async function fetchPTORequests() {
 }
 
 /**
- * Fetches the PTO request of Approved and Rejected one
- * @returns {Promise<Array>} A promise that resolves to an array of PTO request objects.
+ * Fetches approved and rejected PTO requests.
+ * @returns {Promise<Object>} A promise that resolves to an object containing approved_requests and rejected_requests arrays.
  */
 export async function fetchApprovedAndRejectedRequests() {
     const csrftoken = getCookie('csrftoken');
@@ -77,7 +77,7 @@ export async function fetchApprovedAndRejectedRequests() {
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`Failed to load PTO requests. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
+        throw new Error(`Failed to load approved/rejected PTO requests. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
     }
 
     return response.json();
@@ -102,5 +102,5 @@ export async function deletePTORequest(requestId) {
         const errorData = await response.json();
         throw new Error(`Failed to delete request. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
     }
-    // No content expected for a successful DELETE
+    // No content expected for a successful DELETE, so no need to return JSON
 }

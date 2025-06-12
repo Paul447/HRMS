@@ -3,114 +3,153 @@
 import { fetchPTORequests, deletePTORequest, fetchApprovedAndRejectedRequests } from './modules/ptoview/apiService.js';
 import { showToast, toggleLoading, toggleNoRequestsMessage, toggleErrorMessage, checkURLForMessages } from './modules/ptoview/uiHelpers.js';
 import { renderRequests } from './modules/ptoview/tableRenderer.js';
-// Removed: import { sortRequests, updateSortIndicators } from './modules/sorter.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements for Pending Requests
-    const ptoRequestsList = document.getElementById('ptoRequestsList');
-    const noRequestsMessage = document.getElementById('noRequestsMessage');
-    const errorMessage = document.getElementById('errorMessage');
-    const loadingRow = document.getElementById('loadingRow');
-    // Removed: const tableHeaders = document.querySelectorAll('th[data-sort]'); // Only for pending table
+    // --- DOM Elements ---
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const ptoRequestsTableBody = document.getElementById('ptoRequestsTableBody'); // Unified tbody
+    const loadingRow = document.getElementById('loadingRow'); // Unified loading row
+    const noRequestsMessage = document.getElementById('noRequestsMessage'); // Unified no data message div
+    const noRequestsText = document.getElementById('noRequestsText'); // Span for specific 'no requests' text
+    const errorMessage = document.getElementById('errorMessage'); // Unified error message div
 
-    // DOM Elements for Approved Requests
-    const approvedRequestsList = document.getElementById('approvedRequestsList');
-    const noApprovedRequestsMessage = document.getElementById('noApprovedRequestsMessage');
-    const errorApprovedMessage = document.getElementById('errorApprovedMessage');
-    const loadingApprovedRow = document.getElementById('loadingApprovedRow');
+    const pendingCountSpan = document.getElementById('pendingCount');
+    const approvedCountSpan = document.getElementById('approvedCount');
+    const rejectedCountSpan = document.getElementById('rejectedCount');
 
-    // DOM Elements for Rejected Requests
-    const rejectedRequestsList = document.getElementById('rejectedRequestsList');
-    const noRejectedRequestsMessage = document.getElementById('noRejectedRequestsMessage');
-    const errorRejectedMessage = document.getElementById('errorRejectedMessage');
-    const loadingRejectedRow = document.getElementById('loadingRejectedRow');
-
-    // Modal Elements
+    // Modal elements
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const payPeriodDetailsElement = document.getElementById('payPeriodDetails'); // Correctly identified
 
-    // State Variables
-    let allPendingRequests = [];
-    // Removed: let currentSortColumn = null;
-    // Removed: let currentSortDirection = 'asc';
+    // Actions column header (to show/hide)
+    const actionsHeader = document.getElementById('actionsHeader');
+
+    // --- State Variables ---
+    let allPtoRequests = { // Centralized storage for all requests
+        pending: [],
+        approved: [],
+        rejected: []
+    };
+    let activeTabStatus = localStorage.getItem('activePtoTab') || 'pending'; // Default or last active tab
     let requestIdToDelete = null;
 
-    /**
-     * Orchestrates fetching and rendering *pending* requests.
-     */
-    async function loadAndRenderPendingRequests() {
-        toggleLoading(loadingRow, true);
-        toggleNoRequestsMessage(noRequestsMessage, false);
-        toggleErrorMessage(errorMessage, false);
-        ptoRequestsList.innerHTML = ''; // Clear existing content
+    // --- Functions ---
 
-        try {
-            allPendingRequests = await fetchPTORequests();
-            // Directly render without sorting
-            renderRequests(
-                allPendingRequests,
-                ptoRequestsList,
-                noRequestsMessage,
-                true, // allowActions = true
-                handleUpdateClick,
-                handleDeleteClick
-            );
-        } catch (error) {
-            console.error('Error in loadAndRenderPendingRequests:', error);
-            toggleErrorMessage(errorMessage, true);
-            showToast('Failed to load your pending time off requests. Please try again.', 'error');
-        } finally {
-            toggleLoading(loadingRow, false);
+    /**
+     * Updates the tab styling and count badges.
+     */
+    function updateTabDisplay() {
+        tabButtons.forEach(button => {
+            if (button.dataset.status === activeTabStatus) {
+                button.classList.add('active'); // Apply active class
+                button.setAttribute('aria-selected', 'true');
+            } else {
+                button.classList.remove('active'); // Remove active class
+                button.setAttribute('aria-selected', 'false');
+            }
+        });
+        // Update the 'No requests' message to be specific to the current tab
+        noRequestsText.textContent = `No ${activeTabStatus} requests.`;
+
+        // Toggle visibility of the "Actions" column header
+        if (activeTabStatus === 'pending') {
+            actionsHeader.classList.remove('hidden');
+        } else {
+            actionsHeader.classList.add('hidden');
         }
     }
 
-    // Removed: function applySortingAndRenderPending() { ... }
-    // The sorting logic is now removed.
+    /**
+     * Updates the counts on each status tab.
+     */
+    function updateCounts() {
+        pendingCountSpan.textContent = allPtoRequests.pending.length;
+        approvedCountSpan.textContent = allPtoRequests.approved.length;
+        rejectedCountSpan.textContent = allPtoRequests.rejected.length;
+    }
 
     /**
-     * Fetches and renders approved/rejected requests.
+     * Updates the pay period details display.
+     * Assumes pay period details are available on the first pending request,
+     * or any relevant request. Adjust logic if details come from a different source.
      */
-    async function loadAndRenderApprovedRejectedRequests() {
-        // Show loading spinners for both tables
-        toggleLoading(loadingApprovedRow, true);
-        toggleLoading(loadingRejectedRow, true);
-        toggleNoRequestsMessage(noApprovedRequestsMessage, false);
-        toggleNoRequestsMessage(noRejectedRequestsMessage, false);
-        toggleErrorMessage(errorApprovedMessage, false);
-        toggleErrorMessage(errorRejectedMessage, false);
-        approvedRequestsList.innerHTML = '';
-        rejectedRequestsList.innerHTML = '';
+    function updatePayPeriodDisplay() {
+        if (payPeriodDetailsElement) {
+            // Find a request with pay period details (e.g., the most recent, or any pending)
+            // For simplicity, let's try to get it from the first pending request.
+            const requestWithPayPeriod = allPtoRequests.pending.length > 0 ? allPtoRequests.pending[0] : null;
+
+            if (requestWithPayPeriod && requestWithPayPeriod.pay_period_start_date && requestWithPayPeriod.pay_period_end_date) {
+                const startDate = new Date(requestWithPayPeriod.pay_period_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const endDate = new Date(requestWithPayPeriod.pay_period_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                payPeriodDetailsElement.textContent = `Current Pay Period: ${startDate} - ${endDate}`;
+                payPeriodDetailsElement.classList.remove('hidden'); // Ensure it's visible
+            } else {
+                // If no pay period data, hide the element or show a default message
+                payPeriodDetailsElement.textContent = ''; // Clear content
+                payPeriodDetailsElement.classList.add('hidden'); // Hide the element
+            }
+        }
+    }
+
+    /**
+     * Renders requests based on the active tab status.
+     */
+    function renderActiveTabRequests() {
+        // Hide all messages initially
+        toggleNoRequestsMessage(noRequestsMessage, false);
+        toggleErrorMessage(errorMessage, false);
+        toggleLoading(loadingRow, true); // Keep loading state until data is rendered
+
+        const requestsToRender = allPtoRequests[activeTabStatus];
+        const allowActions = activeTabStatus === 'pending';
+
+        renderRequests(
+            requestsToRender,
+            ptoRequestsTableBody,
+            allowActions,
+            handleUpdateClick,
+            handleDeleteClick
+        );
+
+        // After rendering, check if there are no requests for the current tab
+        if (!requestsToRender || requestsToRender.length === 0) {
+            toggleNoRequestsMessage(noRequestsMessage, true);
+        }
+
+        toggleLoading(loadingRow, false); // Hide loading after rendering
+    }
+
+    /**
+     * Fetches all PTO requests (pending, approved, rejected) and updates the UI.
+     */
+    async function loadAllPtoRequests() {
+        toggleLoading(loadingRow, true);
+        toggleNoRequestsMessage(noRequestsMessage, false);
+        toggleErrorMessage(errorMessage, false);
 
         try {
-            const data = await fetchApprovedAndRejectedRequests();
-            const approvedRequests = data.approved_requests || [];
-            const rejectedRequests = data.rejected_requests || [];
+            // Fetch pending requests
+            const pending = await fetchPTORequests();
+            allPtoRequests.pending = pending;
 
-            // Render approved requests (no actions)
-            renderRequests(
-                approvedRequests,
-                approvedRequestsList,
-                noApprovedRequestsMessage,
-                false // allowActions = false for approved
-            );
+            // Fetch approved and rejected requests
+            const otherRequests = await fetchApprovedAndRejectedRequests();
+            allPtoRequests.approved = otherRequests.approved_requests || [];
+            allPtoRequests.rejected = otherRequests.rejected_requests || [];
 
-            // Render rejected requests (no actions)
-            renderRequests(
-                rejectedRequests,
-                rejectedRequestsList,
-                noRejectedRequestsMessage,
-                false // allowActions = false for rejected
-            );
+            updateCounts(); // Update count badges on tabs
+            updatePayPeriodDisplay(); // Update the pay period details here
+            renderActiveTabRequests(); // Render requests for the currently active tab
 
         } catch (error) {
-            console.error('Error in loadAndRenderApprovedRejectedRequests:', error);
-            toggleErrorMessage(errorApprovedMessage, true);
-            toggleErrorMessage(errorRejectedMessage, true);
-            showToast('Failed to load approved/rejected time off requests. Please try again.', 'error');
+            console.error("Error loading PTO requests:", error);
+            showToast('Failed to load time off requests. Please try again.', 'error');
+            toggleErrorMessage(errorMessage, true);
         } finally {
-            toggleLoading(loadingApprovedRow, false);
-            toggleLoading(loadingRejectedRow, false);
+            toggleLoading(loadingRow, false);
         }
     }
 
@@ -129,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleDeleteClick(id) {
         requestIdToDelete = id;
         confirmationModal.classList.remove('hidden');
+        confirmationModal.classList.add('flex'); // Add flex to center modal
     }
 
     /**
@@ -139,64 +179,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             await deletePTORequest(requestIdToDelete);
-            allPendingRequests = allPendingRequests.filter(req => req.id !== parseInt(requestIdToDelete));
+            // Remove the deleted request from the pending list
+            allPtoRequests.pending = allPtoRequests.pending.filter(req => req.id !== parseInt(requestIdToDelete));
             showToast('Time off request deleted successfully!', 'success');
-            // Re-render pending table with updated data (no sorting applied now)
-            renderRequests(
-                allPendingRequests,
-                ptoRequestsList,
-                noRequestsMessage,
-                true, // allowActions = true
-                handleUpdateClick,
-                handleDeleteClick
-            );
+
+            updateCounts(); // Update count badges
+            updatePayPeriodDisplay(); // Re-evaluate pay period display
+            renderActiveTabRequests(); // Re-render the pending table (as that's where delete happens)
+
         } catch (error) {
             console.error('Error deleting PTO request:', error);
-            showToast('Failed to delete time off request. Please try again.', 'error');
+            showToast(error.message || 'Failed to delete time off request. Please try again.', 'error');
         } finally {
             requestIdToDelete = null; // Clear the stored ID
-            confirmationModal.classList.add('hidden'); // Hide modal
+            closeConfirmationModal(); // Hide modal
         }
     }
 
     /**
      * Cancels the deletion process.
      */
-    function cancelDeletion() {
+    function closeConfirmationModal() {
         requestIdToDelete = null;
         confirmationModal.classList.add('hidden');
+        confirmationModal.classList.remove('flex'); // Remove flex when hidden
     }
 
     // --- Event Listeners ---
 
-    // Removed: Table header sort listeners
-    // tableHeaders.forEach(header => {
-    //     header.addEventListener('click', function() {
-    //         const sortColumn = this.dataset.sort;
-    //         if (currentSortColumn === sortColumn) {
-    //             currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-    //         } else {
-    //             currentSortColumn = sortColumn;
-    //             currentSortDirection = 'asc'; // Default to ascending when changing column
-    //         }
-    //         updateSortIndicators(tableHeaders, currentSortColumn, currentSortDirection);
-    //         applySortingAndRenderPending();
-    //     });
-    // });
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const newStatus = button.dataset.status;
+            if (activeTabStatus !== newStatus) {
+                activeTabStatus = newStatus;
+                localStorage.setItem('activePtoTab', activeTabStatus); // Save active tab
+                updateTabDisplay(); // Update button styling and actions header
+                renderActiveTabRequests(); // Re-render table with new status
+            }
+        });
+    });
 
-    // Confirmation Modal button listeners
     confirmDeleteBtn.addEventListener('click', confirmDeletion);
-    cancelDeleteBtn.addEventListener('click', cancelDeletion);
+    cancelDeleteBtn.addEventListener('click', closeConfirmationModal);
 
     // Close modal if clicking outside
     confirmationModal.addEventListener('click', function(event) {
         if (event.target === confirmationModal) {
-            cancelDeletion();
+            closeConfirmationModal();
         }
     });
 
-    // Initial load and URL message check
-    loadAndRenderPendingRequests();
-    loadAndRenderApprovedRejectedRequests(); // Call new function to load approved/rejected data
-    checkURLForMessages();
+    // --- Initial Load ---
+    updateTabDisplay(); // Set initial tab styling based on localStorage
+    loadAllPtoRequests(); // Fetch all data and render based on active tab
+    checkURLForMessages(); // Check for URL messages (e.g., after a successful form submission)
 });
