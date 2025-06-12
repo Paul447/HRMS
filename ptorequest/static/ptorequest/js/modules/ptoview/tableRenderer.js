@@ -24,6 +24,7 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
         row.className = 'bg-white border-b hover:bg-gray-50';
 
         // Format dates and times
+        // Ensure request.start_date_time and request.end_date_time are valid dates
         const startDate = request.start_date_time ? new Date(request.start_date_time).toLocaleString('en-US', {
             year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         }) : 'N/A';
@@ -43,6 +44,9 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
                 break;
             case 'pending':
                 statusClass = 'status-pending';
+                break;
+            case 'cancelled': // Added 'cancelled' status
+                statusClass = 'status-cancelled';
                 break;
         }
 
@@ -82,12 +86,6 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
                     </div>
                 </td>
             `;
-        } else {
-            // Add an empty <td> for consistency if actions are not allowed,
-            // to match the number of columns in the header.
-            // This is important if the header doesn't also conditionally remove the column.
-            // However, in our HTML, we removed the header column for approved/rejected.
-            // So, no need for an extra <td> here.
         }
 
         row.innerHTML = rowHtml;
