@@ -68,6 +68,7 @@ urlpatterns = [
     path('auth/clock/', include('timeclock.url')),
     path('auth/punchreport/', include('punchreport.url')),
     path('auth/onshift/', include('onshift.url')),
+    path('auth/timeoff/', include('timeoff_management.url')),
 
     path('api/', include(router.urls)),
     path('api/clock/', include(clock_router.urls)),  # API for clock functionality

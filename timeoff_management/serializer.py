@@ -12,6 +12,17 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
     It includes nested serializers for display fields and uses PrimaryKeyRelatedField
     for writeable foreign keys with dynamic queryset filtering.
     """
+    user_first_name = serializers.CharField(
+        source='user.first_name',
+        read_only=True,
+        help_text="First name of the user who made the PTO request."
+    )
+    user_last_name = serializers.CharField(
+        source='user.last_name',
+        read_only=True,
+        help_text="Last name of the user who made the PTO request."
+    )
+
     department_name_display = serializers.CharField(
         source='department_name.name',
         read_only=True,
@@ -28,6 +39,8 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
         model = PTORequests
         fields = [
             'id',
+            'user_first_name',
+            'user_last_name',
             'department_name_display',
             'leave_type_display',
             'start_date_time',
@@ -36,7 +49,7 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
             'total_hours',
             'status',
         ]
-        read_only_fields = ['id','department_name','leave_type', 'department_name_display', 'leave_type_display', 'pay_period_start_date', 'pay_period_end_date', 'total_hours'] 
+        read_only_fields = ['id','department_name','leave_type', 'department_name_display', 'leave_type_display', 'pay_period_start_date', 'pay_period_end_date', 'total_hours', 'user_first_name', 'user_last_name','start_date_time', 'end_date_time'] 
 
     
 

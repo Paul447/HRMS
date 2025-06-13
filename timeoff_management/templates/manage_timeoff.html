@@ -1,0 +1,302 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Time Off Requests{% endblock %}
+{% block page_title %}Manage Time Off Requests{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">Manage Requests</span>
+    </div>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm p-5 md:p-6 border border-gray-100 animate-fade-in">
+    <div class="text-center mb-6 pb-3 border-b border-gray-100">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-1 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Manage Time Off Requests
+        </h2>
+        <p class="text-gray-600 text-sm max-w-xl mx-auto">Approve, reject, and manage time off requests.</p>
+    </div>
+
+    <div class="mb-5 flex space-x-4">
+        <div class="flex-grow">
+            <label for="filterDepartment" class="block text-gray-700 text-sm font-semibold mb-2">Filter by Department:</label>
+            <input type="text" id="filterDepartment" class="shadow border border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" placeholder="Enter department name">
+        </div>
+        <div class="flex-grow">
+            <label for="filterLeaveType" class="block text-gray-700 text-sm font-semibold mb-2">Filter by Leave Type:</label>
+            <input type="text" id="filterLeaveType" class="shadow border border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" placeholder="Enter leave type">
+        </div>
+    </div>
+
+    <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100">
+        <table class="w-full text-xs text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="py-2.5 px-3">SN</th> <!-- Changed from ID to SN -->
+                    <th scope="col" class="py-2.5 px-3">Name</th>
+                    <th scope="col" class="py-2.5 px-3">Dept.</th>
+                    <th scope="col" class="py-2.5 px-3">Leave Type</th>
+                    <th scope="col" class="py-2.5 px-3">Start Date</th>
+                    <th scope="col" class="py-2.5 px-3">End Date</th>
+                    <th scope="col" class="py-2.5 px-3">Hours</th>
+                    <th scope="col" class="py-2.5 px-3">Reason</th>
+                    <th scope="col" class="py-2.5 px-3">Status</th>
+                    <th scope="col" class="py-2.5 px-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ptoRequestsList" class="bg-white divide-y divide-gray-100">
+                <tr id="loadingRow">
+                    <td colspan="10" class="py-4 px-3 text-center">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 flex justify-between items-center">
+        <div id="paginationInfo" class="text-sm text-gray-700"></div>
+        <div id="paginationControls" class="space-x-2">
+            <button id="prevPage" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
+            <button id="nextPage" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-3 right-3 z-[100] space-y-2"></div>
+
+    <div id="confirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-70 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center transition-opacity duration-300">
+        <div class="relative p-5 border w-full max-w-sm shadow-lg rounded-lg bg-white transform transition-transform duration-300">
+            <div class="mt-2 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-5 font-semibold text-gray-900 mt-3">Update Request</h3>
+                <div class="mt-2 px-3 py-1.5">
+                    <p class="text-sm text-gray-600">Confirm changes to this request?</p>
+                </div>
+                <div class="mt-5 flex justify-center gap-3">
+                    <button id="cancelUpdateBtn" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">Cancel</button>
+                    <button id="confirmUpdateBtn" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ptoRequestsList = document.getElementById('ptoRequestsList');
+    const filterDepartmentInput = document.getElementById('filterDepartment');
+    const filterLeaveTypeInput = document.getElementById('filterLeaveType');
+    const prevPageButton = document.getElementById('prevPage');
+    const nextPageButton = document.getElementById('nextPage');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmUpdateBtn = document.getElementById('confirmUpdateBtn');
+    const cancelUpdateBtn = document.getElementById('cancelUpdateBtn');
+    let currentPage = 1;
+    let currentData = []; // Store fetched data
+    let selectedRequestId = null;
+
+    const API_ENDPOINT = '/api/time-off-manage/';
+    const ITEMS_PER_PAGE = 10; // Adjust based on your API's pagination settings
+
+    // Debounce function to limit the rate of function execution
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Function to display toast notifications
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `p-4 rounded-md shadow-md ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} animate-slide-in`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000); // Remove after 3 seconds
+    }
+
+    // Function to fetch and display data
+    async function fetchData(page = 1, filters = {}) {
+        ptoRequestsList.innerHTML = '<tr><td colspan="10" class="py-4 px-3 text-center">Loading...</td></tr>';
+        let url = `${API_ENDPOINT}?page=${page}`;
+        for (const key in filters) {
+            if (filters[key]) {
+                url += `&${key}=${encodeURIComponent(filters[key])}`; // Encode filter values
+            }
+        }
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            currentData = data.results; // Store fetched data
+            displayData(data.results, data.count, page, data.previous, data.next);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            ptoRequestsList.innerHTML = '<tr><td colspan="10" class="py-4 px-3 text-center text-red-500">Error loading data.</td></tr>';
+        }
+    }
+
+    // Function to display data in the table
+    function displayData(requests, totalCount, currentPage, prevUrl, nextUrl) {
+        ptoRequestsList.innerHTML = '';
+        if (requests.length === 0) {
+            ptoRequestsList.innerHTML = '<tr><td colspan="10" class="py-4 px-3 text-center">No requests found.</td></tr>';
+            prevPageButton.disabled = true;
+            nextPageButton.disabled = true;
+            paginationInfo.textContent = '';
+            return;
+        }
+
+        requests.forEach((request, index) => {
+            const serialNumber = (currentPage - 1) * ITEMS_PER_PAGE + index + 1; // Calculate SN
+            const row = document.createElement('tr');
+            row.dataset.requestId = request.id; // Store ID in dataset for updates
+            row.innerHTML = `
+                <td class="py-2 px-3">${serialNumber}</td> <!-- Use SN instead of ID -->
+                <td class="py-2 px-3">${request.user_first_name} ${request.user_last_name}</td>
+                <td class="py-2 px-3">${request.department_name_display}</td>
+                <td class="py-2 px-3">${request.leave_type_display}</td>
+                <td class="py-2 px-3">${new Date(request.start_date_time).toLocaleDateString()}</td>
+                <td class="py-2 px-3">${new Date(request.end_date_time).toLocaleDateString()}</td>
+                <td class="py-2 px-3">${request.total_hours}</td>
+                <td class="py-2 px-3"><textarea class="w-full h-10 border rounded p-1">${request.reason}</textarea></td>
+                <td class="py-2 px-3">
+                    <select class="status-select border rounded p-1">
+                        <option value="pending" ${request.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="approved" ${request.status === 'approved' ? 'selected' : ''}>Approved</option>
+                        <option value="rejected" ${request.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+                </td>
+                <td class="py-2 px-3 text-center">
+                    <button class="update-btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update</button>
+                </td>
+            `;
+            ptoRequestsList.appendChild(row);
+        });
+
+        // Update pagination controls
+        prevPageButton.disabled = !prevUrl;
+        nextPageButton.disabled = !nextUrl;
+        paginationInfo.textContent = `Page ${currentPage} of ${Math.ceil(totalCount / ITEMS_PER_PAGE)}`;
+    }
+
+    // Event listeners for pagination
+    prevPageButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchData(currentPage, getFilters());
+        }
+    });
+
+    nextPageButton.addEventListener('click', () => {
+        currentPage++;
+        fetchData(currentPage, getFilters());
+    });
+
+    // Function to get current filter values
+    function getFilters() {
+        return {
+            department_name_display: filterDepartmentInput.value.trim(),
+            leave_type_display: filterLeaveTypeInput.value.trim(),
+        };
+    }
+
+    // Debounced fetchData function for filtering
+    const debouncedFetchData = debounce(() => {
+        currentPage = 1; // Reset to first page on filter change
+        fetchData(currentPage, getFilters());
+    }, 300); // 300ms delay
+
+    // Event listeners for filtering with debouncing
+    filterDepartmentInput.addEventListener('input', debouncedFetchData);
+    filterLeaveTypeInput.addEventListener('input', debouncedFetchData);
+
+    // Event delegation for update button clicks
+    ptoRequestsList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('update-btn')) {
+            const row = event.target.closest('tr');
+            selectedRequestId = row.dataset.requestId; // Use dataset to get ID
+            if (selectedRequestId) {
+                confirmationModal.classList.remove('hidden');
+            }
+        }
+    });
+
+    // Event listeners for modal buttons
+    confirmUpdateBtn.addEventListener('click', async () => {
+        if (selectedRequestId) {
+            const row = Array.from(ptoRequestsList.rows).find(row => row.dataset.requestId === selectedRequestId);
+            const reason = row.querySelector('textarea').value;
+            const status = row.querySelector('.status-select').value;
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}${selectedRequestId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Function to get CSRF token
+                    },
+                    body: JSON.stringify({
+                        reason: reason,
+                        status: status
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to update request.');
+                }
+
+                showToast('Request updated successfully!', 'success');
+                confirmationModal.classList.add('hidden');
+                selectedRequestId = null;
+                fetchData(currentPage, getFilters()); // Refresh data after update
+            } catch (error) {
+                console.error('Error updating request:', error);
+                showToast(`Error: ${error.message}`, 'error');
+                confirmationModal.classList.add('hidden');
+                selectedRequestId = null;
+            }
+        }
+    });
+
+    cancelUpdateBtn.addEventListener('click', () => {
+        confirmationModal.classList.add('hidden');
+        selectedRequestId = null;
+    });
+
+    // Helper function to get CSRF token (required for Django POST/PUT/PATCH requests)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initial data fetch
+    fetchData(currentPage, getFilters());
+});
+</script>
+{% endblock %}

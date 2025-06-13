@@ -268,6 +268,42 @@
                         <span>Punch Report</span>
                     </a>
 
+
+                </div>
+            </div>
+
+
+            <div class="mt-2 hidden" id="admintoolsButton" aria-hidden="true">
+                <button onclick="toggleSubmenu('admintoolsSubmenu')"
+                    class="w-full flex items-center justify-between py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white shadow-text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2 focus:ring-offset-primary-900"
+                    aria-expanded="false" aria-controls="admintoolsSubmenu">
+                    <div class="flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-5m3 5v-1.5m3 1.5v-3m.5 6.5H9a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-.5z" />
+                        </svg>
+                        <span>Admin Tools</span>
+                    </div>
+                    <svg id="admintoolsSubmenu-arrow" xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5 text-primary-400 transform transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <div id="admintoolsSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
+                    <a href="{% url 'timeoff_management_template' %}" id="timeOffManagementLink"
+                        class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-primary-400 group-hover:text-white" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Time Off Pending</span>
+                    </a>
+
                     <a href="{% url 'on_shift_report' %}" id="onShiftReportLink"
                         class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -280,7 +316,6 @@
                     </a>
                 </div>
             </div>
-
 
 
             <form action="{% url 'logout' %}" method="POST" class="w-full">
