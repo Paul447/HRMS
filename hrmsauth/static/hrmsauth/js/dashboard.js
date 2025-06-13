@@ -18,40 +18,68 @@ function closeSidebar() {
 }
 
 // Highlight active sidebar link based on current URL
+// Highlight active sidebar link based on current URL and close sidebar on mobile click
 document.addEventListener('DOMContentLoaded', () => {
     const currentPath = window.location.pathname;
     const sidebarLinks = document.querySelectorAll('#sidebar a');
+    let exactMatchFound = false;
+    let exactMatchLink = null;
 
+    // First pass: Find an exact match
     sidebarLinks.forEach(link => {
-        // Handle direct links
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('bg-primary-700', 'border-l-4', 'border-primary-300', 'pl-3');
-            // Add subtle backdrop blur for active state
-            link.classList.add('bg-primary-900/50', 'shadow-inner-md'); // Darker semi-transparent background
-            link.classList.remove('hover:bg-primary-700', 'px-4'); // Remove general hover for active
+        const linkHref = link.getAttribute('href');
+        if (linkHref === currentPath) {
+            exactMatchFound = true;
+            exactMatchLink = link;
+        }
+    });
+
+    // Second pass: Apply styles based on exact match or parent match
+    sidebarLinks.forEach(link => {
+        const linkHref = link.getAttribute('href');
+        let isActive = false;
+
+        if (exactMatchFound) {
+            // If an exact match exists, only highlight the exact match
+            isActive = link === exactMatchLink;
+        } else {
+            // No exact match; check for parent match
+            // A link is a parent if currentPath starts with its href, it's not the root, and it's not the currentPath itself
+            isActive = currentPath.startsWith(linkHref) && linkHref !== '/' && currentPath !== linkHref + '/';
         }
 
-        // Handle submenu links (e.g., if /users is active, parent menu should open)
-        if (link.closest('.space-y-1') && link.getAttribute('href') === currentPath) {
-            let parentSubmenu = link.closest('.space-y-1.hidden');
-            if (parentSubmenu) {
-                parentSubmenu.classList.remove('hidden');
-                let parentButton = parentSubmenu.previousElementSibling;
+        if (isActive) {
+            // Apply active styles to the current active link
+            link.classList.add('bg-primary-700', 'border-l-4', 'border-primary-300', 'pl-3');
+            link.classList.add('bg-primary-900/50', 'shadow-inner-md');
+            link.classList.remove('hover:bg-primary-700', 'px-4'); // Remove general hover for active state
 
-                if (parentButton && parentButton.tagName === 'BUTTON' && parentButton.getAttribute(
-                        'onclick')) {
-                    let parentButtonIdMatch = parentButton.getAttribute('onclick').match(
-                        /'([^']*)'/);
+            // Check if this active link is a child within a submenu
+            let parentSubmenu = link.closest('.space-y-0\\.5'); // This targets the submenu container
+            if (parentSubmenu) {
+                parentSubmenu.classList.remove('hidden'); // Ensure the submenu is visible
+
+                // Find the button that controls this submenu
+                let parentButton = parentSubmenu.previousElementSibling;
+                if (parentButton && parentButton.tagName === 'BUTTON') {
+                    // Extract the submenu ID from the onclick attribute to find the arrow
+                    let parentButtonIdMatch = parentButton.getAttribute('onclick').match(/'([^']*)'/);
                     if (parentButtonIdMatch) {
                         let parentButtonId = parentButtonIdMatch[1];
                         const arrow = document.getElementById(parentButtonId + '-arrow');
                         if (arrow) {
-                            arrow.classList.add('rotate-90');
+                            arrow.classList.add('rotate-90'); // Rotate arrow to indicate open state
                         }
-                        // Add active styles to the parent button
+                        // Apply active styles to the parent button
                         parentButton.classList.add('bg-primary-700', 'bg-primary-900/50', 'shadow-inner-md');
+                        parentButton.setAttribute('aria-expanded', 'true'); // Set aria-expanded
                     }
                 }
+            }
+
+            // For mobile click: close sidebar
+            if (window.innerWidth < 768) { // Assuming md breakpoint is 768px
+                link.addEventListener('click', closeSidebar);
             }
         }
     });
@@ -59,7 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Trigger entrance animations for main content elements
     const animatedElements = document.querySelectorAll('.animate-on-load');
     animatedElements.forEach(el => {
-        el.style.animationName = 'fadeInUp';
+        el.style.animationName = 'fadeInUp'; // Ensure correct animation name
+        el.style.animationFillMode = 'forwards'; // Keep the end state
+        el.style.animationDuration = '0.5s'; // Example duration
+        el.style.animationDelay = '0.2s'; // Example delay
+    });
+
+    // Add event listener for window resize
+    window.addEventListener('resize', () => {
+        // Close sidebar if screen size becomes md and sidebar is open
+        if (window.innerWidth >= 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+            closeSidebar();
+        }
     });
 });
 

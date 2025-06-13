@@ -1,0 +1,57 @@
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div
+        class="bg-white rounded-lg shadow-lg-2 p-6 border border-secondary-200 shadow-inner-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl-2 relative animate-on-load">
+        <div class="absolute top-4 right-4 text-primary-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-20" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm-6-9a4 4 0 100-8 4 4 0 000 8zm6 11v-1a6 6 0 00-6-6H6a6 6 0 00-6 6v1h18z" />
+            </svg>
+        </div>
+        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Total Users</h4>
+        <p class="text-4xl font-bold text-primary-600">1,234</p>
+        <p class="text-secondary-500 text-sm mt-1">Last updated: 5 minutes ago</p>
+    </div>
+
+    <div
+        class="bg-white rounded-lg shadow-lg-2 p-6 border border-secondary-200 shadow-inner-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl-2 relative animate-on-load animate-delay-100">
+        <div class="absolute top-4 right-4 text-danger-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-20" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zm7-7l-2 2m0 0l-2-2m2 2V12" />
+            </svg>
+        </div>
+        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Pending Leave Requests</h4>
+        <p class="text-4xl font-bold text-danger-500">12</p>
+        <p class="text-secondary-500 text-sm mt-1">Requires your attention</p>
+    </div>
+
+    <div
+        class="bg-white rounded-lg shadow-lg-2 p-6 border border-secondary-200 shadow-inner-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-xl-2 relative animate-on-load animate-delay-200">
+        <div class="absolute top-4 right-4 text-accent-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-20" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+        </div>
+        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Active Groups</h4>
+        <p class="text-4xl font-bold text-accent-500">7</p>
+        <p class="text-secondary-500 text-sm mt-1">Organized for efficient management</p>
+    </div>
+</div>
+
+<div
+    class="bg-white rounded-lg shadow-lg-2 p-8 text-center border border-secondary-200 shadow-inner-sm animate-on-load animate-delay-300">
+    <h3 class="text-3xl font-bold text-primary-700 mb-4 animate-fade-in-up">Welcome to Your Admin Control
+        Panel!</h3>
+    <p
+        class="text-secondary-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animate-delay-100">
+        This powerful portal provides you with comprehensive tools to manage users, track time off, organize
+        groups, and set permissions. Get started by exploring the navigation on the left.
+    </p>
+
+</div>
+{% endblock content %}
