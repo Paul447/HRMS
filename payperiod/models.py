@@ -18,6 +18,16 @@ class PayPeriod(models.Model):
         help_text="The exact UTC date and time when this pay period ends. "
                   "Typically 23:59:59 on the end day of the period."
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At",
+        help_text="The date and time when this pay period was created."
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="The date and time when this pay period was last updated."
+    )
 
     class Meta:
         verbose_name = "Pay Period"

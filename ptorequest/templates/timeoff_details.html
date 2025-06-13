@@ -6,7 +6,8 @@
 {% block breadcrumb_items %}
 <li aria-current="page">
     <div class="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
         <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">My Requests</span>
@@ -18,120 +19,249 @@
 <div class="bg-white rounded-lg shadow-sm p-5 md:p-6 border border-gray-100 animate-fade-in">
     <div class="text-center mb-6 pb-3 border-b border-gray-100">
         <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-1 flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-700" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             My Time Off
         </h2>
         <p class="text-gray-600 text-sm max-w-xl mx-auto">View and manage your time off requests.</p>
-        {% comment %} This is for Viewing the pay period details {% endcomment %}
-        <div class="mt-2 text-xs text-gray-500" id="payPeriodDetails">
-            <span class="font-semibold">Pay Period:</span> 
+    </div>
+    <div class="flex-grow mb-5"> {# Added mb-5 for spacing #}
+        <label for="payPeriodSelector" class="block text-gray-700 text-sm font-semibold mb-2">Select Pay Period:</label>
+        <div class="relative">
+            <select id="payPeriodSelector"
+                class="appearance-none shadow border border-gray-300 rounded-lg w-full py-2.5 px-4 pr-10 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer">
+                <option value="">Loading Pay Periods...</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+            </div>
         </div>
     </div>
 
-    <div class="mb-5 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-        {# Tab Navigation #}
-        <div class="flex-grow">
-            <nav class="flex space-x-1 sm:space-x-2" aria-label="Tabs" role="tablist">
-                <button type="button" role="tab" id="tab-pending" data-status="pending" aria-selected="true"
-                        class="tab-button inline-flex items-center gap-x-1.5 py-2 px-2.5 sm:px-3 text-sm font-medium text-center rounded-md text-blue-700 bg-blue-50 focus:outline-none transition-all duration-200">
-                    Pending
-                    <span id="pendingCount" class="ml-0.5 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">0</span>
-                </button>
-                <button type="button" role="tab" id="tab-approved" data-status="approved" aria-selected="false"
-                        class="tab-button inline-flex items-center gap-x-1.5 py-2 px-2.5 sm:px-3 text-sm font-medium text-center rounded-md text-gray-700 hover:text-blue-700 hover:bg-blue-50 focus:outline-none transition-all duration-200">
-                    Approved
-                    <span id="approvedCount" class="ml-0.5 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">0</span>
-                </button>
-                <button type="button" role="tab" id="tab-rejected" data-status="rejected" aria-selected="false"
-                        class="tab-button inline-flex items-center gap-x-1.5 py-2 px-2.5 sm:px-3 text-sm font-medium text-center rounded-md text-gray-700 hover:text-blue-700 hover:bg-blue-50 focus:outline-none transition-all duration-200">
-                    Rejected
-                    <span id="rejectedCount" class="ml-0.5 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">0</span>
-                </button>
-            </nav>
-        </div>
-
-        {# New Request Button #}
+    <div class="mb-5 flex justify-end items-center">
         <a href="{% url 'ptorequest' %}"
-           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             New Request
         </a>
     </div>
 
-    {# Single Table for All Requests #}
-    <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100">
-        <table class="w-full text-xs text-left text-gray-700">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                    <th scope="col" class="py-2.5 px-3">#</th>
-                    <th scope="col" class="py-2.5 px-3">Dept.</th>
-                    <th scope="col" class="py-2.5 px-3">Leave Type</th>
-                    <th scope="col" class="py-2.5 px-3 date-col">Start Date</th>
-                    <th scope="col" class="py-2.5 px-3 date-col">End Date</th>
-                    <th scope="col" class="py-2.5 px-3">Hours</th>
-                    <th scope="col" class="py-2.5 px-3 reason-col">Reason</th>
-                    <th scope="col" class="py-2.5 px-3">Status</th>
-                    <th scope="col" class="py-2.5 px-3 text-center actions-col" id="actionsHeader">Actions</th> {# Actions header #}
-                </tr>
-            </thead>
-            <tbody id="ptoRequestsTableBody" class="bg-white divide-y divide-gray-100">
-                {# Loading row will be here #}
-                <tr id="loadingRow" class="loading-message">
-                    <td colspan="9" class="py-8 text-center text-blue-500">
-                        <div class="flex items-center justify-center space-x-2">
-                            <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span class="text-base font-medium">Loading requests...</span>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        {# Unified No Requests Message #}
-        <div id="noRequestsMessage" class="hidden py-6 text-center text-gray-500 text-sm bg-white rounded-b-lg no-data-message">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p id="noRequestsText">No pending requests.</p>
-            <a href="{% url 'ptorequest' %}" class="text-blue-600 hover:underline mt-1 inline-block font-medium text-xs">Submit a new request</a>
+    <div class="space-y-8">
+        {# Pending Requests Section #}
+        <div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">Pending Requests</h3>
+            <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100">
+                <table class="w-full text-xs text-left text-gray-700">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-2.5 px-3">#</th>
+                            <th scope="col" class="py-2.5 px-3">Dept.</th>
+                            <th scope="col" class="py-2.5 px-3">Leave Type</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">Start Date</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">End Date</th>
+                            <th scope="col" class="py-2.5 px-3">Hours</th>
+                            <th scope="col" class="py-2.5 px-3">Reason</th>
+                            <th scope="col" class="py-2.5 px-3">Status</th>
+                            <th scope="col" class="py-2.5 px-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ptoRequestsList" class="bg-white divide-y divide-gray-100">
+                        <tr id="loadingRow" class="loading-message">
+                            <td colspan="9" class="py-8 text-center text-blue-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    <span class="text-base font-medium">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="noRequestsMessage"
+                    class="hidden py-6 text-center text-gray-500 text-sm bg-white rounded-b-lg no-data-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-blue-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p>No **pending** requests.</p>
+                    <a href="{% url 'ptorequest' %}"
+                        class="text-blue-600 hover:underline mt-1 inline-block font-medium text-xs">Submit a new
+                        request</a>
+                </div>
+                <div id="errorMessage"
+                    class="hidden py-6 text-center text-red-600 text-sm bg-white rounded-b-lg error-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-red-500"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>Error loading pending requests. Please try again.</p>
+                </div>
+            </div>
         </div>
-        {# Unified Error Message #}
-        <div id="errorMessage" class="hidden py-6 text-center text-red-600 text-sm bg-white rounded-b-lg error-message">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p>Error loading requests. Please try again.</p>
+
+        {# Approved Requests Section #}
+        <div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">Approved Requests</h3>
+            <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100">
+                <table class="w-full text-xs text-left text-gray-700">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-2.5 px-3">#</th>
+                            <th scope="col" class="py-2.5 px-3">Dept.</th>
+                            <th scope="col" class="py-2.5 px-3">Leave Type</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">Start Date</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">End Date</th>
+                            <th scope="col" class="py-2.5 px-3">Hours</th>
+                            <th scope="col" class="py-2.5 px-3">Reason</th>
+                            <th scope="col" class="py-2.5 px-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvedRequestsList" class="bg-white divide-y divide-gray-100">
+                        <tr id="loadingApprovedRow" class="loading-message">
+                            <td colspan="8" class="py-8 text-center text-blue-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    <span class="text-base font-medium">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="noApprovedRequestsMessage"
+                    class="hidden py-6 text-center text-gray-500 text-sm bg-white rounded-b-lg no-data-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-green-400"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>No **approved** requests.</p>
+                </div>
+                <div id="errorApprovedMessage"
+                    class="hidden py-6 text-center text-red-600 text-sm bg-white rounded-b-lg error-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-red-500"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>Error loading approved requests. Please try again.</p>
+                </div>
+            </div>
+        </div>
+
+        {# Rejected Requests Section #}
+        <div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">Rejected Requests</h3>
+            <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100">
+                <table class="w-full text-xs text-left text-gray-700">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-2.5 px-3">#</th>
+                            <th scope="col" class="py-2.5 px-3">Dept.</th>
+                            <th scope="col" class="py-2.5 px-3">Leave Type</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">Start Date</th>
+                            <th scope="col" class="py-2.5 px-3 date-col">End Date</th>
+                            <th scope="col" class="py-2.5 px-3">Hours</th>
+                            <th scope="col" class="py-2.5 px-3">Reason</th>
+                            <th scope="col" class="py-2.5 px-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rejectedRequestsList" class="bg-white divide-y divide-gray-100">
+                        <tr id="loadingRejectedRow" class="loading-message">
+                            <td colspan="8" class="py-8 text-center text-blue-500">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    <span class="text-base font-medium">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="noRejectedRequestsMessage"
+                    class="hidden py-6 text-center text-gray-500 text-sm bg-white rounded-b-lg no-data-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-red-400"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>No **rejected** requests.</p>
+                </div>
+                <div id="errorRejectedMessage"
+                    class="hidden py-6 text-center text-red-600 text-sm bg-white rounded-b-lg error-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-red-500"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>Error loading rejected requests. Please try again.</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-{# Toast Notification Container #}
-<div id="toast-container" class="fixed top-3 right-3 z-[100] space-y-2"></div>
+    {# Pagination controls - Now per-section if needed, or remove if overall #}
+    {# Removed general pagination to imply per-section management, can be re-added if needed #}
 
-{# Confirmation Modal #}
-<div id="confirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-70 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center transition-opacity duration-300 confirm-modal-overlay">
-    <div class="relative p-5 border w-full max-w-sm shadow-lg rounded-lg bg-white transform transition-transform duration-300 animate-scale-in confirm-modal-content">
-        <div class="mt-2 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <h3 class="text-lg leading-5 font-semibold text-gray-900 mt-3">Delete Request</h3>
-            <div class="mt-2 px-3 py-1.5">
-                <p class="text-sm text-gray-600">This action is irreversible. Confirm deletion?</p>
-            </div>
-            <div class="mt-5 flex justify-center gap-3">
-                <button id="cancelDeleteBtn" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
-                    Cancel
-                </button>
-                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
-                    Delete
-                </button>
+    {# Toast Notification Container #}
+    <div id="toast-container" class="fixed top-3 right-3 z-[100] space-y-2"></div>
+
+    {# Confirmation Modal #}
+    <div id="confirmationModal"
+        class="fixed inset-0 bg-gray-900 bg-opacity-70 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center transition-opacity duration-300 confirm-modal-overlay">
+        <div
+            class="relative p-5 border w-full max-w-sm shadow-lg rounded-lg bg-white transform transition-transform duration-300 animate-scale-in confirm-modal-content">
+            <div class="mt-2 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-5 font-semibold text-gray-900 mt-3">Delete Request</h3>
+                <div class="mt-2 px-3 py-1.5">
+                    <p class="text-sm text-gray-600">This action is irreversible. Confirm deletion?</p>
+                </div>
+                <div class="mt-5 flex justify-center gap-3">
+                    <button id="cancelDeleteBtn"
+                        class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button id="confirmDeleteBtn"
+                        class="px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -140,33 +270,75 @@
 <style>
     /* General animations */
     @keyframes fade-in {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     .animate-fade-in {
         animation: fade-in 0.5s ease-out forwards;
     }
 
     /* Toast notification animations */
     @keyframes slide-in-right {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
+
     @keyframes fade-out-right {
-        from { opacity: 1; transform: translateX(0); }
-        to { opacity: 0; transform: translateX(100%); }
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
     }
-    .toast-enter-active { animation: slide-in-right 0.25s ease-out forwards; }
-    .toast-leave-active { animation: fade-out-right 0.4s ease-in forwards; }
+
+    .toast-enter-active {
+        animation: slide-in-right 0.25s ease-out forwards;
+    }
+
+    .toast-leave-active {
+        animation: fade-out-right 0.4s ease-in forwards;
+    }
 
     /* Modal animations */
     @keyframes scale-in {
-        from { transform: scale(0.97); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+        from {
+            transform: scale(0.97);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
+
     @keyframes fade-out-modal {
-        from { opacity: 1; }
-        to { opacity: 0; }
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
     }
 
     .animate-scale-in {
@@ -181,9 +353,15 @@
     .animate-spin {
         animation: spin 0.8s linear infinite;
     }
+
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     /* Styles for status badges */
@@ -198,30 +376,50 @@
         white-space: nowrap;
         text-transform: capitalize;
     }
+
     .status-pending {
-        background-color: #fefcf3; /* Light yellow */
-        color: #b45309; /* Darker yellow/orange */
-        border: 1px solid #fde68a; /* Soft border */
+        background-color: #fefcf3;
+        /* Light yellow */
+        color: #b45309;
+        /* Darker yellow/orange */
+        border: 1px solid #fde68a;
+        /* Soft border */
     }
+
     .status-approved {
-        background-color: #f0fdf4; /* Light green */
-        color: #166534; /* Darker green */
-        border: 1px solid #bbf7d0; /* Soft border */
+        background-color: #f0fdf4;
+        /* Light green */
+        color: #166534;
+        /* Darker green */
+        border: 1px solid #bbf7d0;
+        /* Soft border */
     }
+
     .status-rejected {
-        background-color: #fef2f2; /* Light red */
-        color: #be123c; /* Darker red */
-        border: 1px solid #fecaca; /* Soft border */
+        background-color: #fef2f2;
+        /* Light red */
+        color: #be123c;
+        /* Darker red */
+        border: 1px solid #fecaca;
+        /* Soft border */
     }
+
     .status-cancelled {
-        background-color: #f8fafc; /* Light gray */
-        color: #64748b; /* Darker gray */
-        border: 1px solid #e2e8f0; /* Soft border */
+        background-color: #f8fafc;
+        /* Light gray */
+        color: #64748b;
+        /* Darker gray */
+        border: 1px solid #e2e8f0;
+        /* Soft border */
     }
+
     .status-info {
-        background-color: #eff6ff; /* Light blue */
-        color: #1e40af; /* Darker blue */
-        border: 1px solid #bfdbfe; /* Soft border */
+        background-color: #eff6ff;
+        /* Light blue */
+        color: #1e40af;
+        /* Darker blue */
+        border: 1px solid #bfdbfe;
+        /* Soft border */
     }
 
 
@@ -229,23 +427,13 @@
     .date-col {
         min-width: 90px;
     }
-    .actions-col {
-        min-width: 70px; /* Ensure enough space for buttons */
-        width: 70px; /* Fixed width */
-    }
-    .reason-col {
-        max-width: 150px; /* Constrain reason column */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
 
     td.truncate {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 120px; /* Use a max-width for the TD itself */
-        display: inline-block; /* Required for max-width and text-overflow to work on TD */
+        max-width: 120px;
+        display: inline-block;
         vertical-align: middle;
     }
 
@@ -262,18 +450,55 @@
         font-weight: 500;
         color: #9ca3af;
     }
-
-    /* Tab button active state */
-    .tab-button.active {
-        color: #1d4ed8; /* blue-700 */
-        background-color: #eff6ff; /* blue-50 */
-        font-weight: 600;
-    }
 </style>
 
 {% load static %}
 <script src="{% static 'ptorequest/js/pto_list.js' %}" type="module" defer></script>
-{# The showToast function in this script block is now redundant as it's provided by uiHelpers.js #}
-{# You can remove it, or keep it if it's needed globally outside the module context. #}
-{# For a clean modular approach, remove this script block. #}
+<script>
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            console.error('Toast container not found!');
+            return;
+        }
+
+        const toast = document.createElement('div');
+        toast.className =
+            `p-2.5 rounded-md shadow-sm flex items-center space-x-2 text-white toast-enter-active min-w-[180px] max-w-xs`;
+
+        let bgColor = 'bg-green-600';
+        let icon =
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+
+        switch (type) {
+            case 'error':
+                bgColor = 'bg-red-600';
+                icon =
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                break;
+            case 'info':
+                bgColor = 'bg-blue-600';
+                icon =
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                break;
+            case 'warning':
+                bgColor = 'bg-yellow-600';
+                icon =
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg`;
+                break;
+            default:
+                break;
+        }
+
+        toast.innerHTML = `${icon}<span class="text-xs font-medium">${message}</span>`;
+        toast.classList.add(bgColor);
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('toast-enter-active');
+            toast.classList.add('toast-leave-active');
+            toast.addEventListener('animationend', () => toast.remove());
+        }, 2500);
+    }
+</script>
 {% endblock %}

@@ -22,7 +22,7 @@ from hrmsauth.views import *
 from department.api import register_userprofile as register_userprofile
 from hrmsauth.views import UserInfoViewSet
 from punchreport.views import PunchReportViewSet 
-from payperiod.views import PayPeriodUptoTodayViewSet,PayPeriodViewSetForPastTimeOffRequest
+from payperiod.views import PayPeriodUptoTodayViewSet,PayPeriodViewSetForPastTimeOffRequest,PayPeriodViewSetForCurrentFutureTimeOffRequest
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -40,7 +40,8 @@ router = DefaultRouter()
 router.register(r'user_info', UserInfoViewSet, basename='user_info')
 router.register(r'punch-report', PunchReportViewSet, basename='punch_report')
 router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_upto_today')
-router.register(r'future-pay-period', PayPeriodViewSetForPastTimeOffRequest, basename='future_pay_period')
+router.register(r'past-pay-period', PayPeriodViewSetForPastTimeOffRequest, basename='past_pay_period')
+router.register(r'current-future-pay-period', PayPeriodViewSetForCurrentFutureTimeOffRequest, basename='current_future_pay_period')
 router.register(r'departmentleavetype', DepartmentBasedLeaveTypeViewSet, basename='departmentleavetype')
 router.register(r'department', UserProfileViewSet, basename='userprofile')
 router.register(r'pto-requests', PTORequestsViewSet, basename='pto-requests')

@@ -46,5 +46,5 @@ class PayPeriodViewSetForCurrentFutureTimeOffRequest(viewsets.ReadOnlyModelViewS
         today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
         end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
         end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
-
-        return PayPeriod.objects.filter(end_date__gte=end_of_today_utc).order_by('start_date')[:20]
+        return PayPeriod.objects.filter(end_date__gte=end_of_today_utc).order_by('start_date')[:26]
+        

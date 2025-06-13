@@ -1,4 +1,4 @@
-// static/ptorequest/js/modules/ptoview/apiService.js
+// static/ptorequest/js/modules/apiService.js
 
 /**
  * Gets a CSRF token from cookies.
@@ -38,12 +38,18 @@ async function smartFetch(url, options = {}, isRetry = false) {
 }
 
 /**
- * Fetches PTO requests from the API (specifically pending ones based on your current endpoint usage).
+ * Fetches PTO requests from the API.
+ * @param {string} [payPeriodId=null] - Optional pay period ID to filter requests.
  * @returns {Promise<Array>} A promise that resolves to an array of PTO request objects.
  */
-export async function fetchPTORequests() {
+export async function fetchPTORequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch('/api/pto-requests/', {
+    let url = '/api/pto-requests/';
+    if (payPeriodId) {
+        url += `?pay_period_id=${payPeriodId}`;
+    }
+
+    const response = await smartFetch(url, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -61,12 +67,41 @@ export async function fetchPTORequests() {
 }
 
 /**
- * Fetches approved and rejected PTO requests.
- * @returns {Promise<Object>} A promise that resolves to an object containing approved_requests and rejected_requests arrays.
+ * Fetches Pay Periods from the API.
+ * @returns {Promise<Array>} A promise that resolves to an array of pay period objects.
  */
-export async function fetchApprovedAndRejectedRequests() {
+export async function fetchPAYPeriods() {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch('/api/pto-requests/approved-and-rejected/', {
+    const response = await smartFetch('/api/current-future-pay-period/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to load pay periods. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
+    }
+
+    return response.json();
+}
+
+/**
+ * Fetches the PTO request of Approved and Rejected ones.
+ * @param {string} [payPeriodId=null] - Optional pay period ID to filter requests.
+ * @returns {Promise<Object>} A promise that resolves to an object containing approved and rejected PTO request arrays.
+ */
+export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
+    const csrftoken = getCookie('csrftoken');
+    let url = '/api/pto-requests/approved-and-rejected/';
+    if (payPeriodId) {
+        url += `?pay_period_id=${payPeriodId}`;
+    }
+
+    const response = await smartFetch(url, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -102,5 +137,5 @@ export async function deletePTORequest(requestId) {
         const errorData = await response.json();
         throw new Error(`Failed to delete request. Status: ${response.status}. Error: ${JSON.stringify(errorData)}`);
     }
-    // No content expected for a successful DELETE, so no need to return JSON
+    // No content expected for a successful DELETE
 }
