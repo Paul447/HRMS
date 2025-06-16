@@ -12,4 +12,6 @@ class Department(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    is_time_off = models.BooleanField(default=False)
+    is_manager = models.BooleanField(default=False)
 

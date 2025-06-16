@@ -20,7 +20,7 @@ from ptorequest.models import PTORequests
 # User Management
 # -------------------------------------------------------
 from yearofexperience.admin import YearOfExperienceAdmin
-from department.admin import DepartmentAdmin, UserProfileAdmin
+from department.admin import DepartmentAdmin, UserProfileAdmin,CustomUserAdmin
 from yearofexperience.models import YearOfExperience
 from department.models import Department, UserProfile
 # -------------------------------------------------------
@@ -158,7 +158,7 @@ hrms_admin_site.register(PTORequests, PTORequestsAdmin)
 hrms_admin_site.register(YearOfExperience, YearOfExperienceAdmin)
 hrms_admin_site.register(Department, DepartmentAdmin)
 hrms_admin_site.register(UserProfile, UserProfileAdmin)
-hrms_admin_site.register(User, UserAdmin)
+hrms_admin_site.register(User, CustomUserAdmin)
 hrms_admin_site.register(Group, GroupAdmin)
 hrms_admin_site.register(EmployeeType, EmployeeTypeAdmin)
 hrms_admin_site.register(Pay_Frequency, PayFrequencyAdmin)

@@ -9,7 +9,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer(read_only=True)
     class Meta:
         model = UserProfile
-        fields = ['department']
+        fields = ['department', 'is_time_off', 'is_manager']
 
     def to_representation(self, instance):
         # Get the default representation (with nested department)
