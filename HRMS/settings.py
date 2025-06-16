@@ -98,6 +98,15 @@ REST_FRAMEWORK = {
     # 'rest_framework.renderers.JSONRenderer',
     # ]
 }
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_PORT = 587                 # Common ports: 587 (TLS), 465 (SSL)
+EMAIL_USE_TLS = True             # Use TLS (Transport Layer Security) for encryption
+EMAIL_USE_SSL = False            # Use SSL (Secure Sockets Layer) for encryption
+EMAIL_HOST_USER = 'pandeysubesh137@gmail.com' # e.g., your email address if using Gmail
+EMAIL_HOST_PASSWORD = 'sagr tmhd haar bber' #
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS to send header

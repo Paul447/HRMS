@@ -15,6 +15,33 @@ from payperiod.models import PayPeriod
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
 from department.models import UserProfile
+from department.models import Department
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.mail import send_mail
+
+
+from django.conf import settings
+
+def send_pto_notification_email(subject, plain_message, html_message, to_email_list):
+    from django.core.mail import send_mail
+    from django.conf import settings
+
+    from_email = settings.DEFAULT_FROM_EMAIL
+
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=from_email,
+            recipient_list=to_email_list,
+            html_message=html_message,
+            fail_silently=False,
+        )
+        print(f"✅ Email sent successfully to {', '.join(to_email_list)}")
+
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
 class IsTimeOffUser(permissions.BasePermission):
@@ -23,8 +50,14 @@ class IsTimeOffUser(permissions.BasePermission):
     to create PTO requests.
     """
     def has_permission(self, request, view):
-        user_profile = UserProfile.objects.filter(user=request.user).first()
-        return user_profile and user_profile.is_time_off
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        try:
+            user_profile = request.user.userprofile  # Assuming OneToOneField
+            return user_profile.is_time_off
+        except UserProfile.DoesNotExist:
+            return False
 
 @method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):
@@ -88,6 +121,59 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
             raise ValidationError({"detail": "No active pay period found for today's date. Cannot submit request."})
 
         serializer.save(user=self.request.user, pay_period=current_pay_period)
+
+        requester = self.request.user
+        requester_profile = UserProfile.objects.filter(user=requester).first()
+
+        if requester_profile:
+            department = requester_profile.department
+            department_supervisor = UserProfile.objects.filter(department=department, is_manager=True).first()
+        else:
+            department_supervisor = None  # Or raise an exception or handle accordingly
+        # Get the email id from the User model
+        if department_supervisor:
+            supervisor_email = department_supervisor.user.email
+
+            requester_name = requester.get_full_name()
+            start_date = serializer.validated_data.get('start_date_time')
+            end_date = serializer.validated_data.get('end_date_time')
+            hours = serializer.validated_data.get('total_hours', 0)
+            reason = serializer.validated_data.get('reason', '')
+            leave_type = serializer.validated_data.get('leave_type', '')
+
+            # Format datetime fields
+            formatted_start = start_date.strftime('%B %d, %Y %I:%M %p') if start_date else 'Not provided'
+            formatted_end = end_date.strftime('%B %d, %Y %I:%M %p') if end_date else 'Not provided'
+
+            # Build plain and HTML message
+            plain_message = f"""
+            A new PTO request has been submitted by {requester_name}.
+
+            Leave Type: {leave_type}
+            Start Date: {formatted_start}
+            End Date: {formatted_end}
+            Hours: {hours}
+            Reason: {reason}
+            """
+
+            html_message = f"""
+            <p>A new PTO request has been submitted by <strong>{requester_name}</strong>.</p>
+            <ul>
+                <li><strong>Leave Type:</strong> {leave_type}</li>
+                <li><strong>Start Date:</strong> {formatted_start}</li>
+                <li><strong>End Date:</strong> {formatted_end}</li>
+                <li><strong>Hours:</strong> {hours}</li>
+                <li><strong>Reason:</strong> {reason}</li>
+            </ul>
+            """
+
+            send_pto_notification_email(
+                subject='New PTO Request Submitted',
+                plain_message=plain_message.strip(),
+                html_message=html_message.strip(),
+                to_email_list=[supervisor_email]
+            )
+
 
     def perform_update(self, serializer):
         """
@@ -236,3 +322,4 @@ class GetPastPTORequestsView(TemplateView, LoginRequiredMixin):
 # Working on this # Refactor --> Create the tooltip to view the entire reason of the request. # DONE Let the normal user view only his/her own leave requests, based on the pay period, and also let the user filter the leave request based on the pay period, check for the intial parameter in the URL if there is no parameter then show the current pay period leave requests, if there is a parameter then show the leave requests for that pay period.
 # TODO Let the SuperUser edit the leave request comment box to add the comment for the leave request.
 # TODO Create the logic for leave request approval and rejection, if rejection don't do anything, if approved, create the logic to deduct the leave balance from the user on the basis of the leave type, and also update the leave request status to approved,
+# TODO Create the logic to mail popup to the manager of the specific department, if some of the user have poped up the PTO request.
