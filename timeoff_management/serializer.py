@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from ptorequest.models import PTORequests
 import pytz
-from leavetype.models import LeaveType
-from department.models import Department, UserProfile
-from leavetype.models import DepartmentBasedLeaveType
 
 
 class TimeOffManagementSerializer(serializers.ModelSerializer):
@@ -33,6 +30,19 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
         read_only=True,
         help_text="Display name of the leave type associated with the PTO request."
     )
+    start_date_time = serializers.DateTimeField(
+        read_only=True,
+        help_text="Start date and time of the PTO request.",
+        default_timezone=pytz.timezone('America/Chicago'),
+        format='%a %m/%d %H:%M %p'  # Optional: specify format if needed
+    )
+    end_date_time = serializers.DateTimeField(
+        read_only=True,
+        help_text="End date and time of the PTO request.",
+        default_timezone=pytz.timezone('America/Chicago'),
+        format='%a %m/%d %H:%M %p'  # Optional: specify format if needed
+    )
+
 
 
     class Meta:

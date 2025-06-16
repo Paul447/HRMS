@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="py-2 px-3">${request.user_first_name} ${request.user_last_name}</td>
                 <td class="py-2 px-3">${request.department_name_display}</td>
                 <td class="py-2 px-3">${request.leave_type_display}</td>
-                <td class="py-2 px-3">${new Date(request.start_date_time).toLocaleDateString()}</td>
-                <td class="py-2 px-3">${new Date(request.end_date_time).toLocaleDateString()}</td>
+                <td class="py-2 px-3">${(request.start_date_time)}</td>
+                <td class="py-2 px-3">${(request.end_date_time)}</td>
                 <td class="py-2 px-3">${request.total_hours}</td>
                 <td class="py-2 px-3"><textarea class="w-full h-10 border rounded p-1">${request.reason}</textarea></td>
                 <td class="py-2 px-3">
