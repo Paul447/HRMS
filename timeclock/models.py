@@ -61,6 +61,16 @@ class Clock(models.Model):
         verbose_name="Is Holiday",
         help_text="Indicates if this clock entry is for a holiday. Used for special handling."
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At",
+        help_text="The date and time when this clock entry was created."
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At",
+        help_text="The date and time when this clock entry was last updated."
+    )
 
     class Meta:
         verbose_name = "Clock Entry"

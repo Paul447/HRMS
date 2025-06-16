@@ -57,7 +57,7 @@ class PTORequests(models.Model):
         help_text="The exact date and time the PTO request ends (in UTC)."
     )
     total_hours = models.DecimalField(
-        max_digits=5,
+        max_digits=4,
         decimal_places=2,
         default=0.0,
         null=True,

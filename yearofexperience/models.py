@@ -6,8 +6,10 @@ User = get_user_model() # Best practice for referencing the User model
 
 class YearOfExperience(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="experience")
-    years_of_experience = models.FloatField(editable=False)  # Auto-calculated field
+    years_of_experience = models.DecimalField(max_digits=4, decimal_places=2, default=0.0, editable=False)  # Auto-calculated field
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def calculate_experience(self):
         """
         Calculate experience in years based on the user's `date_joined` (or a more

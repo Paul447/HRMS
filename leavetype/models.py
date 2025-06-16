@@ -13,6 +13,8 @@ class LeaveType(models.Model):
 class DepartmentBasedLeaveType(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     leave_type = models.ForeignKey(LeaveType, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.department.name} - {self.leave_type.name}"

@@ -1,16 +1,19 @@
 from django.db import models
 from employeetype.models import EmployeeType
 from payfrequency.models import Pay_Frequency
+from django.core.validators import MinValueValidator
 
 
 # Create your models here.
 class AccrualRates(models.Model):
     EXPERIENCE_CHOICES = [(i, f"{i} Year(s)") for i in range(1, 12)]  # 1 to 11 years
     year_of_experience = models.IntegerField(choices=EXPERIENCE_CHOICES)  
-    accrual_rate = models.FloatField(default=0.0)  # e.g., 1.5 hours per pay period
-    annual_accrual_rate = models.FloatField(default=0.0)  # e.g., 18 hours per year
+    accrual_rate = models.DecimalField(max_digits=4, decimal_places=2, validators=[MinValueValidator(0)])
+    annual_accrual_rate = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)])
     employee_type = models.ForeignKey(EmployeeType, on_delete=models.CASCADE, related_name="accrual_rates")
     pay_frequency = models.ForeignKey(Pay_Frequency, on_delete=models.CASCADE, related_name="accrual_rates")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Accrual Rate"
