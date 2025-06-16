@@ -1,101 +1,238 @@
-// Toggle sidebar on mobile
+// --- Sidebar and UI Toggles ---
+
+/**
+ * Toggles the visibility of the sidebar and its backdrop on mobile.
+ */
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('-translate-x-full');
     document.getElementById('sidebar-backdrop').classList.toggle('hidden');
 }
 
-// Toggle submenu visibility
+/**
+ * Toggles the visibility of a submenu and rotates its associated arrow.
+ * @param {string} id - The ID of the submenu to toggle.
+ */
 function toggleSubmenu(id) {
     document.getElementById(id).classList.toggle('hidden');
     const arrow = document.getElementById(id + '-arrow');
-    arrow.classList.toggle('rotate-90');
+    if (arrow) { // Ensure arrow exists before toggling
+        arrow.classList.toggle('rotate-90');
+    }
 }
 
-// Close sidebar when clicking on backdrop
+/**
+ * Closes the sidebar and hides its backdrop.
+ */
 function closeSidebar() {
     document.getElementById('sidebar').classList.add('-translate-x-full');
     document.getElementById('sidebar-backdrop').classList.add('hidden');
 }
 
-// Highlight active sidebar link based on current URL
-// Highlight active sidebar link based on current URL and close sidebar on mobile click
+// --- Data Fetching and UI Updates ---
+
+/**
+ * Fetches user data and updates the UI accordingly, including
+ * user name, avatar, and visibility of admin tools.
+ */
+async function getUserData() {
+    const userNameElement = document.querySelector('.user-name');
+    const userAvatarElement = document.getElementById('user-avatar');
+    const onShiftReportLink = document.getElementById('onShiftReportLink');
+    const timeOffManagementLink = document.getElementById('timeOffManagementLink');
+    const adminToolDiv = document.getElementById('admintoolsButton');
+
+    // Apply skeleton loading styles immediately
+    userNameElement?.classList.add('skeleton-loading', 'w-24', 'h-5');
+    userAvatarElement?.classList.add('skeleton-loading');
+    if (userAvatarElement) userAvatarElement.textContent = '';
+    if (userNameElement) userNameElement.textContent = '';
+
+    try {
+        const response = await fetch('/api/user_info/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            if (userNameElement) userNameElement.textContent = data.username || 'User';
+            if (userAvatarElement) userAvatarElement.textContent = data.username ? data.username.charAt(0).toUpperCase() : 'U';
+
+            const isSuperuser = data.hasOwnProperty('is_superuser') ? data.is_superuser : false;
+
+            const adminElements = [onShiftReportLink, timeOffManagementLink, adminToolDiv];
+
+            adminElements.forEach(el => {
+                if (el) { // Check if element exists before manipulating
+                    if (isSuperuser) {
+                        el.classList.remove('hidden');
+                        el.removeAttribute('aria-hidden');
+                        if (el === adminToolDiv) el.style.display = ''; // Reset display for main admin tools div
+                    } else {
+                        el.classList.add('hidden');
+                        el.setAttribute('aria-hidden', 'true');
+                        if (el === adminToolDiv) el.style.display = 'none'; // Explicitly hide main admin tools div
+                    }
+                }
+            });
+
+        } else {
+            console.error('Failed to fetch user data. Status:', response.status);
+            if (userNameElement) userNameElement.textContent = 'Guest';
+            if (userAvatarElement) userAvatarElement.textContent = '?';
+            // Hide admin elements on fetch failure
+            [onShiftReportLink, timeOffManagementLink, adminToolDiv].forEach(el => {
+                if (el) {
+                    el.classList.add('hidden');
+                    el.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        if (userNameElement) userNameElement.textContent = 'Guest';
+        if (userAvatarElement) userAvatarElement.textContent = '?';
+        // Hide admin elements on general error
+        [onShiftReportLink, timeOffManagementLink, adminToolDiv].forEach(el => {
+            if (el) {
+                el.classList.add('hidden');
+                el.setAttribute('aria-hidden', 'true');
+            }
+        });
+    } finally {
+        // Always remove skeleton loading styles
+        userNameElement?.classList.remove('skeleton-loading', 'w-24', 'h-5');
+        userAvatarElement?.classList.remove('skeleton-loading');
+    }
+}
+
+/**
+ * Fetches department data to determine if the time off link should be hidden.
+ */
+async function hideTimeOffLink() {
+    const timeOffLinkDiv = document.getElementById('timeoff');
+    if (!timeOffLinkDiv) {
+        console.warn('Time off link element not found. Skipping hideTimeOffLink.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/department/', { // Added leading slash for absolute path
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Assuming data is an array and the first element contains is_time_off
+            const timeoffFeatureEnabled = data[0]?.is_time_off;
+
+            if (timeoffFeatureEnabled) {
+                timeOffLinkDiv.classList.remove('hidden');
+                timeOffLinkDiv.removeAttribute('aria-hidden');
+            } else {
+                timeOffLinkDiv.classList.add('hidden');
+                timeOffLinkDiv.setAttribute('aria-hidden', 'true');
+            }
+        } else {
+            console.error('Failed to fetch department data. Status:', response.status);
+            // Default to visible or hidden if fetch fails based on your requirement.
+            // For now, let's assume it should be visible if we can't determine otherwise.
+            timeOffLinkDiv.classList.remove('hidden');
+            timeOffLinkDiv.removeAttribute('aria-hidden');
+        }
+    } catch (error) {
+        console.error('Error fetching department data:', error);
+        // Default to visible if an error occurs
+        timeOffLinkDiv.classList.remove('hidden');
+        timeOffLinkDiv.removeAttribute('aria-hidden');
+    }
+}
+
+// --- Initialization on DOM Content Load ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Run all initial setup functions
+    getUserData(); // Fetch and display user data
+    hideTimeOffLink(); // Conditionally hide time off link
+
     const currentPath = window.location.pathname;
     const sidebarLinks = document.querySelectorAll('#sidebar a');
     let exactMatchFound = false;
     let exactMatchLink = null;
 
-    // First pass: Find an exact match
+    // First pass: Find an exact match for the current URL
     sidebarLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
-        if (linkHref === currentPath) {
+        if (linkHref && linkHref === currentPath) {
             exactMatchFound = true;
             exactMatchLink = link;
         }
     });
 
-    // Second pass: Apply styles based on exact match or parent match
+    // Second pass: Apply active styles based on exact or parent match
     sidebarLinks.forEach(link => {
         const linkHref = link.getAttribute('href');
+        if (!linkHref) return; // Skip links without an href
+
         let isActive = false;
 
         if (exactMatchFound) {
-            // If an exact match exists, only highlight the exact match
             isActive = link === exactMatchLink;
         } else {
-            // No exact match; check for parent match
-            // A link is a parent if currentPath starts with its href, it's not the root, and it's not the currentPath itself
-            isActive = currentPath.startsWith(linkHref) && linkHref !== '/' && currentPath !== linkHref + '/';
+            // Check for parent match: currentPath starts with linkHref, but it's not the root and not an exact match
+            isActive = currentPath.startsWith(linkHref) && linkHref !== '/' && currentPath !== linkHref; // Removed trailing slash check as it complicates things for exact match only
         }
 
         if (isActive) {
-            // Apply active styles to the current active link
-            link.classList.add('bg-primary-700', 'border-l-4', 'border-primary-300', 'pl-3');
-            link.classList.add('bg-primary-900/50', 'shadow-inner-md');
+            // Apply active styles
+            link.classList.add('bg-primary-700', 'border-l-4', 'border-primary-300', 'pl-3', 'bg-primary-900/50', 'shadow-inner-md');
             link.classList.remove('hover:bg-primary-700', 'px-4'); // Remove general hover for active state
 
-            // Check if this active link is a child within a submenu
-            let parentSubmenu = link.closest('.space-y-0\\.5'); // This targets the submenu container
+            // If the active link is inside a submenu, ensure it's expanded
+            const parentSubmenu = link.closest('.space-y-0\\.5'); // Targets the submenu container
             if (parentSubmenu) {
-                parentSubmenu.classList.remove('hidden'); // Ensure the submenu is visible
+                parentSubmenu.classList.remove('hidden');
 
-                // Find the button that controls this submenu
-                let parentButton = parentSubmenu.previousElementSibling;
+                const parentButton = parentSubmenu.previousElementSibling;
                 if (parentButton && parentButton.tagName === 'BUTTON') {
-                    // Extract the submenu ID from the onclick attribute to find the arrow
-                    let parentButtonIdMatch = parentButton.getAttribute('onclick').match(/'([^']*)'/);
+                    const parentButtonIdMatch = parentButton.getAttribute('onclick')?.match(/'([^']*)'/);
                     if (parentButtonIdMatch) {
-                        let parentButtonId = parentButtonIdMatch[1];
+                        const parentButtonId = parentButtonIdMatch[1];
                         const arrow = document.getElementById(parentButtonId + '-arrow');
                         if (arrow) {
-                            arrow.classList.add('rotate-90'); // Rotate arrow to indicate open state
+                            arrow.classList.add('rotate-90');
                         }
-                        // Apply active styles to the parent button
                         parentButton.classList.add('bg-primary-700', 'bg-primary-900/50', 'shadow-inner-md');
-                        parentButton.setAttribute('aria-expanded', 'true'); // Set aria-expanded
+                        parentButton.setAttribute('aria-expanded', 'true');
                     }
                 }
             }
 
-            // For mobile click: close sidebar
-            if (window.innerWidth < 768) { // Assuming md breakpoint is 768px
+            // For mobile, close sidebar when an active link is clicked
+            if (window.innerWidth < 768) {
                 link.addEventListener('click', closeSidebar);
             }
         }
     });
 
-    // Trigger entrance animations for main content elements
+    // --- Animation Triggering ---
     const animatedElements = document.querySelectorAll('.animate-on-load');
     animatedElements.forEach(el => {
-        el.style.animationName = 'fadeInUp'; // Ensure correct animation name
-        el.style.animationFillMode = 'forwards'; // Keep the end state
-        el.style.animationDuration = '0.5s'; // Example duration
-        el.style.animationDelay = '0.2s'; // Example delay
+        // Setting animation properties directly in JS for better control
+        el.style.animationName = 'fadeInUp';
+        el.style.animationFillMode = 'forwards';
+        el.style.animationDuration = '0.5s';
+        el.style.animationDelay = '0.2s';
     });
 
-    // Add event listener for window resize
+    // --- Responsive Behavior ---
     window.addEventListener('resize', () => {
-        // Close sidebar if screen size becomes md and sidebar is open
+        // Close sidebar if screen size becomes tablet/desktop and sidebar is open
         if (window.innerWidth >= 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
             closeSidebar();
         }
@@ -108,6 +245,7 @@ async function getUserData() {
     const onShiftReportLink = document.getElementById('onShiftReportLink');
     const timeOffManagementLink = document.getElementById('timeOffManagementLink');
     const adminToolDiv = document.getElementById('admintoolsButton');
+    
 
     // Apply skeleton loading styles
     userNameElement.classList.add('skeleton-loading', 'w-24', 'h-5');
@@ -188,5 +326,34 @@ async function getUserData() {
     }
 }
 
-// Call the function on page load
-window.onload = getUserData;
+
+async function hideTimeOffLink() {
+    const timeOffLinkDiv = document.getElementById('timeoff');
+    try{
+        const response = await fetch('/api/department/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        // console.log('Response:', response);
+        if (response.ok){
+            const data = await response.json();
+            // console.log('Data:', data);
+            const timeoff = data[0].is_time_off;
+
+            if (!timeoff) {
+                timeOffLinkDiv.classList.add('hidden');
+                timeOffLinkDiv.setAttribute('aria-hidden', 'true'); // Hide from screen readers
+            } else {
+                timeOffLinkDiv.classList.remove('hidden');
+                timeOffLinkDiv.removeAttribute('aria-hidden'); // Make it accessible
+            }
+
+
+        }
+
+    }catch (error) {
+        console.error('Error:', error);
+    }
+}

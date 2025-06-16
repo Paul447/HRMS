@@ -1,6 +1,6 @@
 # Create your views here.
 from django.shortcuts import  redirect
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .models import PTORequests
 from .serializer import PTORequestsSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -14,8 +14,18 @@ from rest_framework.decorators import action
 from payperiod.models import PayPeriod
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
+from department.models import UserProfile
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
+class IsTimeOffUser(permissions.BasePermission):
+    """
+    Custom permission to only allow users with the 'is_time_off' profile flag
+    to create PTO requests.
+    """
+    def has_permission(self, request, view):
+        user_profile = UserProfile.objects.filter(user=request.user).first()
+        return user_profile and user_profile.is_time_off
+
 @method_decorator(csrf_protect, name='dispatch')
 class PTORequestsViewSet(viewsets.ModelViewSet):
     """
@@ -24,7 +34,7 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
     for user-specific access and status-based filtering.
     """
     serializer_class = PTORequestsSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTimeOffUser]  # Only allow authenticated users with 'is_time_off' profile flag
 
     def get_queryset(self):
         """

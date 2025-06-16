@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <div class="mt-2">
+        <div class="mt-2" id="timeoff" aria-hidden="true" class="hidden">
             <button onclick="toggleSubmenu('timeOffSubmenu')"
                 class="w-full flex items-center justify-between py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white shadow-text-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2 focus:ring-offset-primary-900"
                 aria-expanded="false" aria-controls="timeOffSubmenu">
@@ -94,7 +94,7 @@
             </button>
             <div id="timeOffSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
 
-                <a href="{% url 'timeoff_details' %}"
+                <a href="{% url 'timeoff_details' %}" id="timeoff_details"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-4 w-4 text-primary-400 group-hover:text-white" fill="none"
@@ -107,7 +107,7 @@
                     <span>Leave Details</span>
                 </a>
 
-                <a href="{% url 'ptorequest' %}"
+                <a href="{% url 'ptorequest' %}" id="timeoffrequest"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-4 w-4 text-primary-400 group-hover:text-white" fill="none"
@@ -117,7 +117,7 @@
                     </svg>
                     <span>Leave Request</span>
                 </a>
-                <a href="{% url 'past_ptorequests' %}"
+                <a href="{% url 'past_ptorequests' %}" id="timeoffhistory"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-4 w-4 text-primary-400 group-hover:text-white" fill="none"

@@ -11,3 +11,4 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return UserProfile.objects.filter(user=user)
+    
