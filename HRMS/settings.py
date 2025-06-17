@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "onshift",
     "timeoff_management",
     "adminorganizer",
+    "deptleaves",
     
     "django_filters",
 ]

@@ -32,6 +32,7 @@ from leavetype.views import DepartmentBasedLeaveTypeViewSet
 from department.views import UserProfileViewSet
 from ptorequest.views import PTORequestsViewSet , GetPTORequestsFromPastPayPeriodViewSet
 from ptobalance.views import PTOBalanceViewSet
+from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
 router = DefaultRouter()
@@ -49,6 +50,7 @@ router.register(r'past-pto-requests', GetPTORequestsFromPastPayPeriodViewSet, ba
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
 router.register(r'all-departments', DepartmentReturnView, basename='all_departments')
 router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, basename='time_off_requests')
+router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
 
 
 clock_router = DefaultRouter()
@@ -69,6 +71,7 @@ urlpatterns = [
     path('auth/punchreport/', include('punchreport.url')),
     path('auth/onshift/', include('onshift.url')),
     path('auth/timeoff/', include('timeoff_management.url')),
+    path('auth/department/', include('deptleaves.url')),
 
     path('api/', include(router.urls)),
     path('api/clock/', include(clock_router.urls)),  # API for clock functionality
