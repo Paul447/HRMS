@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from allowipaddress.models import AllowIpAddress
 import logging
 
@@ -25,7 +25,7 @@ class IPAddressRestrictionMiddleware:
             logger.info(f"Client IP: {client_ip}")
             if client_ip not in self.allowed_ips:
                 logger.warning(f"Forbidden access attempt from IP: {client_ip}")
-                return HttpResponseForbidden("Access denied from this IP address.")
+                return JsonResponse({"error": "Access denied", "message": "You have to be in office for Clock actions."}, status=403)
         response = self.get_response(request)
         return response
 

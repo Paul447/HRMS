@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     "adminorganizer",
     "deptleaves",
     "allowipaddress",
+    "notificationapp",
+
     
     "django_filters",
 ]

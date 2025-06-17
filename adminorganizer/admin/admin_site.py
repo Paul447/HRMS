@@ -23,6 +23,8 @@ from yearofexperience.admin import YearOfExperienceAdmin
 from department.admin import DepartmentAdmin, UserProfileAdmin,CustomUserAdmin
 from yearofexperience.models import YearOfExperience
 from department.models import Department, UserProfile
+from notificationapp.models import Notification
+from notificationapp.admin import NotificationAdmin
 # -------------------------------------------------------
 
 # Balance and Determining Factors
@@ -140,6 +142,7 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(Holiday, 'Holidays', 'holiday'),
             create_model_entry(PayPeriod, 'Pay Periods', 'payperiod'),
             create_model_entry(AllowIpAddress, 'Allowed IP Addresses', 'allowipaddress'),
+            create_model_entry(Notification, 'Notifications', 'notificationapp'),
         ]
         app_list.append({
             'name': 'System Adjustments',
@@ -172,3 +175,4 @@ hrms_admin_site.register(PayPeriod, PayPeriodAdmin)
 hrms_admin_site.register(LeaveType, LeaveTypeAdmin)
 hrms_admin_site.register(DepartmentBasedLeaveType, DepartmentBasedLeaveTypeAdmin)
 hrms_admin_site.register(AllowIpAddress, AllowIpAddressAdmin)
+hrms_admin_site.register(Notification, NotificationAdmin)
