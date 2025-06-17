@@ -35,6 +35,7 @@ from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
+from notificationapp.views import NotificationViewSet
 router = DefaultRouter()
 
 # router.register(r'clock', ClockDataViewSet, basename='clock')
@@ -51,7 +52,7 @@ router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
 router.register(r'all-departments', DepartmentReturnView, basename='all_departments')
 router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, basename='time_off_requests')
 router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
-
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 clock_router = DefaultRouter()
 clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')

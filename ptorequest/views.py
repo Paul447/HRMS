@@ -14,12 +14,16 @@ from rest_framework.decorators import action
 from payperiod.models import PayPeriod
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin
-from department.models import UserProfile
-from department.models import Department
+from department.models import UserProfile, Department # Make sure Department is imported
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+from notificationapp.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
+import logging # Import logging
+
+logger = logging.getLogger(__name__) # Get a logger for this module
 
 from django.conf import settings
 
@@ -29,6 +33,10 @@ def send_pto_notification_email(subject, plain_message, html_message, to_email_l
 
     from_email = settings.DEFAULT_FROM_EMAIL
 
+    if not to_email_list:
+        logger.warning(f"No recipient email addresses provided for subject: '{subject}'. Skipping email send.")
+        return
+
     try:
         send_mail(
             subject=subject,
@@ -36,12 +44,13 @@ def send_pto_notification_email(subject, plain_message, html_message, to_email_l
             from_email=from_email,
             recipient_list=to_email_list,
             html_message=html_message,
-            fail_silently=False,
+            fail_silently=False, # Set to True in production if you want to suppress errors
         )
-        print(f"✅ Email sent successfully to {', '.join(to_email_list)}")
+        logger.info(f"✅ Email sent successfully for PTO request to {', '.join(to_email_list)}")
 
     except Exception as e:
-        print(f"❌ Error sending email: {e}")
+        logger.error(f"❌ Error sending PTO notification email to {', '.join(to_email_list)}: {e}", exc_info=True)
+
 
 # Only dedicated to PTO Request Create Functionality Not for List, Update, Delete
 class IsTimeOffUser(permissions.BasePermission):
@@ -54,7 +63,9 @@ class IsTimeOffUser(permissions.BasePermission):
             return False
 
         try:
-            user_profile = request.user.userprofile  # Assuming OneToOneField
+            # Assumes a related_name of 'userprofile' on the User model
+            # or UserProfile has a OneToOneField back to User named 'user'
+            user_profile = request.user.userprofile
             return user_profile.is_time_off
         except UserProfile.DoesNotExist:
             return False
@@ -67,24 +78,16 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
     for user-specific access and status-based filtering.
     """
     serializer_class = PTORequestsSerializer
-    permission_classes = [IsAuthenticated, IsTimeOffUser]  # Only allow authenticated users with 'is_time_off' profile flag
+    permission_classes = [IsAuthenticated, IsTimeOffUser]
 
     def get_queryset(self):
-        """
-        Filters PTO requests to only show those belonging to the authenticated user.
-        For 'list' action, supports filtering by 'status' and 'pay_period_id'.
-        For 'retrieve', 'update', 'destroy' actions, allows fetching any of the user's requests.
-        """
         user = self.request.user
         queryset = PTORequests.objects.filter(user=user)
 
-        # Apply filters only for the 'list' action
         if self.action == 'list':
-            # Get status from query parameters, default to 'pending' for the primary list
             status_param = self.request.query_params.get('status', 'pending')
             queryset = queryset.filter(status__iexact=status_param)
 
-            # Get pay_period_id from query parameters
             pay_period_id = self.request.query_params.get('pay_period_id')
 
             if pay_period_id:
@@ -92,87 +95,137 @@ class PTORequestsViewSet(viewsets.ModelViewSet):
                     pay_period_id = int(pay_period_id)
                     queryset = queryset.filter(pay_period__id=pay_period_id)
                 except ValueError:
-                    # If invalid pay_period_id, return empty for safety on list views
                     queryset = PTORequests.objects.none()
             else:
-                # If no pay_period_id is provided for list, filter by the current pay period
                 now = timezone.now()
                 current_pay_period = PayPeriod.get_pay_period_for_date(now)
                 if current_pay_period:
                     queryset = queryset.filter(pay_period=current_pay_period)
                 else:
-                    # If no current pay period found, return an empty queryset for list
                     queryset = PTORequests.objects.none()
 
-        # Always order by created_at for consistency
         return queryset.order_by('-created_at')
-
 
     def perform_create(self, serializer):
         """
         Automatically assigns the authenticated user and the current pay period
         to the PTO request upon creation.
+        Handles notification creation and email sending for the supervisor.
         """
         now = timezone.now()
         current_pay_period = PayPeriod.get_pay_period_for_date(now)
 
         if not current_pay_period:
-            # Handle the case where no current pay period exists
             raise ValidationError({"detail": "No active pay period found for today's date. Cannot submit request."})
 
+        # Save the PTO request instance first. This is crucial for the signal to work,
+        # and also for `serializer.instance.id` to be available.
         serializer.save(user=self.request.user, pay_period=current_pay_period)
+        pto_request_instance = serializer.instance # Get the newly created instance
 
         requester = self.request.user
-        requester_profile = UserProfile.objects.filter(user=requester).first()
+        supervisor_to_notify = None
+        supervisor_email = None
 
-        if requester_profile:
+        try:
+            requester_profile = UserProfile.objects.get(user=requester)
             department = requester_profile.department
-            department_supervisor = UserProfile.objects.filter(department=department, is_manager=True).first()
-        else:
-            department_supervisor = None  # Or raise an exception or handle accordingly
-        # Get the email id from the User model
-        if department_supervisor:
-            supervisor_email = department_supervisor.user.email
+            if department:
+                # Find the first manager in the requester's department
+                supervisor_to_notify = UserProfile.objects.filter(
+                    department=department,
+                    is_manager=True
+                ).first()
 
-            requester_name = requester.get_full_name()
-            start_date = serializer.validated_data.get('start_date_time')
-            end_date = serializer.validated_data.get('end_date_time')
-            hours = serializer.validated_data.get('total_hours', 0)
-            reason = serializer.validated_data.get('reason', '')
-            leave_type = serializer.validated_data.get('leave_type', '')
+                if supervisor_to_notify and supervisor_to_notify.user:
+                    supervisor_email = supervisor_to_notify.user.email
+                else:
+                    logger.warning(
+                        f"No manager found in department '{department.name}' "
+                        f"for PTO request from {requester.username} (ID: {requester.id}). "
+                        f"Notification/Email to supervisor skipped."
+                    )
+            else:
+                logger.warning(
+                    f"Requester {requester.username} (ID: {requester.id}) has no department. "
+                    f"Notification/Email to supervisor skipped."
+                )
 
-            # Format datetime fields
-            formatted_start = start_date.strftime('%B %d, %Y %I:%M %p') if start_date else 'Not provided'
-            formatted_end = end_date.strftime('%B %d, %Y %I:%M %p') if end_date else 'Not provided'
-
-            # Build plain and HTML message
-            plain_message = f"""
-            A new PTO request has been submitted by {requester_name}.
-
-            Leave Type: {leave_type}
-            Start Date: {formatted_start}
-            End Date: {formatted_end}
-            Hours: {hours}
-            Reason: {reason}
-            """
-
-            html_message = f"""
-            <p>A new PTO request has been submitted by <strong>{requester_name}</strong>.</p>
-            <ul>
-                <li><strong>Leave Type:</strong> {leave_type}</li>
-                <li><strong>Start Date:</strong> {formatted_start}</li>
-                <li><strong>End Date:</strong> {formatted_end}</li>
-                <li><strong>Hours:</strong> {hours}</li>
-                <li><strong>Reason:</strong> {reason}</li>
-            </ul>
-            """
-
-            send_pto_notification_email(
-                subject='New PTO Request Submitted',
-                plain_message=plain_message.strip(),
-                html_message=html_message.strip(),
-                to_email_list=[supervisor_email]
+        except UserProfile.DoesNotExist:
+            logger.error(
+                f"UserProfile not found for requester {requester.username} (ID: {requester.id}). "
+                f"Notification/Email to supervisor skipped.", exc_info=True
             )
+        except Exception as e:
+            logger.error(f"Error finding supervisor for PTO request from {requester.username}: {e}", exc_info=True)
+
+
+        # Only create notification and send email if a supervisor was found and has an email
+        if supervisor_to_notify and supervisor_email:
+            try:
+                Notification.objects.create(
+                    actor=requester,
+                    recipient=supervisor_to_notify.user, # This needs to be a UserProfile instance
+                    verb='Time Off request',
+                    content_type=ContentType.objects.get_for_model(pto_request_instance),
+                    object_id=pto_request_instance.id,
+                    description=f"{requester.username} has created a Time Off request."
+                )
+                logger.info(f"In-app notification created for supervisor {supervisor_to_notify.user.username}.")
+
+                requester_name = requester.get_full_name()
+                start_date = serializer.validated_data.get('start_date_time')
+                end_date = serializer.validated_data.get('end_date_time')
+                hours = serializer.validated_data.get('total_hours', 0)
+                reason = serializer.validated_data.get('reason', '')
+                leave_type = serializer.validated_data.get('leave_type', '')
+
+                formatted_start = start_date.strftime('%B %d, %Y %I:%M %p') if start_date else 'Not provided'
+                formatted_end = end_date.strftime('%B %d, %Y %I:%M %p') if end_date else 'Not provided'
+
+                plain_message = f"""
+                A new PTO request has been submitted by {requester_name}.
+
+                Leave Type: {leave_type}
+                Start Date: {formatted_start}
+                End Date: {formatted_end}
+                Hours: {hours}
+                Reason: {reason}
+                """
+
+                html_message = f"""
+                <p>A new PTO request has been submitted by <strong>{requester_name}</strong>.</p>
+                <ul>
+                    <li><strong>Leave Type:</strong> {leave_type}</li>
+                    <li><strong>Start Date:</strong> {formatted_start}</li>
+                    <li><strong>End Date:</strong> {formatted_end}</li>
+                    <li><strong>Hours:</strong> {hours}</li>
+                    <li><strong>Reason:</strong> {reason}</li>
+                </ul>
+                """
+
+                send_pto_notification_email(
+                    subject='New PTO Request Submitted',
+                    plain_message=plain_message.strip(),
+                    html_message=html_message.strip(),
+                    to_email_list=[supervisor_email]
+                )
+
+            except Exception as e:
+                logger.error(f"FATAL ERROR during notification/email sending for PTO request ID {pto_request_instance.id}: {e}", exc_info=True)
+                # It's generally not good to let this error propagate and cause a 500
+                # because the PTO request itself was successfully created.
+                # However, if notification/email delivery is absolutely critical,
+                # you might re-raise or use a transaction to roll back the PTO request.
+                # For now, we're just logging.
+
+        else:
+            logger.warning(
+                f"Notification and email for PTO request from {requester.username} (ID: {pto_request_instance.id}) "
+                f"were skipped due to missing supervisor or supervisor email."
+            )
+
+    # ... rest of your ViewSet methods (perform_update, perform_destroy, actions) ...
 
 
     def perform_update(self, serializer):
