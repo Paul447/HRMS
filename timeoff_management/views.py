@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from department.models import Department
 from department.serializer import DepartmentSerializer
 from rest_framework.permissions import IsAuthenticated
-from payperiod.models import PayPeriod
+
 from django.utils import timezone
 from ptorequest.models import PTORequests
 from timeoff_management.serializer import TimeOffManagementSerializer
@@ -11,13 +11,16 @@ from timeoff_management.filter import PTORequestFilter
 from .pagination import TimeOffManagementPagination
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from department.models import UserProfile # Assuming UserProfile links to User
+
 from django.contrib.auth import get_user_model # Import to get the User model
 import logging
 from notificationapp.models import Notification
+from .services import send_pto_notification_and_email # Import the new service function
 
 
 logger = logging.getLogger(__name__)
+
+# logger = logging.getLogger(__name__)
 # Create your views here.
 class IsSuperuserCustom():
     """
@@ -59,19 +62,6 @@ class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
         queryset = PTORequests.objects.filter(status='pending')
         now = timezone.now()
 
-        # You had a trailing comma and some extra commas in your original return statement.
-        # Ensure your queryset is correctly ordered and returned.
-        # Example: Filter by current pay period (you'll need to define how to calculate this)
-        # For demonstration, let's assume 'start_date_time' should be within the last 30 days
-        # You'll need to adjust this logic to truly represent "current pay period"
-        # For example, you might have a 'pay_period_start' and 'pay_period_end' in your settings
-        # or calculate it based on your company's pay cycle.
-
-        # Example (replace with your actual pay period logic):
-        # from datetime import timedelta
-        # thirty_days_ago = now - timedelta(days=30)
-        # queryset = queryset.filter(start_date_time__gte=thirty_days_ago)
-
         return queryset.order_by('start_date_time')
 
     def perform_update(self, serializer):
@@ -80,38 +70,12 @@ class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
         """
         
         serializer.save()
+        
         requester = self.request.user
-        instance_user = serializer.instance.user
         instance_status = serializer.instance.status
         
-        # Get the User model dynamically
-        User = get_user_model() 
-
-        if instance_status == 'approved':
-            # Log the approval action
-            logger.info(f"PTO request approved by {requester.username} for user {instance_user.username}.")
-            # Create a notification for the user whose PTO request was approved
-            Notification.objects.create(
-                actor=requester,
-                recipient=instance_user,
-                verb='approved',
-                description=f"Your PTO request for {serializer.instance.start_date_time.strftime('%Y-%m-%d')} has been approved.",
-                level='success',
-                content_object=serializer.instance # Link directly to the PTORequest instance
-            )
-            
-        elif instance_status == 'rejected':
-            # Log the rejection action
-            logger.info(f"PTO request rejected by {requester.username} for user {instance_user.username}.")
-            # Create a notification for the user whose PTO request was rejected
-            Notification.objects.create(
-                actor=requester,
-                recipient=instance_user,
-                verb='rejected',
-                description=f"Your PTO request for {serializer.instance.start_date_time.strftime('%Y-%m-%d')} has been rejected.",
-                level='error',
-                content_object=serializer.instance # Link directly to the PTORequest instance
-            )
+        # Call the service function to handle notifications and emails
+        send_pto_notification_and_email(serializer.instance, requester, instance_status)
         
 
 
@@ -126,4 +90,3 @@ class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
