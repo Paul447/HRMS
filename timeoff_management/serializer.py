@@ -66,9 +66,16 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """
         Updates an existing PTORequest instance.
-        The 'total_hours' is automatically calculated in `validate`.
         """
-        # Remove display fields as they are not model fields
+        # Save the original status before the update for comparison
+        # This allows us to check if the status *actually changed*
+        instance._original_status = instance.status
 
-        return super().update(instance, validated_data)
-    
+        # Perform the actual update using super().update()
+        updated_instance = super().update(instance, validated_data)
+
+        # After the update, we can access the new status and the original status
+        # This logic will be handled in the perform_update of the ViewSet,
+        # but storing original status might be useful for custom serializer logic if needed.
+
+        return updated_instance

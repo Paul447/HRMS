@@ -91,9 +91,9 @@ class PTORequests(models.Model):
         ordering = ['-start_date_time']
 
     def __str__(self):
-        local_start = timezone.localtime(self.start_date_time).strftime('%Y-%m-%d %H:%M')
-        local_end = timezone.localtime(self.end_date_time).strftime('%Y-%m-%d %H:%M')
-        return f"{self.user.username} ({self.department_name.name}) - Time off: {local_start} to {local_end} ({self.total_hours or 0} hrs)"
+        local_start = timezone.localtime(self.start_date_time).strftime('%a %m/%d %H:%M %p')
+        local_end = timezone.localtime(self.end_date_time).strftime('%a %m/%d %H:%M %p')
+        return f"{self.user.first_name} {self.user.last_name} (Leave Type : {self.leave_type.name}) - Time off: {local_start} to {local_end} ({self.total_hours or 0} hrs)"
 
     def clean(self):
         if self.start_date_time and self.end_date_time:

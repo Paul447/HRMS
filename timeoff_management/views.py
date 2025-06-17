@@ -11,9 +11,13 @@ from timeoff_management.filter import PTORequestFilter
 from .pagination import TimeOffManagementPagination
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from department.models import UserProfile # Assuming UserProfile links to User
+from django.contrib.auth import get_user_model # Import to get the User model
+import logging
+from notificationapp.models import Notification
 
 
-
+logger = logging.getLogger(__name__)
 # Create your views here.
 class IsSuperuserCustom():
     """
@@ -70,9 +74,46 @@ class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
 
         return queryset.order_by('start_date_time')
 
-    # def perform_update(self, serializer):
+    def perform_update(self, serializer):
+        """
+        Handles the update of an existing PTO request.
+        """
+        
+        serializer.save()
+        requester = self.request.user
+        instance_user = serializer.instance.user
+        instance_status = serializer.instance.status
+        
+        # Get the User model dynamically
+        User = get_user_model() 
 
-    #     serializer.save()
+        if instance_status == 'approved':
+            # Log the approval action
+            logger.info(f"PTO request approved by {requester.username} for user {instance_user.username}.")
+            # Create a notification for the user whose PTO request was approved
+            Notification.objects.create(
+                actor=requester,
+                recipient=instance_user,
+                verb='approved',
+                description=f"Your PTO request for {serializer.instance.start_date_time.strftime('%Y-%m-%d')} has been approved.",
+                level='success',
+                content_object=serializer.instance # Link directly to the PTORequest instance
+            )
+            
+        elif instance_status == 'rejected':
+            # Log the rejection action
+            logger.info(f"PTO request rejected by {requester.username} for user {instance_user.username}.")
+            # Create a notification for the user whose PTO request was rejected
+            Notification.objects.create(
+                actor=requester,
+                recipient=instance_user,
+                verb='rejected',
+                description=f"Your PTO request for {serializer.instance.start_date_time.strftime('%Y-%m-%d')} has been rejected.",
+                level='error',
+                content_object=serializer.instance # Link directly to the PTORequest instance
+            )
+        
+
 
 class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
     """
