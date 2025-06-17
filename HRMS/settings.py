@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "timeoff_management",
     "adminorganizer",
     "deptleaves",
+    "allowipaddress",
     
     "django_filters",
 ]
@@ -83,6 +84,7 @@ MIDDLEWARE = [
     'HRMS.jwt_auth_middleware.logout_middleware.LogoutMiddleware',          # Must run early to handle logout path
     'HRMS.jwt_auth_middleware.auth_status_middleware.AuthStatusMiddleware', # Sets up auth header for DRF
     'HRMS.jwt_auth_middleware.token_refresh_middleware.TokenRefreshMiddleware', # 
+    'HRMS.timeclock_security.middleware.IPAddressRestrictionMiddleware',  # Custom middleware for time clock
 
 ]
 MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")

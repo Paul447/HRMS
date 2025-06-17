@@ -43,6 +43,8 @@ from payperiod.admin import PayPeriodAdmin
 from biweeklycron.models import BiweeklyCron
 from holiday.models import Holiday
 from payperiod.models import PayPeriod
+from allowipaddress.admin import AllowIpAddressAdmin
+from allowipaddress.models import AllowIpAddress
 # -------------------------------------------------------
 
 # Leave Type and Department Based Leave Type Assignment
@@ -137,6 +139,7 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(BiweeklyCron, 'Biweekly Cron Jobs', 'biweeklycron'),
             create_model_entry(Holiday, 'Holidays', 'holiday'),
             create_model_entry(PayPeriod, 'Pay Periods', 'payperiod'),
+            create_model_entry(AllowIpAddress, 'Allowed IP Addresses', 'allowipaddress'),
         ]
         app_list.append({
             'name': 'System Adjustments',
@@ -168,3 +171,4 @@ hrms_admin_site.register(Holiday, HolidayAdmin)
 hrms_admin_site.register(PayPeriod, PayPeriodAdmin)
 hrms_admin_site.register(LeaveType, LeaveTypeAdmin)
 hrms_admin_site.register(DepartmentBasedLeaveType, DepartmentBasedLeaveTypeAdmin)
+hrms_admin_site.register(AllowIpAddress, AllowIpAddressAdmin)
