@@ -357,3 +357,233 @@ async function hideTimeOffLink() {
         console.error('Error:', error);
     }
 }
+
+// hrmsauth/static/hrmsauth/js/dashboard.js
+
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Sidebar Toggle (existing) ---
+    window.toggleSidebar = function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    };
+
+
+
+
+    // --- Notification Functionality ---
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationCount = document.getElementById('notification-count');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const notificationList = document.getElementById('notification-list');
+    const noNotificationsMessage = document.getElementById('no-notifications');
+    const markAllReadButton = document.getElementById('mark-all-read');
+
+    // Function to get CSRF token (adjust if your setup is different)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const CSRF_TOKEN = getCookie('csrftoken'); // Assumes CSRF token is in a cookie
+
+    // Helper to format timestamp
+    function formatTimeAgo(timestamp) {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const seconds = Math.round((now - past) / 1000);
+        const minutes = Math.round(seconds / 60);
+        const hours = Math.round(minutes / 60);
+        const days = Math.round(hours / 24);
+        const months = Math.round(days / 30.44); // Average days in a month
+        const years = Math.round(days / 365.25); // Average days in a year
+
+        if (seconds < 60) return `${seconds}s ago`;
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        if (days < 30) return `${days}d ago`;
+        if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
+        return `${years} year${years > 1 ? 's' : ''} ago`;
+    }
+
+
+    // Function to fetch and render notifications
+    async function fetchNotifications() {
+        try {
+            const response = await fetch('/api/notifications/unread/'); // Your unread endpoint
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const notifications = await response.json();
+            updateNotificationUI(notifications);
+            return notifications; // Return for further processing if needed
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            notificationCount.textContent = '0';
+            notificationList.innerHTML = '';
+            noNotificationsMessage.classList.remove('hidden');
+            markAllReadButton.disabled = true;
+        }
+    }
+
+    // Function to update the notification UI
+    function updateNotificationUI(notifications) {
+        notificationCount.textContent = notifications.length;
+        notificationList.innerHTML = ''; // Clear existing notifications
+
+        if (notifications.length === 0) {
+            noNotificationsMessage.classList.remove('hidden');
+            markAllReadButton.disabled = true;
+        } else {
+            noNotificationsMessage.classList.add('hidden');
+            markAllReadButton.disabled = false;
+            notifications.forEach(notification => {
+                const notificationItem = document.createElement('div');
+                notificationItem.classList.add('flex', 'items-start', 'px-4', 'py-3', 'hover:bg-secondary-50', 'transition-colors', 'duration-150', 'border-b', 'border-secondary-100', 'last:border-b-0', 'group', notification.read ? 'text-secondary-500' : 'text-secondary-800', notification.read ? '' : 'font-medium');
+                notificationItem.setAttribute('data-notification-id', notification.id);
+
+                let iconSvg = `<svg class="h-5 w-5 flex-shrink-0 mt-1 mr-3 ${notification.read ? 'text-secondary-400' : 'text-primary-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                if (notification.verb.includes("Time Off")) {
+                    iconSvg = `<svg class="h-5 w-5 flex-shrink-0 mt-1 mr-3 ${notification.read ? 'text-secondary-400' : 'text-green-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+                }
+                // Add more icon conditions based on 'verb' or 'content_type_model'
+
+                notificationItem.innerHTML = `
+                    ${iconSvg}
+                    <div class="flex-grow">
+                        <p class="text-sm leading-snug">${notification.description}</p>
+                        <p class="text-xs text-secondary-500 mt-1">${formatTimeAgo(notification.timestamp)}</p>
+                        ${notification.content_object_display ? `<p class="text-xs text-secondary-600 mt-1 italic">${notification.content_object_display}</p>` : ''}
+                        ${notification.action_url ? `<a href="${notification.action_url}" class="text-xs text-primary-500 hover:underline mt-1 block">View Details</a>` : ''}
+                    </div>
+                    <div class="flex flex-col ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        <button class="mark-toggle-btn text-xs px-2 py-1 rounded hover:bg-primary-100 text-primary-600 mb-1"
+                                data-id="${notification.id}" data-read="${notification.read}">
+                            ${notification.read ? 'Mark as Unread' : 'Mark as Read'}
+                        </button>
+                        <button class="delete-notification-btn text-xs px-2 py-1 rounded hover:bg-red-100 text-danger-500"
+                                data-id="${notification.id}">
+                            Delete
+                        </button>
+                    </div>
+                `;
+                notificationList.appendChild(notificationItem);
+            });
+            attachNotificationEventListeners(); // Re-attach event listeners for newly added elements
+        }
+    }
+
+    // Attach event listeners for mark/delete buttons
+    function attachNotificationEventListeners() {
+        document.querySelectorAll('.mark-toggle-btn').forEach(button => {
+            button.onclick = async (event) => {
+                event.stopPropagation(); // Prevent dropdown from closing if it's open
+                const id = button.dataset.id;
+                const isCurrentlyRead = button.dataset.read === 'true';
+                const endpoint = isCurrentlyRead ? `/api/notifications/${id}/mark_as_unread/` : `/api/notifications/${id}/mark_as_read/`;
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': CSRF_TOKEN,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    if (!response.ok) throw new Error('Failed to toggle read status');
+                    console.log(`Notification ${id} status toggled.`);
+                    fetchNotifications(); // Refresh notifications
+                } catch (error) {
+                    console.error('Error toggling notification status:', error);
+                }
+            };
+        });
+
+        document.querySelectorAll('.delete-notification-btn').forEach(button => {
+            button.onclick = async (event) => {
+                event.stopPropagation(); // Prevent dropdown from closing
+                if (!confirm('Are you sure you want to delete this notification?')) {
+                    return;
+                }
+                const id = button.dataset.id;
+                try {
+                    const response = await fetch(`/api/notifications/${id}/delete/`, { // Note: Your URL is /api/notifications/{pk}/delete/
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': CSRF_TOKEN,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    if (response.status === 204) { // 204 No Content for successful deletion
+                        console.log(`Notification ${id} deleted.`);
+                        fetchNotifications(); // Refresh notifications
+                    } else {
+                        throw new Error(`Failed to delete notification, status: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error deleting notification:', error);
+                }
+            };
+        });
+    }
+
+
+    // Toggle notification dropdown
+    notificationBell.addEventListener('click', async (event) => {
+        event.stopPropagation(); // Prevent click from bubbling to document and closing immediately
+        const isHidden = notificationDropdown.classList.contains('hidden');
+        if (isHidden) {
+            notificationDropdown.classList.remove('hidden');
+            await fetchNotifications(); // Fetch and display notifications when opening
+        } else {
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+    // Mark all as read functionality
+    markAllReadButton.addEventListener('click', async () => {
+        if (markAllReadButton.disabled) return;
+        try {
+            const response = await fetch('/api/notifications/mark_all_as_read/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+            if (!response.ok) throw new Error('Failed to mark all as read');
+            const data = await response.json();
+            console.log(data.message);
+            fetchNotifications(); // Refresh notifications after marking all as read
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+        }
+    });
+
+    // Close dropdown if clicked outside
+    document.addEventListener('click', (event) => {
+        if (!notificationDropdown.contains(event.target) && !notificationBell.contains(event.target)) {
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+    // Initial fetch of unread count when the page loads
+    fetchNotifications();
+
+    // Optional: Periodically refresh notifications (e.g., every 5 minutes)
+    // setInterval(fetchNotifications, 5 * 60 * 1000);
+});
