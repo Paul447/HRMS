@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     
     "django_filters",
 ]
+
+COMPANY_NAME = "University Police Department"
 SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",

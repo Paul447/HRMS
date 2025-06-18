@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from notificationapp.models import Notification
 from django.contrib.auth import get_user_model
+from HRMS.settings import COMPANY_NAME
 
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ def send_pto_notification_and_email(pto_request_instance, requester, new_status)
     """
     recipient = pto_request_instance.user
     start_date_time = pto_request_instance.start_date_time.strftime('%Y-%m-%d')
+    time_off_hours = pto_request_instance.total_hours
     subject = ""
     notification_description = ""
     email_template_name = ""
@@ -59,17 +61,18 @@ def send_pto_notification_and_email(pto_request_instance, requester, new_status)
     # Send an email
     try:
         context = {
-            'user_name': recipient.username,
+            'user_name': recipient.first_name,
             'start_date': start_date_time,
             'end_date': pto_request_instance.end_date_time.strftime('%Y-%m-%d'),
             'reason': pto_request_instance.reason,
             'status': new_status.capitalize(),
-            'approved_by': requester.username,
-            'site_name': 'Your Company Name', # Replace with your actual site name
-            'site_url': 'https://yourcompany.com', # Replace with your actual site URL
+            'approved_by': requester.first_name,
+            'time_off': time_off_hours,
+            'site_name': COMPANY_NAME,
+            # 'site_url': 'https://yourcompany.com', # Replace with your actual site URL
         }
         html_message = render_to_string(email_template_name, context)
-        plain_message = f"Dear {recipient.username},\n\nYour PTO request from {start_date_time} to {pto_request_instance.end_date_time.strftime('%Y-%m-%d')} has been {new_status}.\n\nReason: {pto_request_instance.reason}\n\nRegards,\nYour Company Name"
+        plain_message = f"Dear {recipient.first_name},\n\nYour PTO request from {start_date_time} to {pto_request_instance.end_date_time.strftime('%Y-%m-%d')} has been {new_status}.\n\nReason: {pto_request_instance.reason}\n\nRegards,\nYour Company Name"
 
         send_mail(
             subject,
