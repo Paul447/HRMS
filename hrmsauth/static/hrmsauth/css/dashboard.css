@@ -59,3 +59,29 @@ aside::-webkit-scrollbar-thumb:hover {
     animation: skeleton 1.5s infinite linear;
     border-radius: 0.25rem;
 }
+/* hrmsauth/static/hrmsauth/css/dashboard.css */
+
+/* For Webkit browsers (Chrome, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9; /* secondary-100 */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1; /* secondary-300 */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; /* secondary-400 */
+}
+
+/* For Firefox (requires scrollbar-width and scrollbar-color) */
+.custom-scrollbar {
+    scrollbar-width: thin; /* "auto" or "none" */
+    scrollbar-color: #cbd5e1 #f1f5f9; /* thumb and track color */
+}
