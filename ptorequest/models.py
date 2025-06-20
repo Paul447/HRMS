@@ -13,10 +13,12 @@ from leavetype.models import LeaveType  # Assuming LeaveType is defined in leave
 # Assuming Department is defined in department/models.py
 from department.models import Department
 from rest_framework.response import Response
+from .utils.file_upload_helpers import pto_document_upload_path
 
 
 
 from django.contrib.auth.models import User
+# ptorequest/models.py
 
 class PTORequests(models.Model):
     """
@@ -82,7 +84,7 @@ class PTORequests(models.Model):
         verbose_name="Associated Pay Period",
         help_text="The pay period to which this PTO request portion belongs. Assigned automatically."
     )
-    medical_document = models.FileField(upload_to='documents/', null=True, blank=True)
+    medical_document = models.FileField(upload_to=pto_document_upload_path, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
