@@ -47,6 +47,8 @@ from holiday.models import Holiday
 from payperiod.models import PayPeriod
 from allowipaddress.admin import AllowIpAddressAdmin
 from allowipaddress.models import AllowIpAddress
+from sickpolicy.admin import SickLeaveProratedValueAdmin, MaxSickValueAdmin
+from sickpolicy.models import SickLeaveProratedValue ,MaxSickValue
 # -------------------------------------------------------
 
 # Leave Type and Department Based Leave Type Assignment
@@ -143,6 +145,8 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(PayPeriod, 'Pay Periods', 'payperiod'),
             create_model_entry(AllowIpAddress, 'Allowed IP Addresses', 'allowipaddress'),
             create_model_entry(Notification, 'Notifications', 'notificationapp'),
+            create_model_entry(SickLeaveProratedValue, 'Sick Policies', 'sickpolicy'),
+            create_model_entry(MaxSickValue, 'Maximum Sick Values', 'sickpolicy'),
         ]
         app_list.append({
             'name': 'System Adjustments',
@@ -176,3 +180,5 @@ hrms_admin_site.register(LeaveType, LeaveTypeAdmin)
 hrms_admin_site.register(DepartmentBasedLeaveType, DepartmentBasedLeaveTypeAdmin)
 hrms_admin_site.register(AllowIpAddress, AllowIpAddressAdmin)
 hrms_admin_site.register(Notification, NotificationAdmin)
+hrms_admin_site.register(SickLeaveProratedValue, SickLeaveProratedValueAdmin)
+hrms_admin_site.register(MaxSickValue, MaxSickValueAdmin)

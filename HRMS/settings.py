@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "deptleaves",
     "allowipaddress",
     "notificationapp",
+    "sickpolicy",
 
     
     "django_filters",
