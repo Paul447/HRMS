@@ -14,8 +14,8 @@ from sickpolicy.models import SickLeaveProratedValue ,MaxSickValue
 class SickLeaveBalance(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="sick_leave_balance")
     sick_prorated = models.ForeignKey(SickLeaveProratedValue, on_delete=models.CASCADE, related_name="sick_leave_balances")
-    unverified_sick_balance = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
-    verified_sick_balance = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    unverified_sick_balance = models.DecimalField(max_digits=13, decimal_places=10, default=0.0)
+    verified_sick_balance = models.DecimalField(max_digits=14, decimal_places=10, default=0.0)
     used_FVSL = models.DecimalField(
         max_digits=5, decimal_places=2, default=0.0,
         help_text="Verified family care leave balance, maximum 96 hours per employee per year, not prorated by FTE."
@@ -44,7 +44,7 @@ class SickLeaveBalance(models.Model):
         if self.is_new_hire and self.verified_sick_balance <= 0:
             self.verified_sick_balance = self.sick_prorated.prorated_upfront_verified
             self.is_new_hire = False # Set to False after initialization
-
+        # self.accrue_biweekly()
         # 3. Now, call the original save method to store the data
         super().save(*args, **kwargs)
 
@@ -58,25 +58,23 @@ class SickLeaveBalance(models.Model):
     def accrue_biweekly(self):
         if self.sick_prorated.fte_value < 0.5:
             raise ValueError("FTE must be greater than or equal to 0.5.")
+        
+
         max_unverified = self.sick_prorated.prorated_unverified_sick_leave
-        # Check for the accural rate from MaxSickValue model
         max_sick_value = MaxSickValue.objects.first()
         accrual = max_sick_value.accrued_rate
         if not accrual:
             raise ValidationError("MaxSickValue instance not found. Please create one.")
-        # Update the unverified sick leave balance can check cetain conditions
+       
+
         if self.unverified_sick_balance < max_unverified:
             room = max_unverified - self.unverified_sick_balance
             to_add = min(room, accrual)
             self.unverified_sick_balance += to_add
             accrual -= to_add
-        else: 
-            raise ValueError("Unverified sick leave balance has reached its maximum limit.")
-        # If there is still accrual left, add it to the verified sick leave balance
+        
         if accrual > 0:
             self.verified_sick_balance += accrual
-        else:
-            raise ValueError("No accrual left to add to the verified sick leave balance.")
         
         
     def __str__(self):

@@ -12,6 +12,7 @@ from leavetype.models import LeaveType  # Assuming LeaveType is defined in leave
 # Refactor the code accordingly to the leavetype/models.py structure
 # Assuming Department is defined in department/models.py
 from department.models import Department
+from rest_framework.response import Response
 
 
 
@@ -81,6 +82,7 @@ class PTORequests(models.Model):
         verbose_name="Associated Pay Period",
         help_text="The pay period to which this PTO request portion belongs. Assigned automatically."
     )
+    medical_document = models.FileField(upload_to='documents/', null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -96,6 +98,7 @@ class PTORequests(models.Model):
         return f"{self.user.first_name} {self.user.last_name} (Leave Type : {self.leave_type.name}) - Time off: {local_start} to {local_end} ({self.total_hours or 0} hrs)"
 
     def clean(self):
+
         if self.start_date_time and self.end_date_time:
             if self.end_date_time < self.start_date_time:
                 raise ValidationError("End date and time cannot be before start date and time.")
@@ -105,6 +108,12 @@ class PTORequests(models.Model):
     def save(self, *args, **kwargs):
         process_pto_logic = kwargs.pop('process_pto_logic', True)
 
+        # Ensure leave_type is loaded before accessing its name
+        if self.leave_type: # Check if leave_type is set (e.g., not None)
+            if self.leave_type.name == 'FVSL' and not self.medical_document:
+                raise ValidationError("Medical document is required for FVSL requests.")
+            if self.leave_type.name == 'VSL' and not self.medical_document:
+                raise ValidationError("Medical document is required for VSL requests.")
         # Ensure times are timezone-aware
         if self.start_date_time and timezone.is_naive(self.start_date_time):
             self.start_date_time = timezone.make_aware(self.start_date_time, timezone.get_current_timezone())

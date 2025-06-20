@@ -60,7 +60,7 @@ class PTORequestsSerializer(serializers.ModelSerializer):
             'status',
             'pay_period_start_date',
             'pay_period_end_date',
-
+            'medical_document',
         ]
         read_only_fields = ['id', 'status', 'total_hours'] # total_hours is calculated, not directly set by client
 
