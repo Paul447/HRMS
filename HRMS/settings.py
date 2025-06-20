@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "allowipaddress",
     "notificationapp",
     "sickpolicy",
+    "unverifiedsickleave",
 
     
     "django_filters",

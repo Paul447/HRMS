@@ -25,12 +25,5 @@ class SickLeaveProratedValueAdmin(admin.ModelAdmin):
         ]
 
 class MaxSickValueAdmin(admin.ModelAdmin):
-    list_display = ['max_unverified_sick_leave', 'upfront_verified', 'accrued_rate','allow_verified_family_care_limit']
-    # list_editable = [
-    #     'max_unverified_sick_leave',
-    #     'upfront_verified',
-    #     'accrued_rate',
-    #     'allow_verified_family_care_limit',
-    # ]
-    # Everything view and edit 
+    list_display = ['max_unverified_sick_leave', 'upfront_verified', 'accrued_rate','threshold_FVSL']
     

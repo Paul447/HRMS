@@ -43,6 +43,7 @@ class DepartmentLeavesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PTORequests
         fields = [
+            'user',
             'user_first_name',
             'user_last_name',
             'department_name_display',

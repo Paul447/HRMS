@@ -56,16 +56,6 @@ class DepartmentTemplateView(LoginRequiredMixin, TemplateView):
     template_name = "deptleaves.html"
     login_url = 'login'  # name of your login route
 
-    def dispatch(self, request, *args, **kwargs):
-        # Ensure user is logged in (LoginRequiredMixin handles that)
-        try:
-            user_profile = request.user.userprofile
-            if not user_profile.is_time_off:
-                raise PermissionDenied("You do not have permission to view this page.")
-        except UserProfile.DoesNotExist:
-            raise PermissionDenied("User profile not found.")
-
-        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

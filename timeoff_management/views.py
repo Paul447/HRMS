@@ -16,7 +16,7 @@ from django.contrib.auth import get_user_model # Import to get the User model
 import logging
 from notificationapp.models import Notification
 from .services import send_pto_notification_and_email # Import the new service function
-
+from department.models import UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,18 @@ class IsSuperuserCustom():
         return bool(request.user.is_superuser)
     def has_object_permission(self, request, view, obj):
         return bool(request.user.is_superuser)
+    
+class IsManager():
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
 
+        try:
+            user_profile = request.user.userprofile  # Assuming OneToOneField
+            return user_profile.is_manager
+        except UserProfile.DoesNotExist:
+            return False
+        
 class DepartmentReturnView(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for returning department information.
@@ -51,7 +62,7 @@ class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
     ViewSet for returning time off requests for the current pay period.
     This is a read-only viewset that allows users to retrieve time off request data.
     """
-    permission_classes = [IsSuperuserCustom, IsAuthenticated]
+    permission_classes = [IsSuperuserCustom, IsAuthenticated , IsManager]
     serializer_class = TimeOffManagementSerializer
     http_method_names = ['get', 'put', 'patch', 'head', 'options', 'trace']
     filterset_class = PTORequestFilter

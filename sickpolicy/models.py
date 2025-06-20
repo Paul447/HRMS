@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 class SickLeaveProratedValue(models.Model):
@@ -23,6 +25,9 @@ class SickLeaveProratedValue(models.Model):
         verbose_name = "Sick Leave Prorated Value"
         verbose_name_plural = "Sick Leave Prorated Values"
         unique_together = ('name', 'fte_value')
+
+    def __str__(self):
+        return f"{self.name} - FTE: {self.fte_value}, Unverified Sick Leave: {self.prorated_unverified_sick_leave}, Upfront Verified: {self.prorated_upfront_verified}"
     
     def get_prorated_max_unverified_sick_leave(self):
         """
@@ -50,9 +55,8 @@ class SickLeaveProratedValue(models.Model):
         return max_prorated.upfront_verified * self.fte_value
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.prorated_unverified_sick_leave = self.get_prorated_max_unverified_sick_leave()
-            self.prorated_upfront_verified = self.get_upfront_verified_sick_leave_per_fte()
+        self.prorated_unverified_sick_leave = self.get_prorated_max_unverified_sick_leave()
+        self.prorated_upfront_verified = self.get_upfront_verified_sick_leave_per_fte()
         super().save(*args, **kwargs)
 
 
@@ -74,7 +78,7 @@ class MaxSickValue(models.Model):
         default=2.4615384615,
         help_text="Fixed monthly accrual rate. Not prorated by FTE."
     )
-    allow_verified_family_care_limit = models.DecimalField(
+    threshold_FVSL = models.DecimalField(
         max_digits=5, decimal_places=2, default=96.0,
         help_text="Max 96 hrs/year for verified family care. Not prorated. Resets yearly.",
     )
@@ -88,4 +92,24 @@ class MaxSickValue(models.Model):
 
 
     def __str__(self):
-        return f"Max Sick Value: {self.max_unverified_sick_leave}, Upfront Verified: {self.upfront_verified}, Accrued Rate: {self.accrued_rate}, Family Care Limit: {self.allow_verified_family_care_limit}"
+        return f"Max Sick Value: {self.max_unverified_sick_leave}, Upfront Verified: {self.upfront_verified}, Accrued Rate: {self.accrued_rate}, Family Care Limit: {self.threshold_FVSL}"
+
+# # Signal to update SickLeaveProratedValue when MaxSickValue is saved
+# def update_sick_leave_prorated(sender, instance, **kwargs):
+#     """
+#     Update SickLeaveProratedValue instances when MaxSickValue is saved.
+#     This ensures that the prorated values are always in sync with the global max sick value.
+#     """
+#     SickLeaveProratedValue.objects.all().update(
+#         prorated_unverified_sick_leave=instance.max_unverified_sick_leave,
+#         prorated_upfront_verified=instance.upfront_verified
+#     )
+# post_save.connect(update_sick_leave_prorated, sender=MaxSickValue)
+@receiver(post_save, sender=MaxSickValue)
+def update_sick_leave_prorated(sender, instance, **kwargs):
+    """
+    Update SickLeaveProratedValue instances when MaxSickValue is saved.
+    This ensures that the prorated values are always in sync with the global max sick value.
+    """
+    for obj in SickLeaveProratedValue.objects.all():
+        obj.save()
