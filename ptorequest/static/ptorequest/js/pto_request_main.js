@@ -1,3 +1,4 @@
+
 // static/ptorequest/js/pto_request_main.js
 
 import { smartFetch } from './modules/ptorequest/apiService.js';
@@ -17,7 +18,7 @@ import {
 } from './modules/ptorequest/confirmationModal.js';
 import { fetchAndPopulateDropdown } from './modules/ptorequest/dropdownHandler.js';
 
-// Global variables for DOM elements (or pass them around as needed)
+// Global variables for DOM elements
 let dom = {};
 let ptoRequestId = null;
 
@@ -72,23 +73,40 @@ function validateMedicalDocument(leaveTypeSelectElement, medicalDocumentInput, m
  * @param {HTMLFormElement} formElement - The form element.
  */
 function handleFormErrors(errorData, formElement) {
+    console.log('Error data received:', errorData); // Debug log
+
+    let errorMessages = [];
+
+    // Handle global errors
     if (errorData.detail) {
-        // Global error (e.g., "No active pay period")
-        showNotification(`Submission failed: ${errorData.detail}`, 'error');
-    } else if (errorData.non_field_errors) {
-        // General non-field errors
-        showNotification(`Submission failed: ${errorData.non_field_errors.join(' ')}`, 'error');
-    } else {
-        // Field-specific errors
-        Object.keys(errorData).forEach(field => {
-            const fieldElement = formElement.querySelector(`[name="${field}"]`);
-            if (fieldElement) {
-                const errorDiv = fieldElement.closest('div').querySelector('.field-errors');
-                if (errorDiv) {
-                    errorDiv.textContent = Array.isArray(errorData[field]) ? errorData[field].join(' ') : errorData[field];
-                }
+        errorMessages.push(errorData.detail);
+    }
+
+    // Handle non-field errors
+    if (errorData.non_field_errors) {
+        errorMessages.push(errorData.non_field_errors.join(' '));
+    }
+
+    // Handle all field-specific and logical errors
+    Object.keys(errorData).forEach(field => {
+        const fieldElement = formElement.querySelector(`[name="${field}"]`);
+        if (fieldElement) {
+            // Field-specific errors tied to form inputs
+            const errorDiv = fieldElement.closest('div').querySelector('.field-errors');
+            if (errorDiv) {
+                errorDiv.textContent = Array.isArray(errorData[field]) ? errorData[field].join(' ') : errorData[field];
+                errorMessages.push(`${field}: ${errorData[field]}`);
             }
-        });
+        } else {
+            // Logical errors not tied to form fields (e.g., unverified_sick_balance)
+            errorMessages.push(errorData[field]);
+        }
+    });
+
+    // Display all collected error messages
+    if (errorMessages.length > 0) {
+        showNotification(errorMessages.join('\n'), 'error');
+    } else {
         showNotification('Please correct the errors in the form.', 'error');
     }
 }
@@ -102,7 +120,7 @@ async function handleFormSubmission(event) {
 
     // Client-side validation for medical document
     if (!validateMedicalDocument(dom.leaveTypeSelect, dom.medicalDocumentInput, dom.medicalDocumentFieldErrors)) {
-        return; // Stop submission if validation fails
+        return;
     }
 
     // Ask for confirmation
@@ -112,11 +130,11 @@ async function handleFormSubmission(event) {
         return;
     }
 
-    clearFieldErrors(); // Clear all existing field errors
+    clearFieldErrors();
     showLoadingState(dom.submitButton, dom.submitButtonText, dom.loadingSpinner, ptoRequestId ? 'Updating...' : 'Submitting...');
 
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const formData = new FormData(dom.form); // 'dom.form' is the form element
+    const formData = new FormData(dom.form);
 
     let headers = {
         'X-CSRFToken': csrftoken
@@ -144,25 +162,21 @@ async function handleFormSubmission(event) {
         });
 
         if (response.ok) {
-            // Success
             window.location.href = `/auth/ptorequest/details/?message=${encodeURIComponent(successMessage)}&type=success`;
         } else if (response.status === 400) {
-            // Bad Request (Validation Errors)
             const errorData = await response.json();
-            handleFormErrors(errorData, dom.form); // Pass form element to helper
+            console.log('Validation errors:', errorData); // Debug log
+            handleFormErrors(errorData, dom.form);
         } else if (response.status === 401) {
-            // Unauthorized
             showNotification('Your session has expired. Please log in again.', 'error');
             window.location.href = '/auth/login/';
         } else {
-            // Other server errors
             const errorText = await response.text();
+            console.error('Server error:', errorText);
             showNotification(`An unexpected error occurred (${response.status}). Please try again.`, 'error');
-            console.error("Server error:", errorText);
         }
     } catch (err) {
-        // Network or unexpected client-side errors
-        console.error("Fetch error:", err);
+        console.error('Fetch error:', err);
         showNotification('Network error, please check your internet connection and try again.', 'error');
     } finally {
         hideLoadingState(dom.submitButton, dom.submitButtonText, dom.loadingSpinner, ptoRequestId ? 'Update Request' : 'Submit Request');
@@ -175,11 +189,9 @@ async function handleFormSubmission(event) {
 function handleClearForm() {
     dom.form.reset();
     clearFieldErrors();
-    // Manually reset the medical document field's visibility and required status
-    // This calls the same logic as toggleMedicalDocumentField to ensure state consistency
-    toggleMedicalDocumentField(); // Resets to default hidden state
-    dom.medicalDocumentInput.value = ''; // Clear selected file content
-    
+    toggleMedicalDocumentField();
+    dom.medicalDocumentInput.value = '';
+
     if (ptoRequestId) {
         showNotification('Form cleared. To revert, refresh the page.', 'warning');
     } else {
@@ -193,10 +205,7 @@ function handleClearForm() {
  */
 function toggleMedicalDocumentField() {
     const selectedLeaveTypeName = dom.leaveTypeSelect.options[dom.leaveTypeSelect.selectedIndex]?.text;
-
-    // Define leave types where the document is MANDATORY
-    const mandatoryDocumentLeaveTypes = ['FVSL', 'VSL']; // Family Verified Sick Leave, Verified Sick Leave
-    // Define other medical leave types where the document is OPTIONAL but shown
+    const mandatoryDocumentLeaveTypes = ['FVSL', 'VSL'];
     const optionalDocumentLeaveTypes = ['Sick Leave', 'Medical Leave', 'Disability'];
 
     let isMandatory = false;
@@ -204,7 +213,7 @@ function toggleMedicalDocumentField() {
 
     if (mandatoryDocumentLeaveTypes.includes(selectedLeaveTypeName)) {
         isMandatory = true;
-        isOptionalButShown = true; // If mandatory, it's also shown
+        isOptionalButShown = true;
     } else if (optionalDocumentLeaveTypes.includes(selectedLeaveTypeName)) {
         isOptionalButShown = true;
     }
@@ -213,58 +222,45 @@ function toggleMedicalDocumentField() {
         dom.medicalDocumentField.classList.remove('hidden');
         if (isMandatory) {
             dom.medicalDocumentInput.setAttribute('required', 'required');
-            dom.medicalDocumentRequiredStar.classList.remove('hidden'); // Show the star
+            dom.medicalDocumentRequiredStar.classList.remove('hidden');
         } else {
             dom.medicalDocumentInput.removeAttribute('required');
-            dom.medicalDocumentRequiredStar.classList.add('hidden'); // Hide the star
+            dom.medicalDocumentRequiredStar.classList.add('hidden');
         }
     } else {
         dom.medicalDocumentField.classList.add('hidden');
         dom.medicalDocumentInput.removeAttribute('required');
-        dom.medicalDocumentRequiredStar.classList.add('hidden'); // Ensure star is hidden
-        dom.medicalDocumentInput.value = ''; // Clear selected file when hidden
+        dom.medicalDocumentRequiredStar.classList.add('hidden');
+        dom.medicalDocumentInput.value = '';
     }
 }
 
-
 // --- Main DOMContentLoaded Event Listener ---
 document.addEventListener('DOMContentLoaded', async function() {
-    dom = getDomElements(); // Populate dom object with all elements
-
-    // Get specific medical document elements after general DOM elements are fetched
-    // Ensure these are directly assigned to 'dom' for consistency
+    dom = getDomElements();
     dom.medicalDocumentField = document.getElementById('medicalDocumentField');
     dom.medicalDocumentInput = document.getElementById('medical_document');
     dom.medicalDocumentRequiredStar = document.getElementById('medicalDocumentRequiredStar');
     dom.medicalDocumentFieldErrors = dom.medicalDocumentInput ? dom.medicalDocumentInput.closest('div').querySelector('.field-errors') : null;
 
-
-    // Initialize Confirmation Modal Listeners
     initializeConfirmationModalListeners(dom.confirmationModal, dom.confirmSubmitButton, dom.confirmCancelButton);
 
-    // --- Initial Data Loading & Mode Check ---
     const urlParams = new URLSearchParams(window.location.search);
     ptoRequestId = urlParams.get('id');
 
     if (ptoRequestId) {
-        // In update mode, populate dropdowns and then form data
         await fetchAndPopulateDropdown('/api/department/', dom.departmentSelect, 'Select your Department', 'id', 'name');
         await fetchAndPopulateDropdown('/api/departmentleavetype/', dom.leaveTypeSelect, 'Select Leave Type', 'id', 'name');
         await populateFormForUpdate(ptoRequestId, dom.form, dom.pageTitle, dom.formHeading, dom.formParagraph, dom.submitButtonText, dom.clearFormButton, showLoadingState, hideLoadingState, showNotification);
         updateUIMode(ptoRequestId, dom.pageTitle, dom.formHeading, dom.formParagraph, dom.submitButtonText, dom.clearFormButton);
-        // Important: Call toggleMedicalDocumentField after populating form for update
-        // to ensure its state is correct based on loaded data.
         toggleMedicalDocumentField();
     } else {
-        // In create mode, just populate dropdowns
         fetchAndPopulateDropdown('/api/department/', dom.departmentSelect, 'Select your Department', 'id', 'name');
         fetchAndPopulateDropdown('/api/departmentleavetype/', dom.leaveTypeSelect, 'Select Leave Type', 'id', 'name');
-        // Call initially for create mode to set default state
         toggleMedicalDocumentField();
     }
 
-    // --- Event Listeners ---
     dom.form.addEventListener('submit', handleFormSubmission);
     dom.clearFormButton.addEventListener('click', handleClearForm);
-    dom.leaveTypeSelect.addEventListener('change', toggleMedicalDocumentField); // Add this listener here
+    dom.leaveTypeSelect.addEventListener('change', toggleMedicalDocumentField);
 });

@@ -16,6 +16,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+print(f"DEBUGGING BASE_DIR: {BASE_DIR}") # <--- ADD THIS
 
 
 # Quick-start development settings - unsuitable for production
@@ -67,8 +68,7 @@ INSTALLED_APPS = [
     "notificationapp",
     "sickpolicy",
     "unverifiedsickleave",
-
-    
+    "timeoffreq",
     "django_filters",
 ]
 
@@ -256,7 +256,9 @@ STATICFILES_DIRS = [
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+print(f"DEBUGGING MEDIA_ROOT: {MEDIA_ROOT}")
 
+print(f"DEBUG FINAL CHECK: settings.DEBUG is set to {DEBUG}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -2,7 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from department.models import Department
 from department.serializer import DepartmentSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import permissions
 
 from django.utils import timezone
 from ptorequest.models import PTORequests
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # logger = logging.getLogger(__name__)
 # Create your views here.
-class IsSuperuserCustom():
+class IsSuperuserCustom(permissions.BasePermission):
     """
     Custom permission class to check if the user is a superuser.
     This can be used to restrict access to certain views.
@@ -32,7 +33,7 @@ class IsSuperuserCustom():
     def has_object_permission(self, request, view, obj):
         return bool(request.user.is_superuser)
     
-class IsManager():
+class IsManager(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -51,6 +52,7 @@ class DepartmentReturnView(viewsets.ReadOnlyModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
     permission_classes = [IsAuthenticated, IsSuperuserCustom]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         return super().get_queryset()
@@ -62,7 +64,7 @@ class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
     ViewSet for returning time off requests for the current pay period.
     This is a read-only viewset that allows users to retrieve time off request data.
     """
-    permission_classes = [IsSuperuserCustom, IsAuthenticated , IsManager]
+    # permission_classes = [IsSuperuserCustom, IsAuthenticated , IsManager]
     serializer_class = TimeOffManagementSerializer
     http_method_names = ['get', 'put', 'patch', 'head', 'options', 'trace']
     filterset_class = PTORequestFilter

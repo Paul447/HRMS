@@ -56,6 +56,7 @@ class TimeOffManagementSerializer(serializers.ModelSerializer):
             'start_date_time',
             'end_date_time',
             'reason',
+            'medical_document',
             'total_hours',
             'status',
         ]

@@ -36,6 +36,11 @@ from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
 from notificationapp.views import NotificationViewSet
+
+# IMPORTS YOU NEED TO ADD:
+from django.conf import settings # Import settings
+from django.conf.urls.static import static # Import static file serving helper
+
 router = DefaultRouter()
 
 # router.register(r'clock', ClockDataViewSet, basename='clock')
@@ -88,3 +93,8 @@ urlpatterns = [
 
 
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # It's also good practice to serve static files this way in development,
+    # though collectstatic is used in production.
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) # Optional, but good for dev
