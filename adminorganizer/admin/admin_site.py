@@ -15,6 +15,8 @@ from ptobalance.admin import PTOBalanceAdmin
 from ptorequest.admin import PTORequestsAdmin
 from ptobalance.models import PTOBalance
 from ptorequest.models import PTORequests
+from timeoffreq.admin import TimeoffreqAdmin
+from timeoffreq.models import TimeoffRequest
 # -------------------------------------------------------
 
 # User Management
@@ -117,6 +119,7 @@ class CustomAdminSite(admin.AdminSite):
         leave_balance_models = [
             create_model_entry(PTOBalance, 'PTO Balances', 'ptobalance'),
             create_model_entry(PTORequests, 'Time Off Requests', 'ptorequest'),
+            create_model_entry(TimeoffRequest, 'Time Off Requests', 'timeoffreq'),
             create_model_entry(LeaveType, 'Leave Types', 'leavetype'),
             create_model_entry(DepartmentBasedLeaveType, 'Department Based Leave Types', 'leavetype'),
         ]
@@ -186,3 +189,4 @@ hrms_admin_site.register(Notification, NotificationAdmin)
 hrms_admin_site.register(SickLeaveProratedValue, SickLeaveProratedValueAdmin)
 hrms_admin_site.register(MaxSickValue, MaxSickValueAdmin)
 hrms_admin_site.register(SickLeaveBalance, SickLeaveBalanceAdmin)
+hrms_admin_site.register(TimeoffRequest, TimeoffreqAdmin)

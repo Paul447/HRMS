@@ -1,0 +1,412 @@
+Subesh's Git Commit Summary (2025-06-01 to 2025-06-21)
+------------------------------------------------------
+Commit: 6dd97f1
+Date  : 2025-06-21
+Msg   : Creating the new timeoffreq module
+Files changed: 21
+
+Commit: 475d969
+Date  : 2025-06-20
+Msg   : Creating the logic for creating file under the user name
+Files changed: 12
+
+Commit: 5f15bfc
+Date  : 2025-06-20
+Msg   : Creating Time Off Request logic for different types of leave
+Files changed: 14
+
+Commit: 56d6f29
+Date  : 2025-06-20
+Msg   : Refactor for the error showing in the dispatch method of the deptleave
+Files changed: 16
+
+Commit: d348881
+Date  : 2025-06-19
+Msg   : Adding the Sick Realted models make user able to make the request related to sick leave
+Files changed: 791
+
+Commit: c485811
+Date  : 2025-06-18
+Msg   : Creating the univerified Sick leave app
+Files changed: 3
+
+Commit: 4f44fee
+Date  : 2025-06-18
+Msg   : Commiting the Notification Frontend
+Files changed: 2
+
+Commit: c7cc496
+Date  : 2025-06-18
+Msg   : Managing Email template which is going to be rendered, in email
+Files changed: 5
+
+Commit: 8cb609b
+Date  : 2025-06-17
+Msg   : Creating the templates for the emails
+Files changed: 8
+
+Commit: 5b2461d
+Date  : 2025-06-17
+Msg   : Finalizing the pto request notification, Notification info populated to user through the api, in approval and rejection and admin get the pending request notification
+Files changed: 4
+
+Commit: 0a1157c
+Date  : 2025-06-17
+Msg   : Adding all details for the Notification
+Files changed: 9
+
+Commit: d85d8a3
+Date  : 2025-06-17
+Msg   : Creating the notification service application
+Files changed: 13
+
+Commit: c0bf1a7
+Date  : 2025-06-17
+Msg   : Middleware setup for the ClockInOut Module for restriction
+Files changed: 1
+
+Commit: 6c2e307
+Date  : 2025-06-17
+Msg   : Creating the logic to restrict timeclock usase
+Files changed: 15
+
+Commit: 29975a1
+Date  : 2025-06-17
+Msg   : Creating the departmental leaves
+Files changed: 10
+
+Commit: 8a1e253
+Date  : 2025-06-16
+Msg   : Date time view in the timeoffpending and creating deptleaves app to view the department specific leaves
+Files changed: 11
+
+Commit: 692d810
+Date  : 2025-06-16
+Msg   : Setting Up the email client
+Files changed: 4
+
+Commit: 96d5ddd
+Date  : 2025-06-16
+Msg   : Creating the Custom Permission fot the timeoff management
+Files changed: 6
+
+Commit: 3c3fca4
+Date  : 2025-06-16
+Msg   : Adding the is_time_off & is_manager to verify the user are able to make the time off request
+Files changed: 8
+
+Commit: e78627e
+Date  : 2025-06-16
+Msg   : Refactoring the database
+Files changed: 41
+
+Commit: 61578ab
+Date  : 2025-06-13
+Msg   : Splitting the dashboard code and modularizing that resolving the error of the navigational menu
+Files changed: 7
+
+Commit: fb64d35
+Date  : 2025-06-13
+Msg   : Time Off Management of the time off request is visualized into the frontend with the pagination
+Files changed: 10
+
+Commit: d68374d
+Date  : 2025-06-13
+Msg   : Minor unidentified change
+Files changed: 13
+
+Commit: 1cf22b8
+Date  : 2025-06-13
+Msg   : Making the Leave History as it is in before logic, to retrive the past records, with new payperiod view endpoint which retrives the past payperiods
+Files changed: 3
+
+Commit: b4ea65d
+Date  : 2025-06-12
+Msg   : Creating the serializer for the frontendrender of timeoffrequest also creating the filter from which the super user can filter the department leavetype and also visualizing the data to frontend from views, putting some condition and creating another enpoint serializer for viewing the past_pto_list request, which is going to be future, which return all the payperiods and let the user see all conditions
+Files changed: 13
+
+Commit: 4f0e2d0
+Date  : 2025-06-12
+Msg   : Creating the Time off management application to get the report of the user requested for the time off and get there details to frontend and managed by the superuser, like approving rejecting, something like that, gettting the details for current pay period
+Files changed: 7
+
+Commit: ced83f3
+Date  : 2025-06-12
+Msg   : Creating the more interactive the user interface for the user to view there time off request
+Files changed: 6
+
+Commit: 6dffb09
+Date  : 2025-06-12
+Msg   : Modularizing the past pto request view and
+Files changed: 5
+
+Commit: d0a6fb4
+Date  : 2025-06-12
+Msg   : Created the new endpoint which only retrive the leave request and accept the filter by the payperiod to return the leave of the specific logged in person
+Files changed: 12
+
+Commit: 40a74c4
+Date  : 2025-06-12
+Msg   : Getting all of the payperiods into the frontend and filter according with the payperiods
+Files changed: 6
+
+Commit: f73a647
+Date  : 2025-06-12
+Msg   : Managing the redirect to the login page and holding that request in the same page
+Files changed: 6
+
+Commit: fe57cb4
+Date  : 2025-06-11
+Msg   : Modularizing the middleware
+Files changed: 14
+
+Commit: 71a7165
+Date  : 2025-06-11
+Msg   : PTO balance frontend manage
+Files changed: 10
+
+Commit: cf2b200
+Date  : 2025-06-11
+Msg   : PTO balance Refactor
+Files changed: 10
+
+Commit: fc23cf2
+Date  : 2025-06-11
+Msg   : Refactoring the entire codebase for more understandable modularization
+Files changed: 16
+
+Commit: fcac629
+Date  : 2025-06-11
+Msg   : TODO work Added
+Files changed: 3
+
+Commit: 82b4939
+Date  : 2025-06-10
+Msg   : Removing the unnecessary code
+Files changed: 1
+
+Commit: 6e159ae
+Date  : 2025-06-10
+Msg   : Resturcturing the entire codebase timeclock and punch report
+Files changed: 10
+
+Commit: 715454f
+Date  : 2025-06-10
+Msg   : Change into the frontend of the punch report
+Files changed: 2
+
+Commit: 95d1f2f
+Date  : 2025-06-10
+Msg   : Changes made Into the Clock In/Out Template
+Files changed: 5
+
+Commit: c0bac23
+Date  : 2025-06-10
+Msg   : Refactoring the User interface
+Files changed: 8
+
+Commit: 0bd0884
+Date  : 2025-06-10
+Msg   : Unknown
+Files changed: 30
+
+Commit: fe2d37c
+Date  : 2025-06-09
+Msg   : changes not know
+Files changed: 1
+
+Commit: be4738b
+Date  : 2025-06-09
+Msg   : Adding the filter to onshift reports
+Files changed: 10
+
+Commit: 12dfec2
+Date  : 2025-06-09
+Msg   : admin site organization
+Files changed: 13
+
+Commit: 7fb761b
+Date  : 2025-06-09
+Msg   : Changing the name of the PTORequest to time off request
+Files changed: 11
+
+Commit: 82a116f
+Date  : 2025-06-09
+Msg   : Removing the unused js and removing the paytype related code from settings
+Files changed: 5
+
+Commit: ca38408
+Date  : 2025-06-09
+Msg   : Removing the paytypes application
+Files changed: 43
+
+Commit: 60f9f49
+Date  : 2025-06-09
+Msg   : Separating the leavetypes with the paytypes, refactoring the code
+Files changed: 16
+
+Commit: fb55913
+Date  : 2025-06-09
+Msg   : Changing the PayTypes to LeaveTypes
+Files changed: 30
+
+Commit: 0396138
+Date  : 2025-06-09
+Msg   : Creating the Application of Unverified Sick Leave
+Files changed: 7
+
+Commit: ceaef8c
+Date  : 2025-06-06
+Msg   : Seperation of On Shift reports
+Files changed: 16
+
+Commit: 48fbeee
+Date  : 2025-06-06
+Msg   : Creating the Application for the onshift logic seperation
+Files changed: 7
+
+Commit: 21d8f2b
+Date  : 2025-06-06
+Msg   : Seperation of punch report logic done
+Files changed: 30
+
+Commit: 52a3955
+Date  : 2025-06-06
+Msg   : Creating the new application punch report for seperation of logic from timeclock
+Files changed: 7
+
+Commit: 6f2a6d5
+Date  : 2025-06-06
+Msg   : Unknown change
+Files changed: 5
+
+Commit: 2b662ed
+Date  : 2025-06-06
+Msg   : getting all the active user data into the frontend
+Files changed: 3
+
+Commit: 5b7189a
+Date  : 2025-06-05
+Msg   : Unknown changes
+Files changed: 6
+
+Commit: 7d23906
+Date  : 2025-06-05
+Msg   : Getting the details of onshift to frontend and rendering it into plain json for now
+Files changed: 6
+
+Commit: baffb37
+Date  : 2025-06-05
+Msg   : Creating the endpoint for onshift view of the users
+Files changed: 3
+
+Commit: 3dff7a1
+Date  : 2025-06-05
+Msg   : Modularizing the time clock utils to make it clearly understandable
+Files changed: 1
+
+Commit: 82a3e38
+Date  : 2025-06-05
+Msg   : generating the excel report
+Files changed: 1
+
+Commit: 6f54457
+Date  : 2025-06-05
+Msg   : Holiday hours populated in frontend
+Files changed: 5
+
+Commit: bd9fa13
+Date  : 2025-06-05
+Msg   : Holiday Logic Done
+Files changed: 11
+
+Commit: c2ee1a5
+Date  : 2025-06-04
+Msg   : Commiting the documentation of every app
+Files changed: 8
+
+Commit: 9c975b2
+Date  : 2025-06-04
+Msg   : Application holiday is created
+Files changed: 7
+
+Commit: 46762e4
+Date  : 2025-06-04
+Msg   : Refactoring the code for the punch report and timeclock
+Files changed: 5
+
+Commit: 9a25ff2
+Date  : 2025-06-04
+Msg   : Changing the color of the type of pay
+Files changed: 1
+
+Commit: d3395ad
+Date  : 2025-06-04
+Msg   : Adding the employee leave request to punch report
+Files changed: 5
+
+Commit: 399c3f7
+Date  : 2025-06-03
+Msg   : Getting all the details of the users time off request need to manage what to fetch declearing the other endpoint serializer to handle this request and get the required details to frontend and populate the related information into the frontend page of punch report
+Files changed: 3
+
+Commit: 2ee83d9
+Date  : 2025-06-03
+Msg   : Time off request of the specific pay period to all the users
+Files changed: 2
+
+Commit: a4e4301
+Date  : 2025-06-03
+Msg   : assigning the PayPeriod to the Time Off Request Successfully
+Files changed: 6
+
+Commit: 247daf7
+Date  : 2025-06-03
+Msg   : Modularizing the Punch_Report Java Script
+Files changed: 6
+
+Commit: 0a09c53
+Date  : 2025-06-03
+Msg   : Letting the superuser create the clockentry
+Files changed: 3
+
+Commit: 97c4f0b
+Date  : 2025-06-03
+Msg   : Refactoring the API user route to get the details
+Files changed: 3
+
+Commit: 95e4eca
+Date  : 2025-06-03
+Msg   : Creating the Excel template with the highlight feature in the OT row if any OT is there
+Files changed: 2
+
+Commit: 7e2558d
+Date  : 2025-06-02
+Msg   : Managing the OT hours and the regular hours
+Files changed: 2
+
+Commit: 8e64c8d
+Date  : 2025-06-02
+Msg   : Making the employee type as the total hours to populate the total hours worked
+Files changed: 1
+
+Commit: 7665e4b
+Date  : 2025-06-02
+Msg   : Creating the punch reports
+Files changed: 9
+
+Commit: 3365ec9
+Date  : 2025-06-02
+Msg   : Managing the URL routes of time clock
+Files changed: 9
+
+Commit: 6aadc48
+Date  : 2025-06-02
+Msg   : Working in displaying the duration of the worked hours and push after significant changes
+Files changed: 4
+
+Commit: 0d9ae89
+Date  : 2025-06-02
+Msg   : Adding the java script to the Time Clock and enhancing the experinece of the time clock
+Files changed: 8
+

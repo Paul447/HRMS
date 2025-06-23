@@ -1,5 +1,5 @@
 import logging
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import pytz
@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from .utils import pto_document_upload_path
-from payperiod.models import PayPeriod
+from payperiod.models import PayPeriod # Assuming this model exists and works as expected
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ class TimeoffRequest(models.Model):
     time_off_duration = models.DecimalField(
         max_digits=5,
         decimal_places=2,
+        default=0.0,
         verbose_name='Time Off Duration',
         help_text='Duration in hours, automatically calculated based on start and end date/time',
     )
@@ -57,6 +58,8 @@ class TimeoffRequest(models.Model):
     )
     reference_pay_period = models.ForeignKey(
         'payperiod.PayPeriod',
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name='timeoff_requests',
         verbose_name='Pay Period',
@@ -131,19 +134,24 @@ class TimeoffRequest(models.Model):
         if self.start_date_time and self.end_date_time:
             if self.end_date_time <= self.start_date_time:
                 raise ValidationError("End date and time must be after start date and time.")
-            duration_hours = (self.end_date_time - self.start_date_time).total_seconds() / 3600.0
-            if duration_hours <= 0:
+            duration_seconds = (self.end_date_time - self.start_date_time).total_seconds()
+            if duration_seconds <= 0:
                 raise ValidationError("Time off request must have a positive duration.")
-            if self.time_off_duration != round(duration_hours, 2):
-                raise ValidationError("Time off duration does not match the period between start and end dates.")
             if self.requested_leave_type and self.requested_leave_type.leave_type.name in ['FVSL', 'VSL'] and not self.medical_document_proof:
                 raise ValidationError(f"Medical document is required for {self.requested_leave_type.leave_type.name} requests.")
+
+    def calculate_duration(self, start_dt, end_dt):
+        """Calculates duration in hours, rounded to 2 decimal places."""
+        if not start_dt or not end_dt:
+            return 0.0
+        delta = end_dt - start_dt
+        return round(delta.total_seconds() / 3600.0, 2)
 
     def save(self, *args, **kwargs):
         """Custom save method to handle create and update logic."""
         process_timeoff_logic = kwargs.pop('process_timeoff_logic', True)
         is_new = not self.pk
-
+        
         # Ensure timezone awareness
         if self.start_date_time and timezone.is_naive(self.start_date_time):
             self.start_date_time = timezone.make_aware(self.start_date_time, timezone.get_current_timezone())
@@ -151,72 +159,53 @@ class TimeoffRequest(models.Model):
             self.end_date_time = timezone.make_aware(self.end_date_time, timezone.get_current_timezone())
 
         # Validate before saving
-        self.full_clean()
+        self.full_clean() # Calls clean() which includes the duration check
 
-        # Store original values for comparison
-        original_time_off_duration = self.time_off_duration
-        original_end_date_time = self.end_date_time
-        original_reference_pay_period = self.reference_pay_period
+        # Store original values for comparison if updating
+        original_start_date_time = None
+        original_end_date_time = None
+        original_status = None
+        if not is_new:
+            try:
+                original_instance = TimeoffRequest.objects.get(pk=self.pk)
+                original_start_date_time = original_instance.start_date_time
+                original_end_date_time = original_instance.end_date_time
+                original_status = original_instance.status
+            except TimeoffRequest.DoesNotExist:
+                # Should not happen if self.pk exists, but good for robustness
+                pass
 
-        if is_new:
-            self._handle_create(process_timeoff_logic)
-        else:
-            self._handle_update(process_timeoff_logic, original_time_off_duration, original_end_date_time, original_reference_pay_period)
-
-    def _handle_create(self, process_timeoff_logic):
-        """Handle logic for creating a new instance."""
-        # Store original values for comparison
-        original_time_off_duration = self.time_off_duration
-        original_end_date_time = self.end_date_time
-        original_reference_pay_period = self.reference_pay_period
-        original_status = self.status  # Add more fields if needed
-
-        # Assign pay period if not set
         if not self.reference_pay_period and self.start_date_time:
             self.reference_pay_period = PayPeriod.get_pay_period_for_date(self.start_date_time)
             if not self.reference_pay_period:
                 raise ValidationError(f"No PayPeriod found for {self.start_date_time}. Please ensure pay periods are configured.")
 
-        # Perform initial save to assign PK
-        super().save()
+        # Calculate time_off_duration before initial save for current instance
+        # This will be adjusted during splitting if applicable
+        self.time_off_duration = self.calculate_duration(self.start_date_time, self.end_date_time)
 
-        # Process TO splitting if enabled
-        if process_timeoff_logic and self.start_date_time and self.end_date_time:
-            self._process_to_splitting()
+        # Use a transaction to ensure atomicity for splitting operations
+        with transaction.atomic():
+            super().save(*args, **kwargs) # Initial save to get PK for new instances
 
-        # Run custom business logic
-        self.post_create_business_logic()
+            if process_timeoff_logic and self.start_date_time and self.end_date_time:
+                # Only re-process splitting if start/end times have changed or it's a new instance
+                if is_new or (original_start_date_time != self.start_date_time or original_end_date_time != self.end_date_time):
+                    # The _process_to_splitting method will modify the current instance and create new ones.
+                    # It relies on the instance having a PK, so it must be saved once before this.
+                    # It will also implicitly handle the time_off_duration for the current instance.
+                    self._process_to_splitting()
+                    
+                    # After splitting, if the current instance's end_date_time or duration was adjusted,
+                    # save it again. Use update_fields to prevent re-triggering this save logic.
+                    if original_end_date_time != self.end_date_time or self.calculate_duration(self.start_date_time, self.end_date_time) != self.time_off_duration:
+                        super().save(update_fields=['end_date_time', 'time_off_duration', 'reference_pay_period'])
 
-        # Save again only if attributes changed
-        if (self.time_off_duration != original_time_off_duration or
-                self.end_date_time != original_end_date_time or
-                self.reference_pay_period != original_reference_pay_period or
-                self.status != original_status):
-            super().save(update_fields=['time_off_duration', 'end_date_time', 'reference_pay_period', 'status'])
 
-    def _handle_update(self, process_timeoff_logic, original_time_off_duration, original_end_date_time, original_reference_pay_period):
-        """Handle logic for updating an existing instance."""
-        # Re-assign pay period if start_date_time changed and pay_period not set
-        if not self.reference_pay_period and self.start_date_time:
-            self.reference_pay_period = PayPeriod.get_pay_period_for_date(self.start_date_time)
-            if not self.reference_pay_period:
-                raise ValidationError(f"No PayPeriod found for {self.start_date_time}. Please ensure pay periods are configured.")
-
-        # Perform initial save
-        super().save()
-
-        # Process TO splitting if enabled and relevant fields changed
-        if process_timeoff_logic and self.start_date_time and self.end_date_time:
-            self._process_to_splitting()
-
-        # Run custom business logic
-        self.post_update_business_logic()
-
-        # Save again if attributes changed
-        if (self.time_off_duration != original_time_off_duration or
-                self.end_date_time != original_end_date_time or
-                self.reference_pay_period != original_reference_pay_period):
-            super().save(update_fields=['time_off_duration', 'end_date_time', 'reference_pay_period'], process_timeoff_logic=False)
+            if is_new:
+                self.post_create_business_logic()
+            else:
+                self.post_update_business_logic()
 
     def post_create_business_logic(self):
         """Hook for additional business logic after creation."""
@@ -236,53 +225,72 @@ class TimeoffRequest(models.Model):
         local_start = self.start_date_time.astimezone(local_tz)
         local_end = self.end_date_time.astimezone(local_tz)
 
-        # Check for midnight crossing (daily split)
+        # If the request is for multiple days, split across midnight
         if local_start.date() != local_end.date():
             self._split_to_across_midnight(local_start, local_end)
         else:
-            # Process single-day segment for pay period assignment and splitting
+            # For single-day requests, assign pay period and handle pay period splitting
             self._assign_hours_and_split_by_pay_period(local_start, local_end)
 
     def _split_to_across_midnight(self, local_start_time, local_original_end_time):
-        """Splits a Time Off request across midnight boundaries."""
+        """Splits a Time Off request across midnight boundaries.
+           The current instance will be updated to represent the first day's segment.
+           New instances will be created for subsequent days.
+        """
         local_tz = pytz.timezone(settings.TIME_ZONE)
+        current_segment_start = local_start_time
 
-        # Calculate first day's end at midnight
-        first_day_end_boundary_naive = datetime.combine(local_start_time.date() + timedelta(days=1), time(0, 0, 0))
+        # Update the current instance for the first day's portion
+        # Calculate the end of the current day (midnight of the next day)
+        first_day_end_boundary_naive = datetime.combine(current_segment_start.date() + timedelta(days=1), time(0, 0, 0))
         first_day_end_boundary_local = local_tz.normalize(local_tz.localize(first_day_end_boundary_naive))
+        
+        # The end of the first segment is either the original end time or midnight
+        current_instance_end_local = min(local_original_end_time, first_day_end_boundary_local)
 
-        # Update current instance for first day
-        current_instance_end_local = first_day_end_boundary_local
-        first_day_duration = current_instance_end_local - local_start_time
-        first_day_hours = round(first_day_duration.total_seconds() / 3600.0, 2)
+        # Update the current instance's attributes
         self.end_date_time = current_instance_end_local.astimezone(pytz.utc)
-        self.time_off_duration = first_day_hours
+        self.time_off_duration = self.calculate_duration(current_segment_start, current_instance_end_local)
+        
+        # Re-assign pay period for the (potentially changed) start_date_time
+        self.reference_pay_period = PayPeriod.get_pay_period_for_date(current_segment_start)
+        if not self.reference_pay_period:
+            logger.error(f"No PayPeriod found for {current_segment_start} during midnight splitting for existing TO request {self.pk}.")
+            # Decide how to handle: raise error, default to None, etc. For now, continuing.
 
-        # Create subsequent days' portions
+        # If the original request extended beyond the first day, create new segments
         next_segment_start_local = current_instance_end_local
-
         while next_segment_start_local < local_original_end_time:
+            # Determine the end of the current daily segment (midnight of next day)
             daily_segment_end_boundary_naive = datetime.combine(next_segment_start_local.date() + timedelta(days=1), time(0, 0, 0))
             daily_segment_end_boundary_local = local_tz.normalize(local_tz.localize(daily_segment_end_boundary_naive))
+            
+            # The end of this segment is either the original end time or the next midnight
             current_daily_segment_end_local = min(local_original_end_time, daily_segment_end_boundary_local)
 
-            daily_segment_duration = current_daily_segment_end_local - next_segment_start_local
-            daily_segment_hours = round(daily_segment_duration.total_seconds() / 3600.0, 2)
+            daily_segment_hours = self.calculate_duration(next_segment_start_local, current_daily_segment_end_local)
 
-            if daily_segment_hours <= 0:
-                break
+            if daily_segment_hours > 0: # Only create new entries for positive durations
+                subsequent_pay_period = PayPeriod.get_pay_period_for_date(next_segment_start_local)
+                if not subsequent_pay_period:
+                    logger.error(f"No PayPeriod found for {next_segment_start_local} when creating split TO segment.")
+                    # If a pay period is crucial, you might raise a ValidationError here
+                    # For now, we'll continue, but the reference_pay_period will be None.
 
-            new_to_entry = TimeoffRequest(
-                employee=self.employee,
-                requested_leave_type=self.requested_leave_type,
-                start_date_time=next_segment_start_local.astimezone(pytz.utc),
-                end_date_time=current_daily_segment_end_local.astimezone(pytz.utc),
-                time_off_duration=daily_segment_hours,
-                employee_leave_reason=self.employee_leave_reason,
-                status=self.status,
-                medical_document_proof=self.medical_document_proof,
-            )
-            new_to_entry.save(process_timeoff_logic=True)
+                new_to_entry = TimeoffRequest(
+                    employee=self.employee,
+                    requested_leave_type=self.requested_leave_type,
+                    start_date_time=next_segment_start_local.astimezone(pytz.utc),
+                    end_date_time=current_daily_segment_end_local.astimezone(pytz.utc),
+                    time_off_duration=daily_segment_hours,
+                    employee_leave_reason=self.employee_leave_reason,
+                    status=self.status,
+                    reference_pay_period=subsequent_pay_period,
+                    medical_document_proof=self.medical_document_proof,
+                )
+                # Pass process_timeoff_logic=False to prevent further splitting on this new segment's save
+                # as it has already been determined to be a daily segment.
+                new_to_entry.save(process_timeoff_logic=False)
 
             next_segment_start_local = current_daily_segment_end_local
 
@@ -290,45 +298,54 @@ class TimeoffRequest(models.Model):
         """Assigns pay period and splits if crossing pay period boundary."""
         local_tz = pytz.timezone(settings.TIME_ZONE)
 
-        # Assign pay period
         current_pay_period = PayPeriod.get_pay_period_for_date(local_start_time)
         self.reference_pay_period = current_pay_period
 
         if not current_pay_period:
             self.time_off_duration = 0.0
-            logger.warning(f"No PayPeriod found for {local_start_time} during Time Off details calculation.")
+            logger.warning(f"No PayPeriod found for {local_start_time} during Time Off details calculation. Duration set to 0.")
             return
 
-        # Calculate pay period boundary
+        # Calculate pay period boundary (midnight of the day after pay period end)
         pay_period_boundary_naive = datetime.combine(current_pay_period.end_date + timedelta(days=1), time(0, 0, 0))
         pay_period_boundary_local = local_tz.normalize(local_tz.localize(pay_period_boundary_naive))
 
-        # Check for pay period crossing
+        # Check if the time off crosses into the next pay period
         if local_end_time > pay_period_boundary_local:
+            # Split the current instance at the pay period boundary
+            # The current instance will keep the portion within its pay period
             self._split_to_at_pay_period_boundary(local_start_time, local_end_time, pay_period_boundary_local)
         else:
-            delta = local_end_time - local_start_time
-            self.time_off_duration = round(delta.total_seconds() / 3600.0, 2)
+            # If not crossing, simply calculate and set duration for the current instance
+            self.time_off_duration = self.calculate_duration(local_start_time, local_end_time)
+
 
     def _split_to_at_pay_period_boundary(self, local_start_time, local_original_end_time, pay_period_boundary_local):
-        """Splits a Time Off segment at a pay period boundary."""
+        """Splits a Time Off segment at a pay period boundary.
+           The current instance will be updated to represent the first pay period's segment.
+           A new instance will be created for the subsequent pay period's segment.
+        """
         local_tz = pytz.timezone(settings.TIME_ZONE)
 
-        # Update current instance for first pay period
+        # Determine the end of the current instance's segment (at the pay period boundary)
         first_segment_end_local = pay_period_boundary_local
-        first_segment_duration = first_segment_end_local - local_start_time
-        first_segment_hours = round(first_segment_duration.total_seconds() / 3600.0, 2)
+        
+        # Update current instance for the first pay period's portion
         self.end_date_time = first_segment_end_local.astimezone(pytz.utc)
-        self.time_off_duration = first_segment_hours
+        self.time_off_duration = self.calculate_duration(local_start_time, first_segment_end_local)
 
         # Create next pay period's portion
         next_segment_start_local = first_segment_end_local
         next_segment_end_local = local_original_end_time
-        next_segment_duration = next_segment_end_local - next_segment_start_local
-        next_segment_hours = round(next_segment_duration.total_seconds() / 3600.0, 2)
+        
+        next_segment_hours = self.calculate_duration(next_segment_start_local, next_segment_end_local)
 
-        if next_segment_hours > 0:
+        if next_segment_hours > 0: # Only create new entries for positive durations
             subsequent_pay_period = PayPeriod.get_pay_period_for_date(next_segment_start_local)
+            if not subsequent_pay_period:
+                logger.error(f"No PayPeriod found for {next_segment_start_local} when creating split TO segment at pay period boundary.")
+                raise ValidationError(f"Cannot split time off: No PayPeriod found for {next_segment_start_local}.")
+
             new_to_entry = TimeoffRequest(
                 employee=self.employee,
                 requested_leave_type=self.requested_leave_type,
@@ -340,4 +357,6 @@ class TimeoffRequest(models.Model):
                 reference_pay_period=subsequent_pay_period,
                 medical_document_proof=self.medical_document_proof,
             )
-            new_to_entry.save(process_timeoff_logic=True)
+            # Pass process_timeoff_logic=False to prevent further splitting on this new segment's save.
+            # It's already been determined as a segment within a pay period (or end of it).
+            new_to_entry.save(process_timeoff_logic=False)
