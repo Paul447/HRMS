@@ -10,6 +10,7 @@ from django.core.validators import FileExtensionValidator
 from .utils import pto_document_upload_path
 from decimal import Decimal
 from payperiod.models import PayPeriod # Assuming this model exists and works as expected
+from .balancededuct import perform_balance_deduction_on_approval
 
 logger = logging.getLogger(__name__)
 
@@ -197,16 +198,12 @@ class TimeoffRequest(models.Model):
     def post_update_business_logic(self, original_status):
         """Hook for additional business logic after update."""
         # Example: if status changes from pending to approved/rejected, update reviewer and reviewed_at
-        if original_status == 'pending' and self.status in ['approved', 'rejected']:
-            if self.reviewer is None:
-                # This would typically be set by the view/serializer handling the approval/rejection
-                # You might log a warning or raise an error if a reviewer is expected but not set.
-                logger.warning(f"TimeoffRequest {self.pk} status changed to {self.status} but reviewer is not set.")
-            if self.reviewed_at is None:
-                self.reviewed_at = timezone.now()
-                # Use update_fields to save only the changed fields and avoid recursion
-                TimeoffRequest.objects.filter(pk=self.pk).update(reviewed_at=self.reviewed_at)
-        pass  # Override and add more logic as needed
+        if original_status == 'pending' and self.status in ['approved']:
+            perform_balance_deduction_on_approval(self, self.time_off_duration)  # Deduct balance on approval
+         # Override and add more logic as needed
+        elif original_status == 'pending' and self.status == 'rejected':
+            self.reviewer = self.requested_leave_type.reviewer
+            self.reviewed_at = timezone.now()
 
     def _process_to_splitting(self):
         """Orchestrates TO splitting logic."""

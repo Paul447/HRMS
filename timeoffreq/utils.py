@@ -4,11 +4,7 @@ import datetime
 # No need to import Django models (User, Department, LeaveType) directly here
 # as they will be passed as instances or accessed via instance attributes.
 # However, for type hinting or if you need get_user_model(), you can import it.
-from django.contrib.auth import get_user_model # Still useful if you need the User model itself
 
-# Optional: You might explicitly get the User model if needed elsewhere in this file,
-# but for the upload path functions, `instance.user` is sufficient.
-# User = get_user_model()
 
 
 def _get_user_folder_name(user):
@@ -53,7 +49,7 @@ def pto_document_upload_path(instance, filename):
 
     # 2. Get the leave type slug
     # The `leave_type_instance` passed to `_get_leave_type_slug` is the `LeaveType` instance.
-    leave_type_slug = _get_leave_type_slug(instance.requested_leave_type.leave_type.name)
+    leave_type_slug = _get_leave_type_slug(instance.requested_leave_type.leave_type)
 
     # 3. Get the formatted creation datetime string
     # The `created_at_datetime` passed to `_get_creation_datetime_string` is the datetime object.

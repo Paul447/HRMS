@@ -5,27 +5,7 @@ from sickpolicy.models import  MaxSickValue
 from decimal import Decimal
 
 
-# def _get_sick_leave_balance_object(self):
-#     try:
-#         return SickLeaveBalance.objects.select_for_update().get(user=self.user)
-#     except SickLeaveBalance.DoesNotExist:
-#         raise ValidationError("User does not have a sick leave balance entry.")
-# def _deduct_unvsl_balance(self, hours_to_deduct):
-#     balance_obj = self._get_sick_leave_balance_object()
-#     balance_obj.unverified_sick_balance -= hours_to_deduct
-#     balance_obj.save(update_fields=['unverified_sick_balance'])
 
-# def _deduct_vsl_balance(self, hours_to_deduct):
-#     balance_obj = self._get_sick_leave_balance_object()
-#     balance_obj.verified_sick_balance -= hours_to_deduct
-#     balance_obj.save(update_fields=['verified_sick_balance'])
-
-# def _perform_balance_deduction_on_approval(self, hours_to_deduct):
-#     leave_type_name = self.leave_type.name if self.leave_type else None
-#     if leave_type_name == 'UNVSL':
-#             self._deduct_unvsl_balance(hours_to_deduct)
-#     elif leave_type_name in ['VSL', 'FVSL']:
-#         self._deduct_vsl_balance(hours_to_deduct)
 
 
 
