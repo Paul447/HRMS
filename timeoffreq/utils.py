@@ -49,11 +49,11 @@ def pto_document_upload_path(instance, filename):
     # 1. Get the user's specific folder name
     # We directly access instance.user, assuming it's populated.
     # The `user` object passed to `_get_user_folder_name` is the `User` instance.
-    user_folder = _get_user_folder_name(instance.user)
+    user_folder = _get_user_folder_name(instance.employee)
 
     # 2. Get the leave type slug
     # The `leave_type_instance` passed to `_get_leave_type_slug` is the `LeaveType` instance.
-    leave_type_slug = _get_leave_type_slug(instance.leave_type)
+    leave_type_slug = _get_leave_type_slug(instance.requested_leave_type.leave_type.name)
 
     # 3. Get the formatted creation datetime string
     # The `created_at_datetime` passed to `_get_creation_datetime_string` is the datetime object.

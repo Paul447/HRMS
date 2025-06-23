@@ -9,17 +9,15 @@ class TimeoffreqAdmin(admin.ModelAdmin):
     list_display = (
         'employee',
         'requested_leave_type',
-        'start_date_time',
-        'end_date_time',
+        'formatted_start_date_time',
+        'formatted_end_date_time',
         'time_off_duration',
         'employee_leave_reason',
         'status',
         'reference_pay_period',
-        'medical_document_proof',
-        'approved_by',
-        'rejected_by',
-        'approved_at',
-        'rejected_at',
+        'document_proof',
+        'reviewer',
+        'reviewed_at',
     )
     list_filter = (
         'status',

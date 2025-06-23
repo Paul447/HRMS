@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from .utils import pto_document_upload_path
+from decimal import Decimal
 from payperiod.models import PayPeriod # Assuming this model exists and works as expected
 
 logger = logging.getLogger(__name__)
@@ -65,13 +66,13 @@ class TimeoffRequest(models.Model):
         verbose_name='Pay Period',
         help_text='Pay period during which the time off is requested',
     )
-    medical_document_proof = models.FileField(
+    document_proof = models.FileField( # Renamed from medical_document_proof
         upload_to=pto_document_upload_path,
         blank=True,
         null=True,
-        verbose_name='Medical Document Proof',
+        verbose_name='Document Proof', # Verbose name updated
         validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])],
-        help_text='Upload a medical document proof for applicable leave requests (only PDF, JPG, JPEG, PNG allowed)'
+        help_text='Upload a document proof for applicable leave requests (only PDF, JPG, JPEG, PNG allowed)' # Help text updated
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -83,35 +84,20 @@ class TimeoffRequest(models.Model):
         verbose_name='Updated At',
         help_text='Timestamp when the time off request was last updated',
     )
-    approved_by = models.ForeignKey(
+    reviewer = models.ForeignKey(
         'auth.User',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='approved_timeoff_requests',
-        verbose_name='Approved By',
-        help_text='User who approved the time off request'
+        related_name='reviewed_timeoff_requests',
+        verbose_name='Reviewed By',
+        help_text='User who last reviewed (approved or rejected) the time off request'
     )
-    rejected_by = models.ForeignKey(
-        'auth.User',
-        on_delete=models.SET_NULL,
+    reviewed_at = models.DateTimeField(
         null=True,
         blank=True,
-        related_name='rejected_timeoff_requests',
-        verbose_name='Rejected By',
-        help_text='User who rejected the time off request'
-    )
-    approved_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name='Approved At',
-        help_text='Timestamp when the time off request was approved'
-    )
-    rejected_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name='Rejected At',
-        help_text='Timestamp when the time off request was rejected'
+        verbose_name='Reviewed At',
+        help_text='Timestamp when the time off request was last reviewed (approved or rejected)'
     )
 
     class Meta:
@@ -137,15 +123,17 @@ class TimeoffRequest(models.Model):
             duration_seconds = (self.end_date_time - self.start_date_time).total_seconds()
             if duration_seconds <= 0:
                 raise ValidationError("Time off request must have a positive duration.")
-            if self.requested_leave_type and self.requested_leave_type.leave_type.name in ['FVSL', 'VSL'] and not self.medical_document_proof:
-                raise ValidationError(f"Medical document is required for {self.requested_leave_type.leave_type.name} requests.")
+            # Updated to use 'document_proof'
+            if self.requested_leave_type and self.requested_leave_type.leave_type.name in ['FVSL', 'VSL'] and not self.document_proof:
+                raise ValidationError(f"Document proof is required for {self.requested_leave_type.leave_type.name} requests.")
 
     def calculate_duration(self, start_dt, end_dt):
         """Calculates duration in hours, rounded to 2 decimal places."""
         if not start_dt or not end_dt:
-            return 0.0
+            return Decimal('0.00')
         delta = end_dt - start_dt
-        return round(delta.total_seconds() / 3600.0, 2)
+        hours = delta.total_seconds() / 3600.0
+        return Decimal(str(round(hours, 2)))
 
     def save(self, *args, **kwargs):
         """Custom save method to handle create and update logic."""
@@ -205,15 +193,25 @@ class TimeoffRequest(models.Model):
             if is_new:
                 self.post_create_business_logic()
             else:
-                self.post_update_business_logic()
+                self.post_update_business_logic(original_status) # Pass original_status for comparison
 
     def post_create_business_logic(self):
         """Hook for additional business logic after creation."""
         pass  # Override in your implementation
 
-    def post_update_business_logic(self):
+    def post_update_business_logic(self, original_status):
         """Hook for additional business logic after update."""
-        pass  # Override in your implementation
+        # Example: if status changes from pending to approved/rejected, update reviewer and reviewed_at
+        if original_status == 'pending' and self.status in ['approved', 'rejected']:
+            if self.reviewer is None:
+                # This would typically be set by the view/serializer handling the approval/rejection
+                # You might log a warning or raise an error if a reviewer is expected but not set.
+                logger.warning(f"TimeoffRequest {self.pk} status changed to {self.status} but reviewer is not set.")
+            if self.reviewed_at is None:
+                self.reviewed_at = timezone.now()
+                # Use update_fields to save only the changed fields and avoid recursion
+                TimeoffRequest.objects.filter(pk=self.pk).update(reviewed_at=self.reviewed_at)
+        pass  # Override and add more logic as needed
 
     def _process_to_splitting(self):
         """Orchestrates TO splitting logic."""
@@ -286,7 +284,9 @@ class TimeoffRequest(models.Model):
                     employee_leave_reason=self.employee_leave_reason,
                     status=self.status,
                     reference_pay_period=subsequent_pay_period,
-                    medical_document_proof=self.medical_document_proof,
+                    document_proof=self.document_proof, # Updated
+                    reviewer=None, 
+                    reviewed_at=None,
                 )
                 # Pass process_timeoff_logic=False to prevent further splitting on this new segment's save
                 # as it has already been determined to be a daily segment.
@@ -355,7 +355,9 @@ class TimeoffRequest(models.Model):
                 employee_leave_reason=self.employee_leave_reason,
                 status=self.status,
                 reference_pay_period=subsequent_pay_period,
-                medical_document_proof=self.medical_document_proof,
+                document_proof=self.document_proof, # Updated
+                reviewer=None,
+                reviewed_at=None,
             )
             # Pass process_timeoff_logic=False to prevent further splitting on this new segment's save.
             # It's already been determined as a segment within a pay period (or end of it).

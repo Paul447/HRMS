@@ -4,8 +4,10 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import TimeoffRequest
-from .serializer import TimeoffRequestSerializer
+from .serializer import TimeoffRequestSerializer , TimeoffRequestSerializerEmployee
 from department.models import UserProfile
+from payperiod.models import PayPeriod  # Add this import for PayPeriod
+from rest_framework.exceptions import ValidationError
 
 class IsEmployeeOrManager(permissions.BasePermission):
     """
@@ -22,7 +24,7 @@ class IsEmployeeOrManager(permissions.BasePermission):
         if obj.employee == request.user:
             return True
         
-        # Allow managers to view/approve/reject requests for their department
+        # Allow the user to view time-off requests if they have permission of th
         try:
             user_profile = UserProfile.objects.get(user=request.user)
             if user_profile.is_manager and user_profile.department == obj.employee.userprofile.department:
@@ -31,6 +33,8 @@ class IsEmployeeOrManager(permissions.BasePermission):
             pass
         
         return False
+    
+
 
 class TimeoffRequestViewSet(viewsets.ModelViewSet):
     """
@@ -38,7 +42,7 @@ class TimeoffRequestViewSet(viewsets.ModelViewSet):
     Supports listing, retrieving, creating, updating, and deleting time-off requests.
     Includes custom actions for approving and rejecting requests.
     """
-    serializer_class = TimeoffRequestSerializer
+    serializer_class = TimeoffRequestSerializerEmployee
     permission_classes = [permissions.IsAuthenticated, IsEmployeeOrManager]
 
     def get_queryset(self):
@@ -128,3 +132,93 @@ class TimeoffRequestViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             raise PermissionDenied("User profile not found.")
+        
+
+class IsEmployeeWithTimeoffPermission(permissions.BasePermission):
+    """
+    Custom permission to allow a user to manipulate a time-off request
+    ONLY IF they are the employee associated with the request
+    AND they possess the 'is_time_off' permission.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        is_owner = (obj.employee == request.user)
+        has_timeoff_permission = False
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            has_timeoff_permission = user_profile.is_time_off
+        except UserProfile.DoesNotExist:
+            has_timeoff_permission = False
+        return is_owner and has_timeoff_permission
+
+class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
+    """
+    ViewSet for managing TimeoffRequest instances for employees.
+    Supports listing, retrieving, creating, updating, and deleting time-off requests.
+    Restricted to employee-owned requests with 'is_time_off' permission.
+    """
+    serializer_class = TimeoffRequestSerializerEmployee
+    permission_classes = [permissions.IsAuthenticated, IsEmployeeWithTimeoffPermission]
+
+    def get_queryset(self):
+        """
+        Filter the queryset to include only TimeoffRequests made by the authenticated user.
+        Applies additional filtering by status and pay period for 'list' actions.
+        Includes select_related for optimized fetching of related data.
+        """
+        user = self.request.user
+        queryset = TimeoffRequest.objects.filter(employee=user).select_related(
+            'employee', 'requested_leave_type', 'reference_pay_period'
+        )
+
+        if self.action == 'list':
+            status_param = self.request.query_params.get('status', 'pending')
+            queryset = queryset.filter(status__iexact=status_param)
+
+            pay_period_id = self.request.query_params.get('pay_period_id')
+            if pay_period_id:
+                try:
+                    pay_period_id = int(pay_period_id)
+                    queryset = queryset.filter(reference_pay_period__id=pay_period_id)
+                except ValueError:
+                    queryset = TimeoffRequest.objects.none()
+            else:
+                current_pay_period = PayPeriod.get_pay_period_for_date(timezone.now())
+                if current_pay_period:
+                    queryset = queryset.filter(reference_pay_period=current_pay_period)
+                else:
+                    queryset = TimeoffRequest.objects.none()
+
+        return queryset.order_by('-created_at')
+
+    def perform_create(self, serializer):
+        """
+        Save the time-off request with the authenticated user as the employee.
+        Ensure user has a UserProfile.
+        """
+        try:
+            UserProfile.objects.get(user=self.request.user)
+        except UserProfile.DoesNotExist:
+            raise PermissionDenied("User profile not found.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Ensure updates are performed only by employees with a valid UserProfile.
+        """
+        try:
+            UserProfile.objects.get(user=self.request.user)
+        except UserProfile.DoesNotExist:
+            raise PermissionDenied("User profile not found.")
+        serializer.save()
+
+    def get_serializer_context(self):
+        """
+        Pass request context to serializer for user-specific validations.
+        """
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+        
