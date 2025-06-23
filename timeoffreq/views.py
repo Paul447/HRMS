@@ -4,136 +4,101 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import TimeoffRequest
-from .serializer import TimeoffRequestSerializer , TimeoffRequestSerializerEmployee
+from .serializer import TimeoffRequestSerializerEmployee, TimeoffApproveRejectManager
 from department.models import UserProfile
 from payperiod.models import PayPeriod  # Add this import for PayPeriod
 from rest_framework.exceptions import ValidationError
 
-class IsEmployeeOrManager(permissions.BasePermission):
+
+class IsManagerOfDepartment(permissions.BasePermission):
     """
-    Custom permission to allow:
-    - Authenticated employees to create and view their own time-off requests.
-    - Managers to view, approve, or reject time-off requests for their department.
+    Custom permission to allow only managers of the specific department to access requests.
     """
     def has_permission(self, request, view):
-        # Allow authenticated users to access the view
-        return request.user.is_authenticated
-
-    def has_object_permission(self, request, view, obj):
-        # Allow users to view their own requests
-        if obj.employee == request.user:
-            return True
-        
-        # Allow the user to view time-off requests if they have permission of th
+        if not request.user.is_authenticated:
+            return False
         try:
             user_profile = UserProfile.objects.get(user=request.user)
-            if user_profile.is_manager and user_profile.department == obj.employee.userprofile.department:
-                return True
+            return user_profile.is_manager
         except UserProfile.DoesNotExist:
-            pass
-        
-        return False
-    
+            return False
 
+    def has_object_permission(self, request, view, obj):
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            return user_profile.is_manager and user_profile.department == obj.employee.userprofile.department
+        except UserProfile.DoesNotExist:
+            return False
 
-class TimeoffRequestViewSet(viewsets.ModelViewSet):
+class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    ViewSet for managing TimeoffRequest instances.
-    Supports listing, retrieving, creating, updating, and deleting time-off requests.
-    Includes custom actions for approving and rejecting requests.
+    ViewSet for managers to list pending time-off requests in their department
+    and perform approve or reject actions.
     """
-    serializer_class = TimeoffRequestSerializerEmployee
-    permission_classes = [permissions.IsAuthenticated, IsEmployeeOrManager]
+    serializer_class = TimeoffApproveRejectManager
+    permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment]
 
     def get_queryset(self):
         """
-        Filter the queryset based on the user's role:
-        - Employees see only their own requests.
-        - Managers see requests from their department.
+        Returns only pending time-off requests for the manager's department.
+        Uses select_related to optimize fetching of related data.
         """
-        user = self.request.user
         try:
-            user_profile = UserProfile.objects.get(user=user)
+            user_profile = UserProfile.objects.get(user=self.request.user)
             if user_profile.is_manager:
-                # Managers see all requests from their department
                 return TimeoffRequest.objects.filter(
-                    employee__userprofile__department=user_profile.department
-                ).select_related('employee', 'requested_leave_type', 'reference_pay_period')
-            else:
-                # Employees see only their own requests
-                return TimeoffRequest.objects.filter(
-                    employee=user
-                ).select_related('employee', 'requested_leave_type', 'reference_pay_period')
+                    employee__userprofile__department=user_profile.department,
+                    status='pending'
+                ).select_related(
+                    'employee', 'requested_leave_type', 'reference_pay_period',
+                    'employee__userprofile', 'requested_leave_type__department',
+                    'requested_leave_type__leave_type'
+                ).order_by('-created_at')
         except UserProfile.DoesNotExist:
-            # If no UserProfile, restrict to user's own requests
-            return TimeoffRequest.objects.filter(employee=user).select_related(
-                'employee', 'requested_leave_type', 'reference_pay_period'
-            )
+            return TimeoffRequest.objects.none()
+        return TimeoffRequest.objects.none()
 
-    def perform_create(self, serializer):
-
-        serializer.save(employee=self.request.user)
-
-    def perform_update(self, serializer):
-        """
-        Restrict updates to non-final statuses and ensure only the owner or manager can update.
-        """
-        instance = serializer.instance
-        if instance.status in ['approved', 'rejected']:
-            raise PermissionDenied("Cannot update a request that has been approved or rejected.")
-        serializer.save()
-
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsEmployeeOrManager])
+    @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         """
-        Custom action to approve a time-off request.
-        Only managers can approve requests.
+        Approve a pending time-off request.
+        Only accessible to managers of the employee's department.
         """
         timeoff_request = self.get_object()
-        try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            if not user_profile.is_manager:
-                raise PermissionDenied("Only managers can approve time-off requests.")
-            if user_profile.department != timeoff_request.employee.userprofile.department:
-                raise PermissionDenied("You can only approve requests for your department.")
-            if timeoff_request.status != 'pending':
-                raise PermissionDenied("Only pending requests can be approved.")
-            
-            timeoff_request.status = 'approved'
-            timeoff_request.approved_by = request.user
-            timeoff_request.approved_at = timezone.now()
-            timeoff_request.save(process_timeoff_logic=False)  # Avoid re-splitting
-            serializer = self.get_serializer(timeoff_request)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
-            raise PermissionDenied("User profile not found.")
+        user_profile = UserProfile.objects.get(user=request.user)
+        if user_profile.department != timeoff_request.employee.userprofile.department:
+            raise PermissionDenied("You can only approve requests for your department.")
+        if timeoff_request.status != 'pending':
+            raise PermissionDenied("Only pending requests can be approved.")
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsEmployeeOrManager])
+        timeoff_request.status = 'approved'
+        timeoff_request.reviewer = request.user
+        timeoff_request.reviewed_at = timezone.now()
+        timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
+        serializer = self.get_serializer(timeoff_request)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         """
-        Custom action to reject a time-off request.
-        Only managers can reject requests.
+        Reject a pending time-off request.
+        Only accessible to managers of the employee's department.
         """
         timeoff_request = self.get_object()
-        try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            if not user_profile.is_manager:
-                raise PermissionDenied("Only managers can reject time-off requests.")
-            if user_profile.department != timeoff_request.employee.userprofile.department:
-                raise PermissionDenied("You can only reject requests for your department.")
-            if timeoff_request.status != 'pending':
-                raise PermissionDenied("Only pending requests can be rejected.")
-            
-            timeoff_request.status = 'rejected'
-            timeoff_request.rejected_by = request.user
-            timeoff_request.rejected_at = timezone.now()
-            timeoff_request.save(process_timeoff_logic=False)  # Avoid re-splitting
-            serializer = self.get_serializer(timeoff_request)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
-            raise PermissionDenied("User profile not found.")
-        
+        user_profile = UserProfile.objects.get(user=request.user)
+        if user_profile.department != timeoff_request.employee.userprofile.department:
+            raise PermissionDenied("You can only reject requests for your department.")
+        if timeoff_request.status != 'pending':
+            raise PermissionDenied("Only pending requests can be rejected.")
 
+        timeoff_request.status = 'rejected'
+        timeoff_request.reviewer = request.user
+        timeoff_request.reviewed_at = timezone.now()
+        timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
+        serializer = self.get_serializer(timeoff_request)
+        return Response(serializer.data)
+
+        
 class IsEmployeeWithTimeoffPermission(permissions.BasePermission):
     """
     Custom permission to allow a user to manipulate a time-off request

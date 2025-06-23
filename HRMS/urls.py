@@ -36,7 +36,7 @@ from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
 from notificationapp.views import NotificationViewSet
-from timeoffreq.views import TimeoffRequestViewSet,TimeoffRequestViewSetEmployee
+from timeoffreq.views import ManagerTimeoffApprovalViewSet,TimeoffRequestViewSetEmployee
 
 
 # IMPORTS YOU NEED TO ADD:
@@ -61,6 +61,7 @@ router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, bas
 router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'timeoffrequests', TimeoffRequestViewSetEmployee, basename='timeoffrequests')
+router.register(r'manager-timeoff-approval', ManagerTimeoffApprovalViewSet, basename='manager_timeoff_approval')
 clock_router = DefaultRouter()
 clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')
 clock_router.register(r'clock-in-out', ClockInOutCreate, basename='clock_in_out_post')

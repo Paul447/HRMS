@@ -190,14 +190,9 @@ class TimeoffRequest(models.Model):
                         super().save(update_fields=['end_date_time', 'time_off_duration', 'reference_pay_period'])
 
 
-            if is_new:
-                self.post_create_business_logic()
-            else:
+            if not is_new:
                 self.post_update_business_logic(original_status) # Pass original_status for comparison
 
-    def post_create_business_logic(self):
-        """Hook for additional business logic after creation."""
-        pass  # Override in your implementation
 
     def post_update_business_logic(self, original_status):
         """Hook for additional business logic after update."""
