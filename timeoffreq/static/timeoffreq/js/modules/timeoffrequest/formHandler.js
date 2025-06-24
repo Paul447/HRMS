@@ -10,6 +10,7 @@ import { ApiService } from './apiService.js';
 import { NotificationService } from './notificationService.js'; // Use the modularized service
 import { askForConfirmation } from './confirmationModal.js'; // Use the modularized function
 import { formatDateTimeForAPI } from './utils.js';
+import { DropdownHandler } from './dropdownHandler.js'; // Use the modularized dropdown handler
 
 export const FormHandler = (function() {
     // Defines and retrieves all necessary DOM elements for the form.
@@ -286,7 +287,7 @@ export const FormHandler = (function() {
                     default:
                         // Collect any unhandled field errors into general messages
                         if (fieldName !== 'detail' && fieldName !== 'non_field_errors') {
-                            generalErrorMessages.push(`${fieldName}: ${errorMessages}`);
+                            generalErrorMessages.push(`${errorMessages}`);
                         }
                         break;
                 }

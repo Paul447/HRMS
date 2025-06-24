@@ -223,3 +223,9 @@ class TimeOffRequestView(TemplateView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+class TimeOffRequestDetailsView(TemplateView, LoginRequiredMixin):
+    template_name = 'timeoff_request_view.html'
+    login_url = 'frontend_login'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
