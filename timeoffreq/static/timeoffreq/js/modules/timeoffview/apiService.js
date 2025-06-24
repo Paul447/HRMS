@@ -96,7 +96,7 @@ export async function fetchPAYPeriods() {
  */
 export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    let url = '/api/pto-requests/approved-and-rejected/';
+    let url = '/api/timeoffrequests/summary/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }

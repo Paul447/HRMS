@@ -192,6 +192,68 @@ class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'request': self.request})
         return context
+    @action(detail=False, methods=['get'], url_path='summary')
+    def approved_and_rejected(self, request):
+        """
+        Returns a combined list of approved and rejected time-off requests
+        for the authenticated user, optionally filtered by pay period.
+        """
+        user = self.request.user
+        pay_period_id = self.request.query_params.get('pay_period_id')
+
+        # Base querysets for approved and rejected requests
+        approved_requests_queryset = TimeoffRequest.objects.filter(
+            employee=user, # Corrected field name
+            status__iexact='approved'
+        ).select_related(
+            'employee', 'requested_leave_type', 'reference_pay_period', # Optimizing query
+            'requested_leave_type__leave_type', 'requested_leave_type__department'
+        )
+
+        rejected_requests_queryset = TimeoffRequest.objects.filter(
+            employee=user, # Corrected field name
+            status__iexact='rejected'
+        ).select_related(
+            'employee', 'requested_leave_type', 'reference_pay_period', # Optimizing query
+            'requested_leave_type__leave_type', 'requested_leave_type__department'
+        )
+
+        # Apply pay period filtering
+        if pay_period_id:
+            try:
+                pay_period_id = int(pay_period_id)
+                approved_requests_queryset = approved_requests_queryset.filter(reference_pay_period__id=pay_period_id) # Corrected field name
+                rejected_requests_queryset = rejected_requests_queryset.filter(reference_pay_period__id=pay_period_id) # Corrected field name
+            except ValueError:
+                # If pay_period_id is invalid, return empty lists immediately
+                return Response({
+                    "approved_requests": [],
+                    "rejected_requests": []
+                })
+        else:
+            # If no pay_period_id is provided, filter by the current pay period
+            now = timezone.now()
+            current_pay_period = PayPeriod.get_pay_period_for_date(now)
+            if current_pay_period:
+                approved_requests_queryset = approved_requests_queryset.filter(reference_pay_period=current_pay_period) # Corrected field name
+                rejected_requests_queryset = rejected_requests_queryset.filter(reference_pay_period=current_pay_period) # Corrected field name
+            else:
+                # If no current pay period found, return empty lists
+                return Response({
+                    "approved_requests": [],
+                    "rejected_requests": []
+                })
+
+        # Serialize the filtered querysets
+        # Use self.get_serializer for proper context passing
+        approved_data = self.get_serializer(approved_requests_queryset.order_by('-created_at'), many=True).data
+        rejected_data = self.get_serializer(rejected_requests_queryset.order_by('-created_at'), many=True).data
+
+        # Return the combined data in the desired format
+        return Response({
+            "approved_requests": approved_data,
+            "rejected_requests": rejected_data
+        })
 
 class DepartmentLeaveTypeDropdownView(APIView):
     permission_classes = [IsAuthenticated]
@@ -216,6 +278,9 @@ class DepartmentLeaveTypeDropdownView(APIView):
             for lt in leave_types
         ]
         return Response(data)
+
+
+
 
 class TimeOffRequestView(TemplateView, LoginRequiredMixin):
     template_name = 'timeoff_request.html'

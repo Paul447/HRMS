@@ -213,10 +213,6 @@ class TimeoffRequest(models.Model):
         # Example: if status changes from pending to approved/rejected, update reviewer and reviewed_at
         if original_status == 'pending' and self.status in ['approved']:
             perform_balance_deduction_on_approval(self, self.time_off_duration)  # Deduct balance on approval
-         # Override and add more logic as needed
-        elif original_status == 'pending' and self.status == 'rejected':
-            self.reviewer = self.requested_leave_type.reviewer
-            self.reviewed_at = timezone.now()
 
     def _process_to_splitting(self):
         """Orchestrates TO splitting logic."""
