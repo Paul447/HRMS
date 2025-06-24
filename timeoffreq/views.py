@@ -8,6 +8,10 @@ from .serializer import TimeoffRequestSerializerEmployee, TimeoffApproveRejectMa
 from department.models import UserProfile
 from payperiod.models import PayPeriod  # Add this import for PayPeriod
 from rest_framework.exceptions import ValidationError
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from leavetype.models import DepartmentBasedLeaveType
+
 
 
 class IsManagerOfDepartment(permissions.BasePermission):
@@ -186,4 +190,27 @@ class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'request': self.request})
         return context
-        
+
+class DepartmentLeaveTypeDropdownView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Get user's departments
+        user_department_ids = UserProfile.objects.filter(user=user).values_list('department__id', flat=True)
+
+        # Filter leave types for those departments
+        leave_types = DepartmentBasedLeaveType.objects.filter(
+            department__id__in=user_department_ids
+        ).select_related('department', 'leave_type')
+
+        # Return simplified JSON
+        data = [
+            {
+                "id": lt.id,
+                "display_name": f"{lt.leave_type.name}"
+            }
+            for lt in leave_types
+        ]
+        return Response(data)

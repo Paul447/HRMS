@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Time Off Request</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles for the body to center content */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* Stack header and form vertically */
+            align-items: center; /* Center items horizontally */
+            padding: 1rem;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+
+        /* Form input and select focus styles */
+        input[type="datetime-local"]:focus,
+        input[type="file"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Blue shadow on focus */
+            border-color: #4299e1; /* Blue border on focus */
+        }
+
+        /* Custom file upload button styling */
+        input[type="file"] {
+            display: none; /* Hide default file input */
+        }
+
+        .custom-file-upload {
+            border: 2px dashed #cbd5e0; /* Gray dashed border */
+            border-radius: 0.5rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding */
+            display: inline-block;
+            cursor: pointer;
+            background-color: #ffffff; /* White background */
+            transition: all 0.2s ease-in-out;
+            color: #4a5568; /* Dark gray text */
+        }
+
+        .custom-file-upload:hover {
+            border-color: #a0aec0; /* Darker gray on hover */
+            background-color: #edf2f7; /* Lighter background on hover */
+        }
+
+        .custom-file-upload-selected {
+            border-color: #48bb78; /* Green border when file selected */
+            background-color: #f0fff4; /* Light green background when file selected */
+            color: #2f855a; /* Darker green text */
+        }
+
+        /* Global Notification (Toast) styles */
+        #global-notification {
+            visibility: hidden; /* Start hidden */
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.5rem;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            top: 2.5rem; /* Position from top */
+            right: 1rem; /* Position from right */
+            font-size: 17px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateX(100%); /* Start off-screen for slide-in */
+        }
+
+        #global-notification.animate-slide-in {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(0);
+            animation: slide-in 0.4s forwards ease-out;
+        }
+
+        #global-notification.animate-fade-out {
+            animation: fade-out 0.6s forwards ease-in;
+        }
+
+        #global-notification.success { background-color: #48bb78; } /* Tailwind green-500 */
+        #global-notification.error { background-color: #ef4444; } /* Tailwind red-500 */
+        #global-notification.warning { background-color: #f6ad55; } /* Tailwind yellow-500 */
+
+        /* General fade-in animation for main content */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+        }
+
+        /* Notification slide-in/fade-out animations */
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fade-out {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* Spinner animation for buttons */
+        .loader {
+            border-top-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom modal animations */
+        @keyframes scale-in-modal {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fade-out-modal {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .animate-scale-in {
+            animation: scale-in-modal 0.3s ease-out forwards;
+        }
+        .animate-fade-out-modal {
+            animation: fade-out-modal 0.3s ease-in forwards;
+        }
+
+        /* Overlay for modal */
+        .confirm-modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4 min-h-screen">
+
+    <!-- Page Header mimicking dashboard.html with breadcrumbs and page title -->
+    <div class="w-full max-w-md mb-6 md:mb-8 text-left">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+                <li class="inline-flex items-center">
+                    <a href="#" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                        <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                        </svg>
+                        Home
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">Time Off Request</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h4 id="page_title" class="font-extrabold text-gray-900 text-2xl mb-2 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Submit New Time Off Request
+        </h4>
+        <p id="form_paragraph" class="text-gray-600">Fill out the form below to submit a new time off request.</p>
+    </div>
+
+    <!-- Main Content Area: Time Off Request Form -->
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200 animate-fade-in">
+        <div class="text-center mb-6 pb-4 border-b border-gray-100">
+            <h4 id="form_heading" class="font-extrabold text-gray-900 mb-2 flex items-center justify-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Request Time Off
+            </h4>
+        </div>
+
+        <form id="timeOffRequestForm" class="space-y-6">
+            <!-- CSRF Token (Dummy for client-side environment - replace with real token in backend integration) -->
+            <input type="hidden" name="csrfmiddlewaretoken" value="dummy_csrf_token_for_canvas">
+
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+                <div>
+                    <label for="leave_type" class="block text-sm font-medium text-gray-700 mb-2">Leave Type <span class="text-red-500">*</ Woman's *</span></label>
+                    <div class="relative">
+                        <select id="leave_type" name="requested_leave_type" required
+                                class="block w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white text-gray-800 transition-colors duration-200 appearance-none">
+                            <option value="" disabled selected>Select...</option>
+                            <!-- Options will be loaded dynamically by JavaScript -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="leaveTypeErrors" class="field-errors text-red-600 text-xs mt-1"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="start_date_time" class="block text-sm font-medium text-gray-700 mb-2">Start Date/Time <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="datetime-local" id="start_date_time" name="start_date_time" required
+                               class="block w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-800 transition-colors duration-200">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3177 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="startDateErrors" class="field-errors text-red-600 text-xs mt-1"></div>
+                </div>
+
+                <div>
+                    <label for="end_date_time" class="block text-sm font-medium text-gray-700 mb-2">End Date/Time <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="datetime-local" id="end_date_time" name="end_date_time" required
+                               class="block w-full pl-networks 4 pr-10 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-800 transition-colors duration-200">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="endDateErrors" class="field-errors text-red-600 text-xs mt-1"></div>
+                </div>
+            </div>
+
+            <div>
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">Reason <span class="text-red-500">*</span></label>
+                <textarea id="reason" name="employee_leave_reason" rows="4" required
+                          class="block w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-800 transition-colors duration-200 placeholder-gray-400"
+                          placeholder="e.g., Vacation, Medical Leave, Personal Appointment (max 255 characters)"></textarea>
+                <div id="reasonErrors" class="field-errors text-red-600 text-xs mt-1"></div>
+            </div>
+
+            <div id="medicalDocumentField" class="hidden">
+                <label for="medical_document" class="block text-sm font-medium text-gray-700 mb-2">
+                    Document Proof <span id="medicalDocumentRequiredStar" class="text-red-500 hidden">*</span>
+                </label>
+                <label for="medical_document" id="medicalDocumentUploadLabel" class="custom-file-upload">
+                    Choose File (PDF, JPG, JPEG, PNG)
+                </label>
+                <input type="file" id="medical_document" name="document_proof" accept=".pdf,.jpg,.jpeg,.png">
+                <span id="medicalFileNameDisplay" class="text-sm text-gray-500 ml-2">No file chosen</span>
+                <p class="mt-1 text-xs text-gray-500">Accepted formats: PDF, JPG, JPEG, PNG.</p>
+                <div id="documentProofErrors" class="field-errors text-red-600 text-xs mt-1"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                <button type="button" id="clearFormButton"
+                        class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Clear
+                </button>
+                <button type="submit" id="submitButton"
+                        class="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="submitButtonText">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 inline-block align-text-bottom" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Submit Request
+                    </span>
+                    <span id="loadingSpinner" class="hidden loader ease-linear rounded-full border-4 border-t-4 border-white h-5 w-5 ml-2"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="global-notification"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-70 hidden confirm-modal-overlay">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full animate-scale-in confirm-modal-content">
+            <div class="text-center">
+z                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-14 w-14 text-blue-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Confirm Request</h3>
+                <p class="text-gray-700 text-base mb-4">Submit this time off request?</p>
+                <p class="text-sm text-gray-500">Review details before confirming.</p>
+            </div>
+            <div class="mt-6 flex justify-center gap-4">
+                <button id="confirmCancelButton" type="button"
+                        class="px-5 py-2.5 rounded-md text-base font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button id="confirmSubmitButton" type="button"
+                        class="px-5 py-2.5 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+{% load static %}
+<script src="{% static 'timeoffreq/js/timeOffReq.js' %}" type="module" defer></script>
+{% comment %} {% endblock %} {% endcomment %}
+</body>
+</html>

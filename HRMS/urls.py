@@ -37,7 +37,7 @@ from onshift.views import UserClockOnShiftViewSet
 from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
 from notificationapp.views import NotificationViewSet
 from timeoffreq.views import ManagerTimeoffApprovalViewSet,TimeoffRequestViewSetEmployee
-
+from timeoffreq.views import DepartmentLeaveTypeDropdownView
 
 # IMPORTS YOU NEED TO ADD:
 from django.conf import settings # Import settings
@@ -81,6 +81,7 @@ urlpatterns = [
     path('auth/onshift/', include('onshift.url')),
     path('auth/timeoff/', include('timeoff_management.url')),
     path('auth/department/', include('deptleaves.url')),
+    path('api/leave-type-dropdown/', DepartmentLeaveTypeDropdownView.as_view(), name='leave-type-dropdown'),
 
     path('api/', include(router.urls)),
     path('api/clock/', include(clock_router.urls)),  # API for clock functionality
