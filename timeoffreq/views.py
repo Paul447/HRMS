@@ -11,6 +11,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from leavetype.models import DepartmentBasedLeaveType
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
@@ -214,3 +216,10 @@ class DepartmentLeaveTypeDropdownView(APIView):
             for lt in leave_types
         ]
         return Response(data)
+
+class TimeOffRequestView(TemplateView, LoginRequiredMixin):
+    template_name = 'timeoff_request.html'
+    login_url = 'frontend_login'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context

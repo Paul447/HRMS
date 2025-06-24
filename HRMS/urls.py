@@ -76,6 +76,7 @@ urlpatterns = [
     path('auth/', include('hrmsauth.url')),
     path('auth/ptobalance/', include('ptobalance.url')),
     path('auth/ptorequest/', include('ptorequest.url')),
+    path('auth/timeoffreq/', include('timeoffreq.urls')),
     path('auth/clock/', include('timeclock.url')),
     path('auth/punchreport/', include('punchreport.url')),
     path('auth/onshift/', include('onshift.url')),
