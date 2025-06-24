@@ -57,7 +57,7 @@ export function renderRequests(requests, targetTbody, noRequestsMessageDiv, allo
             <td class="py-4 px-6 date-col">${startDate}</td>
             <td class="py-4 px-6 date-col">${endDate}</td>
             <td class="py-4 px-6">${request.time_off_duration || 'N/A'}</td>
-            <td class="py-4 px-6 truncate max-w-xs" title="${request.reason}">${request.reason || 'No reason provided'}</td>
+            <td class="py-4 px-6 truncate max-w-xs" title="${request.employee_leave_reason}">${request.employee_leave_reason || 'No reason provided'}</td>
             <td class="py-4 px-6">
                 <span class="status-badge ${statusClass}">${statusText}</span>
             </td>

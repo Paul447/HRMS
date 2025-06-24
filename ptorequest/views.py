@@ -2,6 +2,8 @@
 from rest_framework import viewsets, permissions
 from .models import PTORequests
 from .serializer import PTORequestsSerializer
+from timeoffreq.serializer import TimeoffRequestSerializerEmployee
+from timeoffreq.models import TimeoffRequest
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -202,29 +204,31 @@ class GetPTORequestsFromPastPayPeriodViewSet(viewsets.ReadOnlyModelViewSet):
     It filters by authenticated user and specifically for pay periods whose end_date is in the past.
     It does not include 'pending' requests as those should be processed by now.
     """
-    serializer_class = PTORequestsSerializer
+    serializer_class = TimeoffRequestSerializerEmployee
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        queryset = PTORequests.objects.filter(user=user)
+        queryset = TimeoffRequest.objects.filter(employee=user)
         pay_period_id = self.request.query_params.get('pay_period_id')
         queryset = queryset.exclude(status__iexact='pending')
+
         if pay_period_id:
-                try:
-                    pay_period_id = int(pay_period_id)
-                    queryset = queryset.filter(pay_period__id=pay_period_id)
-                except ValueError:
-                    queryset = PTORequests.objects.none()
+            try:
+                pay_period_id = int(pay_period_id)
+                queryset = queryset.filter(reference_pay_period__id=pay_period_id)
+            except ValueError:
+                queryset = TimeoffRequest.objects.none()
         else:
-                now = timezone.now()
-                current_pay_period = PayPeriod.get_pay_period_for_date(now)
-                if current_pay_period:
-                    queryset = queryset.filter(pay_period=current_pay_period)
-                else:
-                    queryset = PTORequests.objects.none()
+            now = timezone.now()
+            current_pay_period = PayPeriod.get_pay_period_for_date(now)
+            if current_pay_period:
+                queryset = queryset.filter(reference_pay_period=current_pay_period)
+            else:
+                queryset = TimeoffRequest.objects.none()
 
         return queryset.order_by('-created_at')
+
 
 class PTORequestsView(TemplateView, LoginRequiredMixin):
     template_name = 'ptorequest.html'

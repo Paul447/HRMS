@@ -255,6 +255,36 @@ class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
             "rejected_requests": rejected_data
         })
 
+class PastTimeOffRequestViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for employees to view past time-off requests.
+    
+    """
+    serializer_class = TimeoffRequestSerializerEmployee
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = TimeoffRequest.objects.filter(employee=user)
+        pay_period_id = self.request.query_params.get('pay_period_id')
+        queryset = queryset.exclude(status__iexact='pending')
+
+        if pay_period_id:
+            try:
+                pay_period_id = int(pay_period_id)
+                queryset = queryset.filter(reference_pay_period__id=pay_period_id)
+            except ValueError:
+                queryset = TimeoffRequest.objects.none()
+        else:
+            now = timezone.now()
+            current_pay_period = PayPeriod.get_pay_period_for_date(now)
+            if current_pay_period:
+                queryset = queryset.filter(reference_pay_period=current_pay_period)
+            else:
+                queryset = TimeoffRequest.objects.none()
+
+        return queryset.order_by('-created_at')
+
 class DepartmentLeaveTypeDropdownView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -281,7 +311,6 @@ class DepartmentLeaveTypeDropdownView(APIView):
 
 
 
-
 class TimeOffRequestView(TemplateView, LoginRequiredMixin):
     template_name = 'timeoff_request.html'
     login_url = 'frontend_login'
@@ -289,7 +318,14 @@ class TimeOffRequestView(TemplateView, LoginRequiredMixin):
         context = super().get_context_data(**kwargs)
         return context
 class TimeOffRequestDetailsView(TemplateView, LoginRequiredMixin):
+
     template_name = 'timeoff_request_view.html'
+    login_url = 'frontend_login'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+class GetPastTimeOffRequestsView(TemplateView, LoginRequiredMixin):
+    template_name = 'get_past_timeoff_requests_view.html'
     login_url = 'frontend_login'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
