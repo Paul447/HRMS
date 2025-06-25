@@ -282,53 +282,83 @@ class TimeOffLinkManager {
     }
 
     /**
-     * Fetches department data to determine if the time off link should be hidden.
+     * Fetches user data to determine if time off links should be displayed.
+     * @returns {Promise<void>}
      */
     async hideTimeOffLink() {
-        if (!this.timeOffLinkDiv) {
-            console.warn('Time off link element not found. Skipping hideTimeOffLink.');
+        // Check if elements exist
+        if (!this.timeOffLinkDiv || !this.managerTimeOffManagementLink) {
+            console.warn('Required elements not found. Time off link:', !!this.timeOffLinkDiv, 
+                        'Manager link:', !!this.managerTimeOffManagementLink);
             return;
         }
 
         try {
-            const response = await fetch('/api/department/', {
+            const response = await fetch('/api/user_info/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                    // Add authentication token if required (e.g., from Django session or JWT)
+                    // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                credentials: 'same-origin' // Include cookies for Django session auth
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                const timeoffFeatureEnabled = data[0]?.is_time_off;
-                const isManager = data[0]?.is_manager;
-
-                if (timeoffFeatureEnabled) {
-                    this.timeOffLinkDiv.classList.remove('hidden');
-                    this.timeOffLinkDiv.removeAttribute('aria-hidden');
-                } else {
-                    this.timeOffLinkDiv.classList.add('hidden');
-                    this.timeOffLinkDiv.setAttribute('aria-hidden', 'true');
-                }
-                if(isManager){
-                    this.managerTimeOffManagementLink.classList.remove('hidden');
-                    this.managerTimeOffManagementLink.removeAttribute('aria-hidden');
-                }else
-                {
-                    this.managerTimeOffManagementLink.classList.add('hidden');
-                    this.managerTimeOffManagementLink.setAttribute('aria-hidden', 'true');
-                }
-            } else {
-                console.error('Failed to fetch department data. Status:', response.status);
-                // Default to visible if fetch fails, or hide based on specific requirement
-                this.timeOffLinkDiv.classList.remove('hidden'); // Assuming default is visible
-                this.timeOffLinkDiv.removeAttribute('aria-hidden');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+            console.log('API response:', data); // Debug: Log the API response
+
+            // Handle both array and object responses
+            const userData = Array.isArray(data) && data[0] ? data[0] : data;
+
+            // Validate required fields
+            if (!userData || typeof userData.is_time_off === 'undefined' || 
+                typeof userData.is_manager === 'undefined' || 
+                typeof userData.is_superuser === 'undefined') {
+                throw new Error('Invalid response data structure: missing required fields');
+            }
+
+            const { is_time_off: timeoffFeatureEnabled, is_manager: isManager, is_superuser: isSuperuser } = userData;
+
+            // Update time off link visibility
+            this.updateElementVisibility(
+                this.timeOffLinkDiv,
+                timeoffFeatureEnabled === true
+            );
+
+            // Update manager link visibility for managers or superusers
+            this.updateElementVisibility(
+                this.managerTimeOffManagementLink,
+                isManager === true || isSuperuser === true
+            );
+
         } catch (error) {
-            console.error('Error fetching department data:', error);
-            // Default to visible if an error occurs
-            this.timeOffLinkDiv.classList.remove('hidden');
-            this.timeOffLinkDiv.removeAttribute('aria-hidden');
+            console.error('Error in hideTimeOffLink:', error);
+            // Default visibility: show timeOffLink, hide manager link
+            this.updateElementVisibility(this.timeOffLinkDiv, true);
+            this.updateElementVisibility(this.managerTimeOffManagementLink, false);
+        }
+    }
+
+    /**
+     * Updates element visibility and ARIA attributes
+     * @param {HTMLElement} element - The element to update
+     * @param {boolean} isVisible - Whether the element should be visible
+     */
+    updateElementVisibility(element, isVisible) {
+        if (!element) return;
+
+        if (isVisible) {
+            element.classList.remove('hidden');
+            element.removeAttribute('aria-hidden');
+            console.log(`Showing element: ${element.id}`); // Debug: Confirm visibility
+        } else {
+            element.classList.add('hidden');
+            element.setAttribute('aria-hidden', 'true');
+            console.log(`Hiding element: ${element.id}`); // Debug: Confirm visibility
         }
     }
 }

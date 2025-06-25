@@ -17,6 +17,7 @@ from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from department.models import UserProfile
 
 
 # from .serializer import (
@@ -94,11 +95,15 @@ class UserInfoViewSet(ViewSet):
 
     def list(self, request):  # routers use `list` for GET /user-info/
         user = request.user
+        user_profile = UserProfile.objects.filter(user=user).first()
         return Response({
             'id': user.id,
             'username': user.username,
             'is_authenticated': user.is_authenticated,
             'is_superuser': user.is_superuser,
+            'is_time_off': user_profile.is_time_off if user_profile else False,
+            'is_manager': user_profile.is_manager if user_profile else False,
+            'name': user_profile.department.name
         })
 
 # -----------------------------
