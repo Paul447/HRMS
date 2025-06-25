@@ -43,17 +43,17 @@ import shutil # For deleting directories
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.conf import settings
-from .models import PTORequests # Import your PTORequests model
+from .models import TimeoffRequest # Import your TimeoffRequest model
 
-@receiver(post_delete, sender=PTORequests)
+@receiver(post_delete, sender=TimeoffRequest)
 def delete_pto_document_and_folder(sender, instance, **kwargs):
     """
     Deletes medical document file and its containing user folder when
-    the associated PTORequests instance is deleted.
+    the associated TimeoffRequest instance is deleted.
     """
-    if instance.medical_document:
+    if instance.document_proof:
         # Get the absolute path to the file
-        file_path = instance.medical_document.path
+        file_path = instance.document_proof.path
         
         # Check if the file exists before attempting to delete
         if os.path.exists(file_path):

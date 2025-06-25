@@ -1,6 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 
-class TimeOffManagementPagination(PageNumberPagination):
+class ManagerTimeOffManagementPagination(PageNumberPagination):
     """
     Custom pagination class for Time Off Management views.
     This class can be used to control the number of results returned per page.

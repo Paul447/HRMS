@@ -1,97 +1,110 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from department.models import Department
-from department.serializer import DepartmentSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import permissions
 
 from django.utils import timezone
-from ptorequest.models import PTORequests
-from timeoff_management.serializer import TimeOffManagementSerializer
-from timeoff_management.filter import PTORequestFilter
-from .pagination import TimeOffManagementPagination
+from .pagination import ManagerTimeOffManagementPagination
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.contrib.auth import get_user_model # Import to get the User model
 import logging
-from notificationapp.models import Notification
-from .services import send_pto_notification_and_email # Import the new service function
 from department.models import UserProfile
+from timeoffreq.models import TimeoffRequest
+from .serializer import TimeoffApproveRejectManager
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 
-# logger = logging.getLogger(__name__)
-# Create your views here.
-class IsSuperuserCustom(permissions.BasePermission):
+                                         # Manager Time off Management Logic
+############################################################################################################################################################################
+class IsManagerOfDepartment(permissions.BasePermission):
     """
-    Custom permission class to check if the user is a superuser.
-    This can be used to restrict access to certain views.
+    Custom permission to allow only managers of the specific department to access requests.
     """
     def has_permission(self, request, view):
-        return bool(request.user.is_superuser)
-    def has_object_permission(self, request, view, obj):
-        return bool(request.user.is_superuser)
-    
-class IsManager(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return False
-
         try:
-            user_profile = request.user.userprofile  # Assuming OneToOneField
+            user_profile = UserProfile.objects.get(user=request.user)
             return user_profile.is_manager
         except UserProfile.DoesNotExist:
             return False
-        
-class DepartmentReturnView(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for returning department information.
-    This is a read-only viewset that allows users to retrieve department data.
-    """
-    queryset = Department.objects.all()
-    serializer_class = DepartmentSerializer
-    permission_classes = [IsAuthenticated, IsSuperuserCustom]
-    permission_classes = [AllowAny]
 
-    def get_queryset(self):
-        return super().get_queryset()
+    def has_object_permission(self, request, view, obj):
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            return user_profile.is_manager and user_profile.department == obj.employee.userprofile.department
+        except UserProfile.DoesNotExist:
+            return False
+
+class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for managers to list pending time-off requests in their department
+    and perform approve or reject actions.
+    """
+    serializer_class = TimeoffApproveRejectManager
+    permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment]
+    pagination_class = ManagerTimeOffManagementPagination 
     
-
-# This viewset can be used to return all the time off requests for the current pay period.
-class TimeOffRequestViewCurrentPayPeriodAdmin(viewsets.ModelViewSet):
-    """
-    ViewSet for returning time off requests for the current pay period.
-    This is a read-only viewset that allows users to retrieve time off request data.
-    """
-    # permission_classes = [IsSuperuserCustom, IsAuthenticated , IsManager]
-    serializer_class = TimeOffManagementSerializer
-    http_method_names = ['get', 'put', 'patch', 'head', 'options', 'trace']
-    filterset_class = PTORequestFilter
-    pagination_class = TimeOffManagementPagination  # Add this line for pagination
-
     def get_queryset(self):
-        # Start with the base queryset
-        queryset = PTORequests.objects.filter(status='pending')
-        now = timezone.now()
-
-        return queryset.order_by('start_date_time')
-
-    def perform_update(self, serializer):
         """
-        Handles the update of an existing PTO request.
+        Returns only pending time-off requests for the manager's department.
+        Uses select_related to optimize fetching of related data.
         """
-        
-        serializer.save()
-        
-        requester = self.request.user
-        instance_status = serializer.instance.status
-        
-        # Call the service function to handle notifications and emails
-        send_pto_notification_and_email(serializer.instance, requester, instance_status)
-        
+        user = self.request.user
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            if user_profile.is_manager:
+                return TimeoffRequest.objects.filter(
+                    employee__userprofile__department=user_profile.department,
+                    status='pending'
+                ).exclude(employee=user).select_related(
+                    'employee', 'requested_leave_type', 'reference_pay_period',
+                    'employee__userprofile', 'requested_leave_type__department',
+                    'requested_leave_type__leave_type'
+                ).order_by('-created_at')
+        except UserProfile.DoesNotExist:
+            return TimeoffRequest.objects.none()
+        return TimeoffRequest.objects.none()
 
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        """
+        Approve a pending time-off request.
+        Only accessible to managers of the employee's department.
+        """
+        timeoff_request = self.get_object()
+        user_profile = UserProfile.objects.get(user=request.user)
+        if user_profile.department != timeoff_request.employee.userprofile.department:
+            raise PermissionDenied("You can only approve requests for your department.")
+        if timeoff_request.status != 'pending':
+            raise PermissionDenied("Only pending requests can be approved.")
 
+        timeoff_request.status = 'approved'
+        timeoff_request.reviewer = request.user
+        timeoff_request.reviewed_at = timezone.now()
+        timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
+        serializer = self.get_serializer(timeoff_request)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """
+        Reject a pending time-off request.
+        Only accessible to managers of the employee's department.
+        """
+        timeoff_request = self.get_object()
+        user_profile = UserProfile.objects.get(user=request.user)
+        if user_profile.department != timeoff_request.employee.userprofile.department:
+            raise PermissionDenied("You can only reject requests for your department.")
+        if timeoff_request.status != 'pending':
+            raise PermissionDenied("Only pending requests can be rejected.")
+
+        timeoff_request.status = 'rejected'
+        timeoff_request.reviewer = request.user
+        timeoff_request.reviewed_at = timezone.now()
+        timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
+        serializer = self.get_serializer(timeoff_request)
+        return Response(serializer.data)
 class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
     """
     Template view for the Time Off Management page.
@@ -103,3 +116,9 @@ class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+                                         # Manager Time off Management Logic
+############################################################################################################################################################################
+
+
+                                         # SuperUser Time off Management Logic
+############################################################################################################################################################################

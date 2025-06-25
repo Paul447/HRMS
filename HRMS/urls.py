@@ -32,7 +32,6 @@ from department.views import UserProfileViewSet
 from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
-from timeoff_management.views import TimeOffRequestViewCurrentPayPeriodAdmin
 from notificationapp.views import NotificationViewSet
 from timeoffreq.views import ManagerTimeoffApprovalViewSet,TimeoffRequestViewSetEmployee,DepartmentLeaveTypeDropdownView ,PastTimeOffRequestViewSet
 
@@ -52,7 +51,6 @@ router.register(r'past-pay-period', PayPeriodViewSetForPastTimeOffRequest, basen
 router.register(r'current-future-pay-period', PayPeriodViewSetForCurrentFutureTimeOffRequest, basename='current_future_pay_period')
 router.register(r'department', UserProfileViewSet, basename='userprofile')
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
-router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, basename='time_off_requests')
 router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'timeoffrequests', TimeoffRequestViewSetEmployee, basename='timeoffrequests')
