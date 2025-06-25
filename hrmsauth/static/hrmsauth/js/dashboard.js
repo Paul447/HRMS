@@ -278,6 +278,7 @@ class UserDataManager {
 class TimeOffLinkManager {
     constructor() {
         this.timeOffLinkDiv = document.getElementById('timeoff');
+        this.managerTimeOffManagementLink = document.getElementById('managerToolsButton');
     }
 
     /**
@@ -300,6 +301,7 @@ class TimeOffLinkManager {
             if (response.ok) {
                 const data = await response.json();
                 const timeoffFeatureEnabled = data[0]?.is_time_off;
+                const isManager = data[0]?.is_manager;
 
                 if (timeoffFeatureEnabled) {
                     this.timeOffLinkDiv.classList.remove('hidden');
@@ -307,6 +309,14 @@ class TimeOffLinkManager {
                 } else {
                     this.timeOffLinkDiv.classList.add('hidden');
                     this.timeOffLinkDiv.setAttribute('aria-hidden', 'true');
+                }
+                if(isManager){
+                    this.managerTimeOffManagementLink.classList.remove('hidden');
+                    this.managerTimeOffManagementLink.removeAttribute('aria-hidden');
+                }else
+                {
+                    this.managerTimeOffManagementLink.classList.add('hidden');
+                    this.managerTimeOffManagementLink.setAttribute('aria-hidden', 'true');
                 }
             } else {
                 console.error('Failed to fetch department data. Status:', response.status);

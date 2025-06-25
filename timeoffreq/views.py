@@ -15,6 +15,9 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth import get_user_model  # Import to get the User model
+
+User = get_user_model()
 
 class ManagerTimeOffManagementPagination(PageNumberPagination):
     """
@@ -54,19 +57,20 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TimeoffApproveRejectManager
     permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment]
     pagination_class = ManagerTimeOffManagementPagination 
-
+    
     def get_queryset(self):
         """
         Returns only pending time-off requests for the manager's department.
         Uses select_related to optimize fetching of related data.
         """
+        user = self.request.user
         try:
-            user_profile = UserProfile.objects.get(user=self.request.user)
+            user_profile = UserProfile.objects.get(user=user)
             if user_profile.is_manager:
                 return TimeoffRequest.objects.filter(
                     employee__userprofile__department=user_profile.department,
                     status='pending'
-                ).select_related(
+                ).exclude(employee=user).select_related(
                     'employee', 'requested_leave_type', 'reference_pay_period',
                     'employee__userprofile', 'requested_leave_type__department',
                     'requested_leave_type__leave_type'
@@ -116,24 +120,53 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
         
+ # Best practice for getting the active user model
+
 class IsEmployeeWithTimeoffPermission(permissions.BasePermission):
     """
-    Custom permission to allow a user to manipulate a time-off request
+    Custom permission to allow a user to manipulate (or view) a time-off request
     ONLY IF they are the employee associated with the request
-    AND they possess the 'is_time_off' permission.
+    AND their UserProfile's 'is_time_off' field is True.
+    This applies to ALL HTTP methods (GET, POST, PUT, DELETE, etc.).
     """
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
+    message = "You must be the request's employee and have the 'Time Off' permission enabled in your profile to access this resource."
 
-    def has_object_permission(self, request, view, obj):
-        is_owner = (obj.employee == request.user)
-        has_timeoff_permission = False
+    def has_permission(self, request, view):
+        # First, ensure the user is authenticated.
+        if not request.user.is_authenticated:
+            return False
+        
+        # Now, regardless of the method (safe or unsafe), check the user's profile.
+        # This global permission means that a user MUST have 'is_time_off'
+        # enabled just to interact with *any* time-off request resource.
         try:
             user_profile = UserProfile.objects.get(user=request.user)
-            has_timeoff_permission = user_profile.is_time_off
+            # User must have a profile AND 'is_time_off' must be True
+            return user_profile.is_time_off 
         except UserProfile.DoesNotExist:
-            has_timeoff_permission = False
-        return is_owner and has_timeoff_permission
+            # If no user profile exists, or 'is_time_off' is False (handled by the return above)
+            return False 
+
+    def has_object_permission(self, request, view, obj):
+        # For ANY method (including GET, HEAD, OPTIONS), the user must be the owner
+        # AND have the 'is_time_off' permission.
+
+        # 1. Check if the requesting user is the employee associated with the time-off request.
+        is_owner = (obj.employee == request.user)
+        
+        # 2. Check if the user's UserProfile has 'is_time_off' set to True.
+        # This check is duplicated from has_permission for robustness at the object level,
+        # ensuring both conditions are met *for this specific object*.
+        has_timeoff_profile_permission = False
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            has_timeoff_profile_permission = user_profile.is_time_off
+        except UserProfile.DoesNotExist:
+            has_timeoff_profile_permission = False # If no profile, no permission
+
+        # The user must be the owner AND have the 'is_time_off' permission for ANY action on this object.
+        return is_owner and has_timeoff_profile_permission
+
 
 class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
     """
@@ -141,8 +174,8 @@ class TimeoffRequestViewSetEmployee(viewsets.ModelViewSet):
     Supports listing, retrieving, creating, updating, and deleting time-off requests.
     Restricted to employee-owned requests with 'is_time_off' permission.
     """
+    permission_classes = [IsEmployeeWithTimeoffPermission]
     serializer_class = TimeoffRequestSerializerEmployee
-    permission_classes = [permissions.IsAuthenticated, IsEmployeeWithTimeoffPermission]
 
     def get_queryset(self):
         """

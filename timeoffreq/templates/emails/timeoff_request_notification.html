@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New PTO Request Submitted</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;font-family:'Inter', Arial, sans-serif;color:#333;background-color:#F8F8F8;">
+    <table width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:30px auto;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <tr>
+            <td style="padding:25px;background-color:#0A2540;color:#ffffff;text-align:center;border-top-left-radius:8px;border-top-right-radius:8px;">
+                <h1 style="margin:0;font-size:26px;font-weight:700;">⏱️ New Time Off Request</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:30px;">
+                <p style="margin:0 0 18px;font-size:16px;line-height:1.6;">Dear Supervisor,</p>
+                <p style="margin:0 0 25px;font-size:16px;line-height:1.6;">
+                    A new Paid Time Off (PTO) request has been submitted by <strong style="color:#0A2540;">{{ requester_name }}</strong>. Please review the details below:
+                </p>
+
+                <table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #E0E0E0;margin-bottom:30px;border-radius:6px;overflow:hidden;">
+                    <tr>
+                        <td colspan="2" style="padding:15px;background-color:#E6F0F6;font-weight:bold;font-size:16px;color:#0A2540;border-bottom:1px solid #E0E0E0;">
+                            Request Details
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 15px;width:35%;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            <strong style="color:#555;">Leave Type:</strong>
+                        </td>
+                        <td style="padding:12px 15px;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            {{ leave_type }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 15px;width:35%;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            <strong style="color:#555;">Start Date:</strong>
+                        </td>
+                        <td style="padding:12px 15px;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            {{ start_date }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 15px;width:35%;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            <strong style="color:#555;">End Date:</strong>
+                        </td>
+                        <td style="padding:12px 15px;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            {{ end_date }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 15px;width:35%;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            <strong style="color:#555;">Total Hours:</strong>
+                        </td>
+                        <td style="padding:12px 15px;vertical-align:top;border-bottom:1px solid #F5F5F5;">
+                            {{ total_hours }} hours
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px 15px;width:35%;vertical-align:top;">
+                            <strong style="color:#555;">Reason:</strong>
+                        </td>
+                        <td style="padding:12px 15px;vertical-align:top;">
+                            {{ reason }}
+                        </td>
+                    </tr>
+                </table>
+
+                <p style="margin:0;font-size:13px;color:#888;text-align:center;">
+                    You received this email as a supervisor in the system.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:18px;background-color:#F0F0F0;color:#777;text-align:center;font-size:12px;border-bottom-left-radius:8px;border-bottom-right-radius:8px;">
+                <p style="margin:0;">© {{ 2025 }} University Police. All rights reserved.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
