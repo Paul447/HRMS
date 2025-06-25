@@ -33,7 +33,8 @@ from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from notificationapp.views import NotificationViewSet
-from timeoffreq.views import ManagerTimeoffApprovalViewSet,TimeoffRequestViewSetEmployee,DepartmentLeaveTypeDropdownView ,PastTimeOffRequestViewSet
+from timeoffreq.views import TimeoffRequestViewSetEmployee,DepartmentLeaveTypeDropdownView ,PastTimeOffRequestViewSet
+from timeoff_management.views import ManagerTimeoffApprovalViewSet
 
 
 
