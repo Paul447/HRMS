@@ -255,6 +255,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "holiday" / "static",
     BASE_DIR / "punchreport" / "static",
     BASE_DIR / "onshift" / "static",
+    BASE_DIR / "timeoff_management" / "static",
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

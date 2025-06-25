@@ -14,6 +14,16 @@ from leavetype.models import DepartmentBasedLeaveType
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from rest_framework.pagination import PageNumberPagination
+
+class ManagerTimeOffManagementPagination(PageNumberPagination):
+    """
+    Custom pagination class for Time Off Management views.
+    This class can be used to control the number of results returned per page.
+    """
+    page_size = 10  # Default number of items per page
+    page_size_query_param = 'page_size'  # Allow clients to set the page size
+    max_page_size = 100  # Maximum number of items per page
 
 
 class IsManagerOfDepartment(permissions.BasePermission):
@@ -43,6 +53,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = TimeoffApproveRejectManager
     permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment]
+    pagination_class = ManagerTimeOffManagementPagination 
 
     def get_queryset(self):
         """

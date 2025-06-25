@@ -28,13 +28,11 @@ from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from adminorganizer.admin.admin_site import hrms_admin_site
 from timeclock.views import UserClockDataAPIView, ClockInOutCreate
-from leavetype.views import DepartmentBasedLeaveTypeViewSet
 from department.views import UserProfileViewSet
-from ptorequest.views import PTORequestsViewSet , GetPTORequestsFromPastPayPeriodViewSet
 from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
-from timeoff_management.views import DepartmentReturnView,TimeOffRequestViewCurrentPayPeriodAdmin
+from timeoff_management.views import TimeOffRequestViewCurrentPayPeriodAdmin
 from notificationapp.views import NotificationViewSet
 from timeoffreq.views import ManagerTimeoffApprovalViewSet,TimeoffRequestViewSetEmployee,DepartmentLeaveTypeDropdownView ,PastTimeOffRequestViewSet
 
@@ -52,12 +50,8 @@ router.register(r'punch-report', PunchReportViewSet, basename='punch_report')
 router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_upto_today')
 router.register(r'past-pay-period', PayPeriodViewSetForPastTimeOffRequest, basename='past_pay_period')
 router.register(r'current-future-pay-period', PayPeriodViewSetForCurrentFutureTimeOffRequest, basename='current_future_pay_period')
-router.register(r'departmentleavetype', DepartmentBasedLeaveTypeViewSet, basename='departmentleavetype')
 router.register(r'department', UserProfileViewSet, basename='userprofile')
-router.register(r'pto-requests', PTORequestsViewSet, basename='pto-requests')
-router.register(r'past-pto-requests', GetPTORequestsFromPastPayPeriodViewSet, basename='past-ptorequests')
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
-router.register(r'all-departments', DepartmentReturnView, basename='all_departments')
 router.register(r'time-off-manage', TimeOffRequestViewCurrentPayPeriodAdmin, basename='time_off_requests')
 router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
 router.register(r'notifications', NotificationViewSet, basename='notification')
