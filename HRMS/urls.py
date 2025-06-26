@@ -35,6 +35,7 @@ from onshift.views import UserClockOnShiftViewSet
 from notificationapp.views import NotificationViewSet
 from timeoffreq.views import TimeoffRequestViewSetEmployee,DepartmentLeaveTypeDropdownView ,PastTimeOffRequestViewSet
 from timeoff_management.views import ManagerTimeoffApprovalViewSet
+from usertimeoffbalance.views import TimeoffBalanceViewSet
 
 
 
@@ -56,7 +57,7 @@ router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'timeoffrequests', TimeoffRequestViewSetEmployee, basename='timeoffrequests')
 router.register(r'past-timeoff-requests', PastTimeOffRequestViewSet, basename='past_timeoff_requests')
 router.register(r'manager-timeoff-approval', ManagerTimeoffApprovalViewSet, basename='manager_timeoff_approval')
-
+router.register(r'timeoff-balance', TimeoffBalanceViewSet, basename='timeoff_balance')
 
 clock_router = DefaultRouter()
 clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')
@@ -77,6 +78,7 @@ urlpatterns = [
     path('auth/onshift/', include('onshift.url')),
     path('auth/timeoff/', include('timeoff_management.url')),
     path('auth/department/', include('deptleaves.url')),
+    path('auth/time-off-balance/', include('usertimeoffbalance.url')),
     path('api/leave-type-dropdown/', DepartmentLeaveTypeDropdownView.as_view(), name='leave-type-dropdown'),
 
     path('api/', include(router.urls)),

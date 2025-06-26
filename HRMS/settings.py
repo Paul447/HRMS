@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "sickpolicy",
     "unverifiedsickleave",
     "timeoffreq",
+    "usertimeoffbalance",
     "django_filters",
 ]
 

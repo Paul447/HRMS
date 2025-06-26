@@ -1,0 +1,359 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Employee Time-off Balances{% endblock %}
+{% block page_title %}View Employee Time-off Balances{% endblock %}
+
+{% block breadcrumb_items %}
+<li aria-current="page">
+    <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="ml-1 text-xs font-semibold text-blue-600 md:ml-2">Time-off Balances</span>
+    </div>
+</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom scrollbar for better aesthetics */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #e2e8f0; /* Light gray track */
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #94a3b8; /* Gray thumb */
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* Darker gray on hover */
+    }
+    /* Ensure body styles from original are adapted if needed, or rely on dashboard.html */
+    body {
+        font-family: 'Inter', sans-serif; /* Ensure Inter font is loaded/used if not by base */
+    }
+</style>
+
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlalDLsUthK8uC/8J8m6x8z1+6wXy7r93N9Pq5f6R5x0F9L8J9K9Y7Zz5oE8+5w/Kz/5x/4w+7A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div class="bg-white rounded-lg shadow-sm p-5 md:p-6 border border-gray-100 animate-fade-in">
+    <div class="text-center mb-6 pb-3 border-b border-gray-100">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-800 mb-1 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Employee Time-off Balances
+        </h2>
+        <p class="text-gray-600 text-sm max-w-xl mx-auto">A quick overview of all employee sick leave and PTO balances.</p>
+    </div>
+
+    <div class="mb-5 flex flex-col md:flex-row md:items-end gap-4">
+        <div class="flex-grow">
+            <label for="filterName" class="block text-gray-700 text-sm font-semibold mb-2">Filter by Employee Name:</label>
+            <input type="text" id="filterName" class="shadow border border-gray-300 rounded-lg w-full py-2.5 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" placeholder="Enter employee name">
+        </div>
+        <div class="flex gap-2">
+            <button id="clearFilter" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="fas fa-times-circle mr-2"></i> Clear
+            </button>
+            <button id="exportCsv" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center">
+                <i class="fas fa-file-csv mr-2"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Color Legend for Balance Types -->
+    <div class="mb-5 p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700">
+        <h3 class="font-semibold text-gray-800 mb-2">Balance Legend:</h3>
+        <div class="flex flex-wrap gap-x-4 gap-y-2">
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-blue-600 mr-2"></span> PTO Balance
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-green-600 mr-2"></span> Verified Sick Balance
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-orange-600 mr-2"></span> Unverified Sick Balance
+            </div>
+            <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-red-600 mr-2"></span> FVSL Used
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Display Area (Table) -->
+    <div class="overflow-x-auto relative shadow-sm rounded-lg border border-gray-100 min-h-[200px]">
+        <table class="w-full text-xs text-left text-gray-700">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="py-2.5 px-3">SN</th>
+                    <th scope="col" class="py-2.5 px-3">Employee Name</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">PTO Bal.</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">Ver. Sick Bal.</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">Unver. Sick Bal.</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">FVSL Used</th>
+                    <th scope="col" class="py-2.5 px-3">Emp. Type</th>
+                    <th scope="col" class="py-2.5 px-3">Pay Freq.</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">Yrs. Exp.</th>
+                    <th scope="col" class="py-2.5 px-3 text-right">Accrual Rate</th>
+                </tr>
+            </thead>
+            <tbody id="timeoffTableBody" class="bg-white divide-y divide-gray-100">
+                <!-- Data will be populated here by JavaScript -->
+            </tbody>
+        </table>
+        <!-- Loading Spinner overlay -->
+        <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+            <p class="ml-4 text-blue-700 text-lg">Loading...</p>
+        </div>
+        <!-- No Data Message -->
+        <div id="noDataMessage" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 hidden">
+            <p class="text-gray-600 text-lg">No matching employee time-off data found.</p>
+        </div>
+    </div>
+
+    <div class="mt-4 flex justify-between items-center">
+        <div id="paginationInfo" class="text-sm text-gray-700"></div>
+        <div id="paginationControls" class="space-x-2">
+            <button id="prevPage" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
+            <button id="nextPage" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+        </div>
+    </div>
+
+    <!-- Error Message Area -->
+    <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mt-6" role="alert">
+        <strong class="font-bold">Error!</strong>
+        <span class="block sm:inline" id="errorText">Failed to load data. Please try again later.</span>
+    </div>
+</div>
+
+<script>
+    // Get references to HTML elements
+    const timeoffTableBody = document.getElementById('timeoffTableBody');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const noDataMessage = document.getElementById('noDataMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const filterNameInput = document.getElementById('filterName');
+    const clearFilterButton = document.getElementById('clearFilter'); // New: Clear Filter Button
+    const exportCsvButton = document.getElementById('exportCsv');     // New: Export CSV Button
+    const prevPageButton = document.getElementById('prevPage');
+    const nextPageButton = document.getElementById('nextPage');
+    const paginationInfo = document.getElementById('paginationInfo');
+
+    let currentPage = 1;
+    const ITEMS_PER_PAGE = 10; // Matches DRF's default pagination size
+
+    /**
+     * Debounce function to limit the rate of function execution.
+     * @param {Function} func - The function to debounce.
+     * @param {number} delay - The delay in milliseconds.
+     */
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    /**
+     * Fetches time-off balance data from the API endpoint and renders the table.
+     * @param {number} page - The page number to fetch.
+     * @param {string} searchTerm - The search term to filter by.
+     */
+    async function fetchAndRenderTable(page = 1, searchTerm = '') {
+        loadingSpinner.classList.remove('hidden'); // Show loading spinner
+        timeoffTableBody.innerHTML = ''; // Clear previous data
+        noDataMessage.classList.add('hidden'); // Hide no data message
+        errorMessage.classList.add('hidden'); // Hide any previous error messages
+
+        currentPage = page; // Update current page globally
+
+        let url = `/api/timeoff-balance/?page=${currentPage}`;
+        if (searchTerm) {
+            url += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                const errorDetails = await response.text();
+                throw new Error(`HTTP error! Status: ${response.status} - ${errorDetails}`);
+            }
+
+            const data = await response.json(); // Data will contain {count, next, previous, results}
+
+            // Render the table with the data from the current page
+            renderTable(data.results); // totalCount is now handled by the fetch, not passed to renderTable
+
+            // Update pagination controls and info
+            const totalItems = data.count;
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+            prevPageButton.disabled = !data.previous; // Use backend's `previous` URL
+            nextPageButton.disabled = !data.next;     // Use backend's `next` URL
+            
+            // Calculate start and end index for display info, handling empty results
+            const startIndex = (totalItems > 0) ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0;
+            const endIndex = (totalItems > 0) ? Math.min(startIndex + ITEMS_PER_PAGE -1, totalItems) : 0;
+
+            paginationInfo.textContent = `Showing ${startIndex} to ${endIndex} of ${totalItems} entries (Page ${currentPage} of ${totalPages > 0 ? totalPages : 1})`;
+
+            // Show/hide no data message based on results
+            if (totalItems === 0) {
+                noDataMessage.classList.remove('hidden');
+                noDataMessage.innerHTML = `<p class="text-gray-600 text-lg">No matching employee time-off data found.</p>`;
+            } else {
+                noDataMessage.classList.add('hidden');
+            }
+
+        } catch (error) {
+            console.error('Error fetching time-off balances:', error);
+            errorText.textContent = `Failed to load time-off data: ${error.message}. Please check the server and try again.`;
+            errorMessage.classList.remove('hidden');
+            noDataMessage.classList.remove('hidden');
+            noDataMessage.innerHTML = `<p class="text-red-500 text-lg">Error loading data.</p>`;
+        } finally {
+            loadingSpinner.classList.add('hidden'); // Hide loading spinner
+        }
+    }
+
+    /**
+     * Renders the given time-off balance data into the table.
+     * @param {Array} balancesToRender - An array of time-off balance objects for the current page.
+     */
+    function renderTable(balancesToRender) {
+        timeoffTableBody.innerHTML = ''; // Clear existing rows
+
+        if (balancesToRender.length === 0) {
+             // Handled by noDataMessage in fetchAndRenderTable
+             return;
+        }
+
+        balancesToRender.forEach((balance, index) => {
+            // Calculate serial number based on current page and index
+            const serialNumber = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+            const { user, unverified_sick_balance, verified_sick_balance, used_FVSL,
+                    pto_balance, employee_type, pay_frequency, year_of_experience, accrual_rate } = balance;
+
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b hover:bg-gray-50 even:bg-gray-50'; // Added even:bg-gray-50 for zebra stripes
+
+            row.innerHTML = `
+                <td class="py-2 px-3">${serialNumber}</td>
+                <td class="py-2 px-3 font-medium text-gray-900 whitespace-nowrap">${user.first_name} ${user.last_name}</td>
+                <td class="py-2 px-3 text-right font-semibold text-blue-600">${parseFloat(pto_balance).toFixed(2)}</td>
+                <td class="py-2 px-3 text-right font-semibold text-green-600">${parseFloat(verified_sick_balance).toFixed(2)}</td>
+                <td class="py-2 px-3 text-right font-semibold text-orange-600">${parseFloat(unverified_sick_balance).toFixed(2)}</td>
+                <td class="py-2 px-3 text-right font-semibold text-red-600">${parseFloat(used_FVSL).toFixed(2)}</td>
+                <td class="py-2 px-3">${employee_type || 'N/A'}</td>
+                <td class="py-2 px-3">${pay_frequency || 'N/A'}</td>
+                <td class="py-2 px-3 text-right">${parseFloat(year_of_experience).toFixed(2) || '0.00'}</td>
+                <td class="py-2 px-3 text-right">${parseFloat(accrual_rate).toFixed(2) || '0.00'}</td>
+            `;
+            timeoffTableBody.appendChild(row);
+        });
+    }
+
+    /**
+     * Exports the current table data to a CSV file.
+     * Fetches all data without pagination or filters from the server to ensure full export.
+     */
+    async function exportTableToCsv() {
+        // Temporarily show spinner during export data fetch
+        loadingSpinner.classList.remove('hidden'); 
+        
+        try {
+            const response = await fetch('/api/timeoff-balance/?page_size=all'); // Request all data
+            if (!response.ok) {
+                const errorDetails = await response.text();
+                throw new Error(`HTTP error! Status: ${response.status} - ${errorDetails}`);
+            }
+            const data = await response.json();
+            const allBalances = data.results || []; // Ensure we get the results array
+
+            if (allBalances.length === 0) {
+                alert("No data to export."); // Use a simple alert for now for user feedback
+                return;
+            }
+
+            let csvContent = "SN,Employee Name,PTO Bal.,Ver. Sick Bal.,Unver. Sick Bal.,FVSL Used,Emp. Type,Pay Freq.,Yrs. Exp.,Accrual Rate\n";
+
+            allBalances.forEach((balance, index) => {
+                const serialNumber = index + 1; // For export, serial number is global
+                const { user, unverified_sick_balance, verified_sick_balance, used_FVSL,
+                        pto_balance, employee_type, pay_frequency, year_of_experience, accrual_rate } = balance;
+
+                const row = [
+                    serialNumber,
+                    `"${user.first_name} ${user.last_name}"`, // Quote names to handle commas
+                    parseFloat(pto_balance).toFixed(2),
+                    parseFloat(verified_sick_balance).toFixed(2),
+                    parseFloat(unverified_sick_balance).toFixed(2),
+                    parseFloat(used_FVSL).toFixed(2),
+                    `"${employee_type || 'N/A'}"`,
+                    `"${pay_frequency || 'N/A'}"`,
+                    parseFloat(year_of_experience).toFixed(2),
+                    parseFloat(accrual_rate).toFixed(2)
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) { // Feature detection for HTML5 download attribute
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "employee_timeoff_balances.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+            alert(`Failed to export data: ${error.message}`); // Inform user of export failure
+        } finally {
+            loadingSpinner.classList.add('hidden'); // Hide loading spinner
+        }
+    }
+
+
+    // Event listeners for pagination controls
+    prevPageButton.addEventListener('click', () => {
+        fetchAndRenderTable(currentPage - 1, filterNameInput.value.trim());
+    });
+
+    nextPageButton.addEventListener('click', () => {
+        fetchAndRenderTable(currentPage + 1, filterNameInput.value.trim());
+    });
+
+    // Event listener for filter input with debounce
+    const debouncedSearch = debounce(() => {
+        fetchAndRenderTable(1, filterNameInput.value.trim()); // Reset to first page on filter change
+    }, 300); // 300ms delay
+
+    filterNameInput.addEventListener('input', debouncedSearch);
+
+    // New: Event listener for Clear Filter button
+    clearFilterButton.addEventListener('click', () => {
+        filterNameInput.value = ''; // Clear the input field
+        fetchAndRenderTable(1, ''); // Fetch data for the first page with no search term
+    });
+
+    // New: Event listener for Export CSV button
+    exportCsvButton.addEventListener('click', exportTableToCsv);
+
+
+    // Initial data fetch and render when the page loads
+    document.addEventListener('DOMContentLoaded', () => fetchAndRenderTable(1, ''));
+</script>
+{% endblock %}
