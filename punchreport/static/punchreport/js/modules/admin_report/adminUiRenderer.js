@@ -12,13 +12,13 @@ export function renderAdminClockDataReport(containerElement, data) {
 
     if (!data?.pay_period || !data?.users_clock_data) {
         containerElement.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 text-gray-500 bg-white rounded-lg shadow-xl mx-auto my-8 max-w-2xl border border-gray-200">
-                <svg class="w-20 h-20 mb-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div class="flex flex-col items-center justify-center py-20 text-gray-500 bg-white rounded-2xl shadow-xl mx-auto my-8 max-w-3xl border border-gray-200">
+                <svg class="w-24 h-24 mb-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <p class="text-2xl font-bold text-gray-800 mb-2">Uh oh! Report data missing.</p>
-                <p class="text-lg text-gray-600 mb-4 text-center px-6">We couldn't load the clock data report. It appears to be incomplete or unavailable.</p>
-                <p class="text-sm text-gray-500 mt-2">Please try selecting the pay period again or contact support if the issue persists.</p>
+                <p class="text-3xl font-extrabold text-gray-800 mb-3">No Report Data Available</p>
+                <p class="text-xl text-gray-600 mb-6 text-center px-8 leading-relaxed">It seems there's no clock data for the selected pay period. Please try a different period or check back later.</p>
+                <p class="text-base text-gray-500 mt-2">If the issue persists, please contact support.</p>
             </div>
         `;
         return;
@@ -28,79 +28,79 @@ export function renderAdminClockDataReport(containerElement, data) {
     const payPeriodEndDate = data.pay_period.end_date_local || 'N/A';
 
     let tableHtml = `
-        <div class="bg-white p-6 rounded-lg shadow-xl mb-8 border border-gray-200">
-            <h2 class="text-2xl sm:text-3xl font-extrabold mb-3 text-gray-900 text-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl mb-10 border border-gray-100">
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 text-gray-900 text-center">
                 Employee Clock Data Report
             </h2>
-            <p class="text-lg text-gray-700 text-center mb-6">
-                Pay Period: <span class="text-blue-700 font-semibold">${payPeriodStartDate} to ${payPeriodEndDate}</span>
+            <p class="text-xl text-gray-700 text-center mb-8">
+                Pay Period: <span class="text-blue-700 font-extrabold">${payPeriodStartDate} to ${payPeriodEndDate}</span>
             </p>
 
-            <div class="p-5 bg-blue-50 rounded-lg border border-blue-200 text-sm">
-                <h3 class="font-bold text-blue-800 mb-3 text-base">Color Legend:</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-2 gap-x-4">
+            <div class="p-5 bg-blue-50 rounded-xl border border-blue-200 text-sm shadow-inner">
+                <h3 class="font-bold text-blue-800 mb-4 text-lg">Color Legend:</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-3 gap-x-6">
                     <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-gray-800 mr-2 border border-gray-300 shadow-sm"></span>
-                        <span class="text-gray-700">Punch (Regular Clock In/Out)</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-gray-800 mr-2.5 border border-gray-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">Punch (Regular Clock In/Out)</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-green-600 mr-2 border border-green-300 shadow-sm"></span>
-                        <span class="text-gray-700">Holiday Pay</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-green-600 mr-2.5 border border-green-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">Holiday Pay</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-purple-600 mr-2 border border-purple-300 shadow-sm"></span>
-                        <span class="text-gray-700">PTO / Other Pay Types</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-purple-600 mr-2.5 border border-purple-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">PTO / Other Pay Types</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-sm bg-green-100 mr-2 border border-green-300 shadow-sm"></span>
-                        <span class="text-gray-700">Holiday Entry Row</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-sm bg-green-100 mr-2.5 border border-green-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">Holiday Entry Row</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-red-600 mr-2 border border-red-300 shadow-sm"></span>
-                        <span class="text-gray-700">Overtime Hours</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-red-600 mr-2.5 border border-red-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">Overtime Hours (Highlighted)</span>
                     </div>
                      <div class="flex items-center">
-                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-yellow-400 mr-2 border border-yellow-300 shadow-sm"></span>
-                        <span class="text-gray-700">Active Punch (Live)</span>
+                        <span class="inline-block w-4 h-4 min-w-[1rem] rounded-full bg-yellow-400 mr-2.5 border border-yellow-300 shadow-sm"></span>
+                        <span class="text-gray-700 font-medium">Active Punch (Currently Clocked In)</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="overflow-x-auto relative shadow-lg rounded-lg border border-gray-200">
-            <table class="w-full text-sm text-left text-gray-700" id="clockDataTable">
-                <thead class="text-xxs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+        <div class="overflow-x-auto relative shadow-2xl rounded-2xl border border-gray-100">
+            <table class="w-full text-base text-left text-gray-700" id="clockDataTable">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100 border-b-2 border-gray-200">
                     <tr>
-                        <th scope="col" class="px-5 py-3 border-r border-gray-200 font-bold tracking-wider sticky left-0 bg-gray-50 z-20" rowspan="2">
+                        <th scope="col" class="px-4 py-3 border-r border-gray-200 font-bold tracking-wider sticky left-0 bg-gray-100 z-10 whitespace-nowrap" rowspan="2">
                             Employee
                         </th>
-                        <th scope="col" class="px-5 py-3 border-r border-gray-200 font-bold tracking-wider text-center" rowspan="2">
+                        <th scope="col" class="px-4 py-3 border-r border-gray-200 font-bold tracking-wider text-center whitespace-nowrap" rowspan="2">
                             Summary
                         </th>
-                        <th scope="col" class="px-5 py-3 text-center border-b border-gray-200 font-bold tracking-wider" colspan="4">
+                        <th scope="col" class="px-4 py-3 text-center border-b border-gray-200 font-bold tracking-wider whitespace-nowrap" colspan="4">
                             Time Entry Details
                         </th>
-                        <th scope="col" class="px-5 py-3 border-l border-gray-200 font-bold tracking-wider text-center" rowspan="2">
+                        <th scope="col" class="px-4 py-3 border-l border-gray-200 font-bold tracking-wider text-center whitespace-nowrap" rowspan="2">
                             Regular Hrs
                         </th>
-                        <th scope="col" class="px-5 py-3 border-l border-gray-200 font-bold tracking-wider text-center" rowspan="2">
+                        <th scope="col" class="px-4 py-3 border-l border-gray-200 font-bold tracking-wider text-center whitespace-nowrap" rowspan="2">
                             OT Hrs
                         </th>
-                        <th scope="col" class="px-5 py-3 border-l border-gray-200 font-bold tracking-wider text-center" rowspan="2">
+                        <th scope="col" class="px-4 py-3 border-l border-gray-200 font-bold tracking-wider text-center whitespace-nowrap" rowspan="2">
                             Total Hrs
                         </th>
                     </tr>
                     <tr>
-                        <th scope="col" class="px-5 py-2 border-r border-gray-200 font-semibold text-center">
+                        <th scope="col" class="px-4 py-3 border-r border-gray-200 font-semibold text-center whitespace-nowrap">
                             IN / Start
                         </th>
-                        <th scope="col" class="px-5 py-2 border-r border-gray-200 font-semibold text-center">
+                        <th scope="col" class="px-4 py-3 border-r border-gray-200 font-semibold text-center whitespace-nowrap">
                             OUT / End
                         </th>
-                        <th scope="col" class="px-5 py-2 border-r border-gray-200 font-semibold text-center">
+                        <th scope="col" class="px-4 py-3 border-r border-gray-200 font-semibold text-center whitespace-nowrap">
                             Duration
                         </th>
-                        <th scope="col" class="px-5 py-2 font-semibold text-center">
+                        <th scope="col" class="px-4 py-3 font-semibold text-center whitespace-nowrap">
                             Type
                         </th>
                     </tr>
@@ -131,7 +131,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_1_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type || 'Hello',
+                    type: entry?.leave_type || 'Time Off', // Default to 'Time Off' if leave_type is missing
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -147,7 +147,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_2_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type|| 'Hello',
+                    type: entry?.leave_type|| 'Time Off', // Default to 'Time Off' if leave_type is missing
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -161,59 +161,61 @@ export function renderAdminClockDataReport(containerElement, data) {
                 const entry = week1CombinedEntries[i];
                 const isPunch = entry?.type === 'Punch';
                 const isHoliday = entry?.type === 'Holiday';
+                // Check if it's a known PTO/Leave type (e.g., if type is not "Punch" or "Holiday")
                 const isPTO = entry && !isPunch && !isHoliday;
 
+
                 tableHtml += `
-                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50 ${isHoliday ? 'bg-green-50/50' : ''}">
-                        ${i === 0 ? `<td class="px-5 py-4 font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 text-base align-top sticky left-0 bg-white z-10" rowspan="${totalRowsForEmployee}">
+                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50 ${isHoliday ? 'bg-green-50' : ''}">
+                        ${i === 0 ? `<td class="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 text-base align-top sticky left-0 bg-white z-10 shadow-sm" rowspan="${totalRowsForEmployee}">
                             ${employeeName}
                         </td>` : ''}
 
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200 text-sm align-top" rowspan="${week1MaxRows}">
-                            <span class="font-bold text-blue-700 text-base">Week 1</span><br>
-                            <span class="text-xs text-gray-600">Punch: <span class="font-medium">${Number(userData?.week_1_total_hours || 0).toFixed(2)} hrs</span></span><br>
-                            <span class="text-xs text-gray-600">Time off: <span class="font-medium">${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} hrs</span></span><br>
-                            <span class="text-xs text-gray-600">Holiday: <span class="font-medium">${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)} hrs</span></span>
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-r border-gray-200 text-xs align-middle bg-blue-50/50" rowspan="${week1MaxRows}">
+                            <span class="font-bold text-blue-800 text-sm">Week 1 Summary</span><br>
+                            <span class="text-xxs text-gray-700">Punch: <span class="font-semibold">${Number(userData?.week_1_total_hours || 0).toFixed(2)} hrs</span></span><br>
+                            <span class="text-xxs text-gray-700">Time off: <span class="font-semibold">${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} hrs</span></span><br>
+                            <span class="text-xxs text-gray-700">Holiday: <span class="font-semibold">${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)} hrs</span></span>
                         </td>` : ''}
 
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
                             ${entry ? `
-                                <div class="text-gray-900 font-medium">${(isPunch || isHoliday) ? formatDate(entry.clock_in_time) : formatDate(entry.start_date_time)}</div>
-                                <div class="text-gray-500 text-xxs">${(isPunch || isHoliday) ? formatOnlyTime(entry.clock_in_time) : formatOnlyTime(entry.start_date_time)}</div>
-                            ` : '<span class="text-gray-400 text-xxs">N/A</span>'}
+                                <div class="text-gray-900 font-medium text-sm">${(isPunch || isHoliday) ? formatDate(entry.clock_in_time) : formatDate(entry.start_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${(isPunch || isHoliday) ? formatOnlyTime(entry.clock_in_time) : formatOnlyTime(entry.start_date_time)}</div>
+                            ` : '<span class="text-gray-400 text-xs">N/A</span>'}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
                             ${(isPunch || isHoliday) ? (entry.clock_out_time ? `
-                                <div class="text-gray-900 font-medium">${formatDate(entry.clock_out_time)}</div>
-                                <div class="text-gray-500 text-xxs">${formatOnlyTime(entry.clock_out_time)}</div>
-                            ` : `<span class="inline-flex items-center text-yellow-500 font-medium animate-pulse text-xs">
-                                <span class="relative flex h-2 w-2 mr-1">
+                                <div class="text-gray-900 font-medium text-sm">${formatDate(entry.clock_out_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.clock_out_time)}</div>
+                            ` : `<span class="inline-flex items-center text-yellow-600 font-semibold animate-pulse text-xs py-1 px-2 bg-yellow-100 rounded-md">
+                                <span class="relative flex h-2.5 w-2.5 mr-1">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
                                 </span>
                                 Active
                             </span>`) : (isPTO && entry.end_date_time ? `
-                                <div class="text-gray-900 font-medium">${formatDate(entry.end_date_time)}</div>
-                                <div class="text-gray-500 text-xxs">${formatOnlyTime(entry.end_date_time)}</div>
-                            ` : '<span class="text-gray-400 text-xxs">N/A</span>')}
+                                <div class="text-gray-900 font-medium text-sm">${formatDate(entry.end_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.end_date_time)}</div>
+                            ` : '<span class="text-gray-400 text-xs">N/A</span>')}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap border-r border-gray-200 text-center">
-                            ${entry ? `<span class="font-bold text-gray-900 text-sm">
-                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} hrs
-                            </span>` : '<span class="text-gray-400 text-sm">0.00 hrs</span>'}
+                        <td class="px-4 py-2 whitespace-nowrap border-r border-gray-200 text-center">
+                            ${entry ? `<span class="font-bold text-gray-900 text-base">
+                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} <span class="font-normal text-sm text-gray-600">hrs</span>
+                            </span>` : '<span class="text-gray-400 text-sm">0.00 <span class="font-normal text-xs">hrs</span></span>'}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
-                            ${entry ? `<span class="font-bold text-xs ${isPunch ? 'text-gray-800' : (isHoliday ? 'text-green-700' : 'text-purple-700')}">${entry.type}</span>` : '<span class="text-gray-400 text-xs">N/A</span>'}
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
+                            ${entry ? `<span class="font-semibold text-xs py-1 px-2 rounded-md ${isPunch ? 'bg-gray-100 text-gray-800' : (isHoliday ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700')}">${entry.type}</span>` : '<span class="text-gray-400 text-xs">N/A</span>'}
                         </td>
 
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-top text-center" rowspan="${week1MaxRows}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-middle text-center bg-gray-50/50" rowspan="${week1MaxRows}">
                             ${Number(userData?.regular_hours_week_1 || 0).toFixed(2)}
                         </td>` : ''}
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-top text-center ${Number(userData?.overtime_hours_week_1 || 0) > 0 ? 'text-red-600' : ''}" rowspan="${week1MaxRows}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-middle text-center bg-gray-50/50 ${Number(userData?.overtime_hours_week_1 || 0) > 0 ? 'text-red-600' : ''}" rowspan="${week1MaxRows}">
                             ${Number(userData?.overtime_hours_week_1 || 0).toFixed(2)}
                         </td>` : ''}
 
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-blue-800 font-extrabold text-xl border-l border-gray-200 align-middle text-center" rowspan="${totalRowsForEmployee}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-blue-800 font-extrabold text-xl border-l border-gray-200 align-middle text-center bg-blue-100/50" rowspan="${totalRowsForEmployee}">
                             ${totalHoursCombined}
                         </td>` : ''}
                     </tr>
@@ -227,49 +229,50 @@ export function renderAdminClockDataReport(containerElement, data) {
                 const isHoliday = entry?.type === 'Holiday';
                 const isPTO = entry && !isPunch && !isHoliday;
 
+
                 tableHtml += `
-                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50 ${isHoliday ? 'bg-green-50/50' : ''}">
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-r border-gray-200 text-sm align-top" rowspan="${week2MaxRows}">
-                            <span class="font-bold text-blue-700 text-base">Week 2</span><br>
-                            <span class="text-xs text-gray-600">Punch: <span class="font-medium">${Number(userData?.week_2_total_hours || 0).toFixed(2)} hrs</span></span><br>
-                            <span class="text-xs text-gray-600">Time off: <span class="font-medium">${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} hrs</span></span><br>
-                            <span class="text-xs text-gray-600">Holiday: <span class="font-medium">${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)} hrs</span></span>
+                    <tr class="bg-white border-b border-gray-100 hover:bg-gray-50 ${isHoliday ? 'bg-green-50' : ''}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-r border-gray-200 text-xs align-middle bg-blue-50/50" rowspan="${week2MaxRows}">
+                            <span class="font-bold text-blue-800 text-sm">Week 2 Summary</span><br>
+                            <span class="text-xxs text-gray-700">Punch: <span class="font-semibold">${Number(userData?.week_2_total_hours || 0).toFixed(2)} hrs</span></span><br>
+                            <span class="text-xxs text-gray-700">Time off: <span class="font-semibold">${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} hrs</span></span><br>
+                            <span class="text-xxs text-gray-700">Holiday: <span class="font-semibold">${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)} hrs</span></span>
                         </td>` : ''}
 
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
                             ${entry ? `
-                                <div class="text-gray-900 font-medium">${(isPunch || isHoliday) ? formatDate(entry.clock_in_time) : formatDate(entry.start_date_time)}</div>
-                                <div class="text-gray-500 text-xxs">${(isPunch || isHoliday) ? formatOnlyTime(entry.clock_in_time) : formatOnlyTime(entry.start_date_time)}</div>
-                            ` : '<span class="text-gray-400 text-xxs">N/A</span>'}
+                                <div class="text-gray-900 font-medium text-sm">${(isPunch || isHoliday) ? formatDate(entry.clock_in_time) : formatDate(entry.start_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${(isPunch || isHoliday) ? formatOnlyTime(entry.clock_in_time) : formatOnlyTime(entry.start_date_time)}</div>
+                            ` : '<span class="text-gray-400 text-xs">N/A</span>'}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
                             ${(isPunch || isHoliday) ? (entry.clock_out_time ? `
-                                <div class="text-gray-900 font-medium">${formatDate(entry.clock_out_time)}</div>
-                                <div class="text-gray-500 text-xxs">${formatOnlyTime(entry.clock_out_time)}</div>
-                            ` : `<span class="inline-flex items-center text-yellow-500 font-medium animate-pulse text-xs">
-                                <span class="relative flex h-2 w-2 mr-1">
+                                <div class="text-gray-900 font-medium text-sm">${formatDate(entry.clock_out_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.clock_out_time)}</div>
+                            ` : `<span class="inline-flex items-center text-yellow-600 font-semibold animate-pulse text-xs py-1 px-2 bg-yellow-100 rounded-md">
+                                <span class="relative flex h-2.5 w-2.5 mr-1">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
                                 </span>
                                 Active
                             </span>`) : (isPTO && entry.end_date_time ? `
-                                <div class="text-gray-900 font-medium">${formatDate(entry.end_date_time)}</div>
-                                <div class="text-gray-500 text-xxs">${formatOnlyTime(entry.end_date_time)}</div>
-                            ` : '<span class="text-gray-400 text-xxs">N/A</span>')}
+                                <div class="text-gray-900 font-medium text-sm">${formatDate(entry.end_date_time)}</div>
+                                <div class="text-gray-500 text-xs">${formatOnlyTime(entry.end_date_time)}</div>
+                            ` : '<span class="text-gray-400 text-xs">N/A</span>')}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap border-r border-gray-200 text-center">
-                            ${entry ? `<span class="font-bold text-gray-900 text-sm">
-                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.time_off_duration || 0).toFixed(2)} hrs
-                            </span>` : '<span class="text-gray-400 text-sm">0.00 hrs</span>'}
+                        <td class="px-4 py-2 whitespace-nowrap border-r border-gray-200 text-center">
+                            ${entry ? `<span class="font-bold text-gray-900 text-base">
+                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.time_off_duration || 0).toFixed(2)} <span class="font-normal text-sm text-gray-600">hrs</span>
+                            </span>` : '<span class="text-gray-400 text-sm">0.00 <span class="font-normal text-xs">hrs</span></span>'}
                         </td>
-                        <td class="px-5 py-3 whitespace-nowrap text-center">
-                            ${entry ? `<span class="font-bold text-xs ${isPunch ? 'text-gray-800' : (isHoliday ? 'text-green-700' : 'text-purple-700')}">${entry.type}</span>` : '<span class="text-gray-400 text-xs">N/A</span>'}
+                        <td class="px-4 py-2 whitespace-nowrap text-center">
+                            ${entry ? `<span class="font-semibold text-xs py-1 px-2 rounded-md ${isPunch ? 'bg-gray-100 text-gray-800' : (isHoliday ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700')}">${entry.type}</span>` : '<span class="text-gray-400 text-xs">N/A</span>'}
                         </td>
 
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-top text-center" rowspan="${week2MaxRows}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-middle text-center bg-gray-50/50" rowspan="${week2MaxRows}">
                             ${Number(userData?.regular_hours_week_2 || 0).toFixed(2)}
                         </td>` : ''}
-                        ${i === 0 ? `<td class="px-5 py-4 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-top text-center ${Number(userData?.overtime_hours_week_2 || 0) > 0 ? 'text-red-600' : ''}" rowspan="${week2MaxRows}">
+                        ${i === 0 ? `<td class="px-4 py-3 whitespace-nowrap text-gray-900 border-l border-gray-200 text-base font-bold align-middle text-center bg-gray-50/50 ${Number(userData?.overtime_hours_week_2 || 0) > 0 ? 'text-red-600' : ''}" rowspan="${week2MaxRows}">
                             ${Number(userData?.overtime_hours_week_2 || 0).toFixed(2)}
                         </td>` : ''}
                     </tr>
@@ -277,22 +280,23 @@ export function renderAdminClockDataReport(containerElement, data) {
             }
             // Add separator row with a slight background for better visual separation
             tableHtml += `
-                <tr class="bg-gray-50 border-t border-gray-200">
-                    <td colspan="9" class="h-4"></td>
+                <tr class="bg-gray-100 border-t-2 border-gray-200">
+                    <td colspan="9" class="h-6"></td>
                 </tr>
             `;
         });
     } else {
         tableHtml += `
             <tr>
-                <td colspan="9" class="px-6 py-16 text-center text-gray-600 bg-white rounded-b-lg">
-                    <svg class="mx-auto h-20 w-20 text-gray-400 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <td colspan="9" class="px-8 py-20 text-center text-gray-600 bg-white rounded-b-2xl">
+                    <svg class="mx-auto h-24 w-24 text-gray-400 mb-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H3z" />
                     </svg>
-                    <h3 class="mt-2 text-2xl font-semibold text-gray-900">No Time Entries Found</h3>
-                    <p class="mt-1 text-lg text-gray-500">
-                        There are no clock data entries for any user in this selected pay period.
+                    <h3 class="mt-2 text-3xl font-bold text-gray-900 mb-3">No Time Entries Found</h3>
+                    <p class="mt-1 text-xl text-gray-600 leading-relaxed">
+                        There are no clock data entries for any employee in this selected pay period.
                     </p>
+                    <p class="mt-3 text-base text-gray-500">Try selecting a different pay period above.</p>
                 </td>
             </tr>
         `;
@@ -317,11 +321,11 @@ export function updateExportButtonState(exportButton, data) {
         if (data && data.users_clock_data && data.users_clock_data.length > 0) {
             exportButton.disabled = false;
             exportButton.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'hover:bg-gray-400');
-            exportButton.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-500'); // Add active styles
+            exportButton.classList.add('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500'); // Add active styles
         } else {
             exportButton.disabled = true;
             exportButton.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400', 'hover:bg-gray-400'); // Dim and disable
-            exportButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-500'); // Remove active styles
+            exportButton.classList.remove('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500'); // Remove active styles
         }
     }
 }

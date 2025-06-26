@@ -86,14 +86,15 @@ export async function exportAdminReportToXLSX(data, filename) {
 
     data.users_clock_data.forEach(userData => {
         const employeeName = `${userData?.first_name || ''} ${userData?.last_name || ''}`.trim() || 'Unknown Employee';
-        const totalHoursCombined = Number(
+        // Calculate totalHoursCombined as a number, without toFixed(2)
+        const totalHoursCombinedNumeric = Number(
             (Number(userData?.week_1_total_hours || 0) +
              Number(userData?.week_2_total_hours || 0) +
              Number(userData?.week_1_pto_total_hours || 0) +
              Number(userData?.week_2_pto_total_hours || 0) +
              Number(userData?.week_1_holiday_total_hours || 0) +
              Number(userData?.week_2_holiday_total_hours || 0))
-        ).toFixed(2);
+        );
 
         // Combine punches, holidays, and PTO entries for Week 1
         const week1CombinedEntries = [
@@ -118,10 +119,10 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_1_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.leave_type_display?.name || 'PTO',
+                type: entry?.leave_type_display?.name || 'PTO', // Reverted to leave_type_display?.name || 'PTO'
                 start: entry.start_date_time,
                 end: entry.end_date_time,
-                duration: Number(entry.total_hours || 0),
+                duration: Number(entry.time_off_duration || 0), // Changed to time_off_duration
                 sortTime: entry.start_date_time
             }))
         ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -149,10 +150,10 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_2_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.leave_type_display?.name || 'PTO',
+                type: entry?.leave_type_display?.name || 'PTO', // Reverted to leave_type_display?.name || 'PTO'
                 start: entry.start_date_time,
                 end: entry.end_date_time,
-                duration: Number(entry.total_hours || 0),
+                duration: Number(entry.time_off_duration || 0), // Changed to time_off_duration
                 sortTime: entry.start_date_time
             }))
         ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -177,7 +178,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             if (entry) {
                 typeValue = entry.type;
                 inOutFormatted = entry.start ? `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}` : 'N/A';
-                durationValue = entry.duration;
+                durationValue = entry.duration; // This is already a number
                 if (isPunch || isHoliday) {
                     outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'Active';
                 } else if (isPTO) {
@@ -190,14 +191,14 @@ export async function exportAdminReportToXLSX(data, filename) {
                 i === 0 ? `Week 1 (P: ${Number(userData?.week_1_total_hours || 0).toFixed(2)} / TO: ${Number(userData?.week_1_pto_total_hours || 0).toFixed(2)} / Hol: ${Number(userData?.week_1_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
-                durationValue,
+                durationValue, // Pass as number
                 typeValue,
-                i === 0 ? Number(userData?.regular_hours_week_1 || 0) : "",
-                i === 0 ? Number(userData?.overtime_hours_week_1 || 0) : "",
-                i === 0 ? totalHoursCombined : ""
+                i === 0 ? Number(userData?.regular_hours_week_1 || 0) : "", // Pass as number
+                i === 0 ? Number(userData?.overtime_hours_week_1 || 0) : "", // Pass as number
+                i === 0 ? totalHoursCombinedNumeric : "" // Pass as number
             ]);
 
-            // Apply number format
+            // Apply number format to the cells explicitly
             row.getCell('E').numFmt = '0.00';
             row.getCell('G').numFmt = '0.00';
             row.getCell('H').numFmt = '0.00';
@@ -234,7 +235,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             if (entry) {
                 typeValue = entry.type;
                 inOutFormatted = entry.start ? `${formatDate(entry.start)} ${formatOnlyTime(entry.start)}` : 'N/A';
-                durationValue = entry.duration;
+                durationValue = entry.duration; // This is already a number
                 if (isPunch || isHoliday) {
                     outEndFormatted = entry.end ? `${formatDate(entry.end)} ${formatOnlyTime(entry.end)}` : 'Active';
                 } else if (isPTO) {
@@ -247,14 +248,14 @@ export async function exportAdminReportToXLSX(data, filename) {
                 i === 0 ? `Week 2 (P: ${Number(userData?.week_2_total_hours || 0).toFixed(2)} / TO: ${Number(userData?.week_2_pto_total_hours || 0).toFixed(2)} / HOL: ${Number(userData?.week_2_holiday_total_hours || 0).toFixed(2)})` : "",
                 inOutFormatted,
                 outEndFormatted,
-                durationValue,
+                durationValue, // Pass as number
                 typeValue,
-                i === 0 ? Number(userData?.regular_hours_week_2 || 0) : "",
-                i === 0 ? Number(userData?.overtime_hours_week_2 || 0) : "",
+                i === 0 ? Number(userData?.regular_hours_week_2 || 0) : "", // Pass as number
+                i === 0 ? Number(userData?.overtime_hours_week_2 || 0) : "", // Pass as number
                 ""
             ]);
 
-            // Apply number format
+            // Apply number format to the cells explicitly
             row.getCell('E').numFmt = '0.00';
             row.getCell('G').numFmt = '0.00';
             row.getCell('H').numFmt = '0.00';
