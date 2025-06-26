@@ -213,3 +213,25 @@ class TimeoffRequestSerializerEmployee(serializers.ModelSerializer):
                 raise serializers.ValidationError(errors)
 
             return super().update(instance, validated_data)
+
+
+class TimeoffSerializerPunchReport(serializers.ModelSerializer):
+    """
+    Serializer for TimeoffRequest, tailored for punch report stakeholders.
+    Handles read operations with minimal fields and no write operations.
+    """
+    # employee_full_name = serializers.CharField(source='employee.get_full_name', read_only=True)
+    leave_type = serializers.CharField(
+        source='requested_leave_type.leave_type.name', read_only=True
+    )
+
+    class Meta:
+        model = TimeoffRequest
+        fields = [
+            'leave_type',
+            'start_date_time',
+            'end_date_time',
+            'time_off_duration',
+            'status',
+        ]
+        read_only_fields = fields

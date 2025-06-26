@@ -12,9 +12,8 @@ from timeclock.models import Clock
 # Balance and Requests Management
 # -------------------------------------------------------
 from ptobalance.admin import PTOBalanceAdmin
-from ptorequest.admin import PTORequestsAdmin
+
 from ptobalance.models import PTOBalance
-from ptorequest.models import PTORequests
 from timeoffreq.admin import TimeoffreqAdmin
 from timeoffreq.models import TimeoffRequest
 # -------------------------------------------------------
@@ -118,7 +117,6 @@ class CustomAdminSite(admin.AdminSite):
         # 3. Leave & Balance Management
         leave_balance_models = [
             create_model_entry(PTOBalance, 'PTO Balances', 'ptobalance'),
-            create_model_entry(PTORequests, 'Time Off Requests', 'ptorequest'),
             create_model_entry(TimeoffRequest, 'Time Off Requests', 'timeoffreq'),
             create_model_entry(LeaveType, 'Leave Types', 'leavetype'),
             create_model_entry(DepartmentBasedLeaveType, 'Department Based Leave Types', 'leavetype'),
@@ -170,7 +168,6 @@ hrms_admin_site = CustomAdminSite(name='hrms_admin')
 # Ensure these are NOT registered with the default admin.site elsewhere if you want them exclusively here.
 hrms_admin_site.register(Clock, ClockAdmin)
 hrms_admin_site.register(PTOBalance, PTOBalanceAdmin)
-hrms_admin_site.register(PTORequests, PTORequestsAdmin)
 hrms_admin_site.register(YearOfExperience, YearOfExperienceAdmin)
 hrms_admin_site.register(Department, DepartmentAdmin)
 hrms_admin_site.register(UserProfile, UserProfileAdmin)

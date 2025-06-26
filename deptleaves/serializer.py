@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ptorequest.models import PTORequests
+from timeoffreq.models import TimeoffRequest
 import pytz
 
 class DepartmentLeavesSerializer(serializers.ModelSerializer):
@@ -8,22 +8,22 @@ class DepartmentLeavesSerializer(serializers.ModelSerializer):
     All the leaves which have the status 'approved' will be displayed. Leaves greater than today's date will be displayed.
     """
     user_first_name = serializers.CharField(
-        source='user.first_name',
+        source='employee.first_name',
         read_only=True,
         help_text="First name of the user who made the PTO request."
     )
     user_last_name = serializers.CharField(
-        source='user.last_name',
+        source='employee.last_name',
         read_only=True,
         help_text="Last name of the user who made the PTO request."
     )
     department_name_display = serializers.CharField(
-        source='department_name.name',
+        source='requested_leave_type.department.name',
         read_only=True,
         help_text="Display name of the department associated with the PTO request."
     )
     leave_type_display = serializers.CharField(
-        source='leave_type.name',
+        source='requested_leave_type.leave_type.name',
         read_only=True,
         help_text="Display name of the leave type associated with the PTO request."
     )
@@ -41,16 +41,15 @@ class DepartmentLeavesSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = PTORequests
+        model = TimeoffRequest
         fields = [
-            'user',
             'user_first_name',
             'user_last_name',
             'department_name_display',
             'leave_type_display',
             'start_date_time',
             'end_date_time',
-            'total_hours',
+            'time_off_duration',
             'status',
         ]
         read_only_fields = fields

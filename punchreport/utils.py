@@ -9,8 +9,8 @@ from timeclock.serializer import ClockSerializerForPunchReportMain
 
 from ptobalance.models import PTOBalance
 from timeclock.models import Clock # Assuming 'clock' is your app name for Clock model
-from ptorequest.models import PTORequests # Assuming 'clock' is your app name for ClockSerializer
-from ptorequest.serializer import PTORequestsListSerializerPunchReport
+from timeoffreq.models import TimeoffRequest
+from timeoffreq.serializer import TimeoffSerializerPunchReport
 
 
 def get_pay_period_week_boundaries(pay_period, local_tz):
@@ -78,7 +78,7 @@ def _get_week_data(user_entries_for_pay_period, user_pto_requests_for_pay_period
     )
 
     total_hours = week_entries_qs.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
-    pto_total_hours = week_pto_entries_qs.aggregate(total_hours=Sum('total_hours'))['total_hours'] or Decimal('0.00')
+    pto_total_hours = week_pto_entries_qs.aggregate(total_hours=Sum('time_off_duration'))['total_hours'] or Decimal('0.00')
     holiday_total_hours = week_entries_qs_holiday.aggregate(total_hours=Sum('hours_worked'))['total_hours'] or Decimal('0.00')
 
     max_regular_hours = Decimal('0.00')
@@ -104,7 +104,7 @@ def _get_week_data(user_entries_for_pay_period, user_pto_requests_for_pay_period
         "total_hours": total_hours,
         "regular_hours": regular_hours,
         "overtime_hours": overtime_hours,
-        "pto_entries": PTORequestsListSerializerPunchReport(week_pto_entries_qs, many=True).data,
+        "pto_entries": TimeoffSerializerPunchReport(week_pto_entries_qs, many=True).data,
         "pto_total_hours": pto_total_hours,
     }
 
@@ -118,9 +118,9 @@ def get_user_weekly_summary(user, pay_period, week_boundaries_utc):
         clock_in_time__gte=pay_period.start_date,
         clock_in_time__lte=pay_period.end_date
     ).order_by('clock_in_time')
-    
-    user_pto_requests_for_pay_period = PTORequests.objects.filter(
-        user=user,
+
+    user_pto_requests_for_pay_period = TimeoffRequest.objects.filter(
+        employee=user,
         start_date_time__gte=pay_period.start_date,
         end_date_time__lte=pay_period.end_date
     ).order_by('start_date_time')

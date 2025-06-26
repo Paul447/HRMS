@@ -13,6 +13,7 @@ from .serializer import TimeoffApproveRejectManager
 from rest_framework.decorators import action
 from .services import send_pto_notification_and_email
 from rest_framework.response import Response
+from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
             # Superusers see all pending requests
             return TimeoffRequest.objects.filter(
                 status='pending'
-            ).exclude().select_related(
+            ).select_related(
                 'employee', 'requested_leave_type', 'reference_pay_period',
                 'employee__userprofile', 'requested_leave_type__department',
                 'requested_leave_type__leave_type'

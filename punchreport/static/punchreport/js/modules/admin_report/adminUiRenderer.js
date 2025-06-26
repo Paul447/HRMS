@@ -131,7 +131,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_1_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type_display || 'Hello',
+                    type: entry?.leave_type || 'Hello',
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -147,7 +147,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                 })),
                 ...(userData?.week_2_pto_entries || []).map(entry => ({
                     ...entry,
-                    type: entry?.leave_type_display || 'Hello',
+                    type: entry?.leave_type|| 'Hello',
                     sortTime: entry.start_date_time
                 }))
             ].sort((a, b) => new Date(a.sortTime || 0) - new Date(b.sortTime || 0));
@@ -259,7 +259,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                         </td>
                         <td class="px-5 py-3 whitespace-nowrap border-r border-gray-200 text-center">
                             ${entry ? `<span class="font-bold text-gray-900 text-sm">
-                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} hrs
+                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.time_off_duration || 0).toFixed(2)} hrs
                             </span>` : '<span class="text-gray-400 text-sm">0.00 hrs</span>'}
                         </td>
                         <td class="px-5 py-3 whitespace-nowrap text-center">

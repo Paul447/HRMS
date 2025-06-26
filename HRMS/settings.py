@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "yearofexperience",
     "accuralrates",
     "ptobalance",
-    "ptorequest",
     "timeclock",
     "biweeklycron",
     "drf_spectacular",
@@ -242,7 +241,6 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "hrmsauth" / "static",
-    BASE_DIR / "ptorequest" / "static",
     BASE_DIR / "payperiod" / "static",
     BASE_DIR / "timeclock" / "static",
     BASE_DIR / "leavetype" / "static",

@@ -36,7 +36,7 @@ class DepartmentLeavesViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated, IsTimeOffUser]
     pagination_class = DepartmentLeavesPagination
     filter_backends = [filters.SearchFilter] # Add SearchFilter
-    search_fields = ['user__first_name', 'user__last_name'] # Fields to search against
+    search_fields = ['employee__first_name', 'employee__last_name'] # Fields to search against
 
     def get_queryset(self):
         user = self.request.user
@@ -48,7 +48,7 @@ class DepartmentLeavesViewSet(viewsets.ReadOnlyModelViewSet):
         # Filter the queryset to include only approved leaves with a start date greater than or equal to today
         return self.serializer_class.Meta.model.objects.filter(
             status='approved',
-            department_name=user_profile.department,
+            requested_leave_type__department=user_profile.department,
             start_date_time__gte=datetime.now()
         ).order_by('start_date_time') # Order by start date for better readability
 

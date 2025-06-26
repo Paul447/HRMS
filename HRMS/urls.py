@@ -50,13 +50,14 @@ router.register(r'punch-report', PunchReportViewSet, basename='punch_report')
 router.register(r'pay-period', PayPeriodUptoTodayViewSet, basename='pay_period_upto_today')
 router.register(r'past-pay-period', PayPeriodViewSetForPastTimeOffRequest, basename='past_pay_period')
 router.register(r'current-future-pay-period', PayPeriodViewSetForCurrentFutureTimeOffRequest, basename='current_future_pay_period')
-router.register(r'department', UserProfileViewSet, basename='userprofile')
 router.register(r'ptobalance',PTOBalanceViewSet, basename = 'ptobalance')
 router.register(r'department-leaves', DepartmentLeavesViewSet, basename='department_leaves')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'timeoffrequests', TimeoffRequestViewSetEmployee, basename='timeoffrequests')
 router.register(r'past-timeoff-requests', PastTimeOffRequestViewSet, basename='past_timeoff_requests')
 router.register(r'manager-timeoff-approval', ManagerTimeoffApprovalViewSet, basename='manager_timeoff_approval')
+
+
 clock_router = DefaultRouter()
 clock_router.register(r'user-clock-data', UserClockDataAPIView, basename='clock_in_out_get')
 clock_router.register(r'clock-in-out', ClockInOutCreate, basename='clock_in_out_post')
@@ -70,7 +71,6 @@ urlpatterns = [
     # Auth Custom Admin Site URLS 
     path('auth/', include('hrmsauth.url')),
     path('auth/ptobalance/', include('ptobalance.url')),
-    path('auth/ptorequest/', include('ptorequest.url')),
     path('auth/timeoffreq/', include('timeoffreq.urls')),
     path('auth/clock/', include('timeclock.url')),
     path('auth/punchreport/', include('punchreport.url')),
