@@ -4,26 +4,26 @@ import { showNotification } from './modules/notificationService.js';
 
 
 function getCsrfToken() {
-        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfInput && csrfInput.value) {
-            return csrfInput.value;
-        }
-        // Fallback for getting from cookies if no input is present
-        // (Less common with modern Django setup where it's in a hidden input)
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
-                    break;
-                }
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput && csrfInput.value) {
+        return csrfInput.value;
+    }
+    // Fallback for getting from cookies if no input is present
+    // (Less common with modern Django setup where it's in a hidden input)
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                break;
             }
         }
-        console.warn("[domElements] CSRF token not found in hidden input. Falling back to cookie. Ensure {% csrf_token %} is in your HTML.");
-        return cookieValue;
     }
+    console.warn("[domElements] CSRF token not found in hidden input. Falling back to cookie. Ensure {% csrf_token %} is in your HTML.");
+    return cookieValue;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchAndRenderPTOBalance();
@@ -63,9 +63,12 @@ async function fetchAndRenderPTOBalance() {
 export function renderPTOBalance(data) {
     document.getElementById('employee-type').textContent = data.employee_type || 'N/A';
     document.getElementById('pay-frequency').textContent = data.pay_frequency || 'N/A';
-    document.getElementById('accrual-rate').textContent = data.accrual_rate   || 'N/A';
-    document.getElementById('username').textContent = data.first_name  + ' ' + data.last_name || 'N/A';
+    document.getElementById('accrual-rate').textContent = data.accrual_rate || 'N/A';
+    document.getElementById('username').textContent = (data.first_name || '') + ' ' + (data.last_name || '') || 'N/A';
     document.getElementById('years-of-experience').textContent = data.year_of_experience || 'N/A';
     document.getElementById('pto-balance').textContent = data.pto_balance || 'N/A';
+    // New fields
+    document.getElementById('verified-sick-balance').textContent = data.verified_sick_balance || '0.00';
+    document.getElementById('unverified-sick-balance').textContent = data.unverified_sick_balance || '0.00';
+    document.getElementById('used-fvsl').textContent = data.used_FVSL || '0.00';
 }
-

@@ -16,60 +16,107 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
 
-    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 col-span-1 md:col-span-2 lg:col-span-3">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-secondary-800 flex items-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0v10v-4M16 4v10m-2 0h-4" />
+    <div class="bg-white rounded-xl shadow-lg p-8 border border-secondary-100 col-span-1 md:col-span-2 lg:col-span-3">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-secondary-200">
+            <h3 class="text-2xl font-bold text-secondary-800 flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 0 002 2h14a2 0 002-2V8a2 0 00-2-2h-5m-4 0V5a2 0 114 0v1m-4 0h4m-4 0v10v-4M16 4v10m-2 0h-4" />
                 </svg>
                 <span>Employee Information</span>
             </h3>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
-            <div>
-                <p class="text-sm font-medium text-secondary-500">Employee Type</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="employee-type"></p>
+        <div id="employee-data-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
+            <!-- Enhanced Employee Information Fields -->
+            <div class="bg-gray-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                <p class="text-sm font-medium text-secondary-600 flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h.01M7 12h.01M7 15h.01M17 12h.01M17 15h.01M17 18h.01M13 15h.01M13 18h.01M16 21H8a2 2 0 01-2-2V7a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                    </svg>
+                    Employee Type
+                </p>
+                <p class="text-xl font-bold text-secondary-800" id="employee-type"></p>
             </div>
-            <div>
-                <p class="text-sm font-medium text-secondary-500">Pay Frequency</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="pay-frequency"></p>
+            <div class="bg-gray-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                <p class="text-sm font-medium text-secondary-600 flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-5 0h.01M9 12h6m-5 0h.01M9 16h6m-5 0h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Pay Frequency
+                </p>
+                <p class="text-xl font-bold text-secondary-800" id="pay-frequency"></p>
             </div>
-            <div>
-                <p class="text-sm font-medium text-secondary-500">Accrual Rate</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="accrual-rate"></p>
+            <div class="bg-gray-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                <p class="text-sm font-medium text-secondary-600 flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                    </svg>
+                    Accrual Rate
+                </p>
+                <p class="text-xl font-bold text-secondary-800" id="accrual-rate"></p>
             </div>
-            <div>
-                <p class="text-sm font-medium text-secondary-500">Username</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="username"></p>
+            <div class="bg-gray-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                <p class="text-sm font-medium text-secondary-600 flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Username
+                </p>
+                <p class="text-xl font-bold text-secondary-800" id="username"></p>
             </div>
-            <div>
-                <p class="text-sm font-medium text-secondary-500">Years of Experience</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="years-of-experience"></p>
+            <div class="bg-gray-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                <p class="text-sm font-medium text-secondary-600 flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                    </svg>
+                    Years of Experience
+                </p>
+                <p class="text-xl font-bold text-secondary-800" id="years-of-experience"></p>
             </div>
-            <div>
-                <p class="text-sm font-medium text-secondary-500">PTO Balance</p>
-                <p class="mt-1 text-base font-semibold text-secondary-800" id="pto-balance"></p>
+
+
+            <!-- Enhanced Leave Balances Section with Color Legend -->
+            <div class="lg:col-span-3 mt-8 pt-6 border-t border-secondary-200">
+                <h4 class="text-xl font-bold text-secondary-800 mb-5">Leave Balances</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-blue-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                        <p class="text-sm font-medium text-blue-700 flex items-center mb-2">
+                            <span class="w-3.5 h-3.5 bg-blue-500 rounded-full mr-2"></span>PTO Balance
+                        </p>
+                        <p class="text-2xl font-bold text-blue-900" id="pto-balance"></p>
+                    </div>
+                    <div class="bg-green-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                        <p class="text-sm font-medium text-green-700 flex items-center mb-2">
+                            <span class="w-3.5 h-3.5 bg-green-500 rounded-full mr-2"></span>Verified Sick Balance
+                        </p>
+                        <p class="text-2xl font-bold text-green-900" id="verified-sick-balance"></p>
+                    </div>
+                    <div class="bg-yellow-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                        <p class="text-sm font-medium text-yellow-700 flex items-center mb-2">
+                            <span class="w-3.5 h-3.5 bg-yellow-500 rounded-full mr-2"></span>Unverified Sick Balance
+                        </p>
+                        <p class="text-2xl font-bold text-yellow-900" id="unverified-sick-balance"></p>
+                    </div>
+                    <div class="bg-red-50 p-5 rounded-xl shadow-sm flex flex-col justify-between transform transition-transform duration-200 hover:scale-105">
+                        <p class="text-sm font-medium text-red-700 flex items-center mb-2">
+                            <span class="w-3.5 h-3.5 bg-red-500 rounded-full mr-2"></span>Used FVSL
+                        </p>
+                        <p class="text-2xl font-bold text-red-900" id="used-fvsl"></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 text-center">
-        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Quick Stats</h4>
-        <p class="text-secondary-600">This could be a summary of system health or recent activity.</p>
-    </div>
-    <div class="bg-white rounded-lg shadow-md p-6 border border-secondary-200 text-center">
-        <h4 class="text-lg font-semibold text-secondary-700 mb-2">Recent Notifications</h4>
-        <p class="text-secondary-600">Display important alerts here.</p>
-    </div>
-
+    <!-- Removed separate Quick Stats and Recent Notifications cards -->
     {% csrf_token%}
 </div>
 
 
 {% load static %}
-<script type="module" src="{% static 'ptobalance/js/main.js' %}" deffer></script>
+<script type="module" src="{% static 'ptobalance/js/main.js' %}" defer></script>
 
 {% endblock %}
