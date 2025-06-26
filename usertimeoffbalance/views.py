@@ -8,6 +8,7 @@ from .pagination import TimeoffBalancePagination
 from rest_framework import filters
 from timeoff_management.views import IsManagerOfDepartment
 from rest_framework import permissions
+from department.models import UserProfile
 class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A ViewSet for viewing time-off balances including both sick leave and PTO balances.
@@ -37,14 +38,26 @@ class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         """
-        Optionally filter queryset based on the authenticated user if they are not staff.
+        Optionally filter queryset based on the authenticated user.
+        - Superusers get full access.
+        - Managers see requests from their department.
+        - Others see nothing.
         """
         queryset = super().get_queryset()
         user = self.request.user
-        if not user.is_staff:
-            queryset = queryset.filter(user=user)
-        return queryset
-    
+
+        if user.is_superuser:
+            return queryset
+
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            if user_profile.is_manager:
+                return queryset.filter(user__userprofile__department=user_profile.department)
+        except UserProfile.DoesNotExist:
+            pass  # Fall through to return none
+
+        return queryset.none()
+
 
 class TimeOffBalanceTemplate(TemplateView, LoginRequiredMixin):
     """
