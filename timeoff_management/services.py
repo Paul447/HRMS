@@ -22,7 +22,7 @@ def send_pto_notification_and_email(time_off_instance, reviewer, new_status):
         new_status: The new status of the PTO request ('approved' or 'rejected').
     """
     recipient = time_off_instance.employee
-    start_date_time = time_off_instance.start_date_time.strftime("%Y-%m-%d")
+    start_date_time = time_off_instance.start_date_time
     time_off_hours = time_off_instance.time_off_duration
     subject = ""
     notification_description = ""
@@ -57,7 +57,7 @@ def send_pto_notification_and_email(time_off_instance, reviewer, new_status):
         context = {
             "user_name": recipient.first_name,
             "start_date": start_date_time,
-            "end_date": time_off_instance.end_date_time.strftime("%Y-%m-%d"),
+            "end_date": time_off_instance.end_date_time,
             "reason": time_off_instance.employee_leave_reason,
             "status": new_status.capitalize(),
             "approved_by": reviewer.first_name,
@@ -66,7 +66,7 @@ def send_pto_notification_and_email(time_off_instance, reviewer, new_status):
             # 'site_url': 'https://yourcompany.com', # Replace with your actual site URL
         }
         html_message = render_to_string(email_template_name, context)
-        plain_message = f"Dear {recipient.first_name},\n\nYour PTO request from {start_date_time} to {time_off_instance.end_date_time.strftime('%Y-%m-%d')} has been {new_status}.\n\nReason: {time_off_instance.employee_leave_reason}\n\nRegards,\nYour Company Name"
+        plain_message = f"Dear {recipient.first_name},\n\nYour PTO request from {start_date_time} to {time_off_instance.end_date_time} has been {new_status}.\n\nReason: {time_off_instance.employee_leave_reason}\n\nRegards,\nYour Company Name"
 
         send_mail(subject, plain_message, settings.DEFAULT_FROM_EMAIL, [recipient.email], html_message=html_message, fail_silently=False)
         logger.info(f"Email sent to {recipient.email} for PTO request {time_off_instance.id} (status: {new_status}).")

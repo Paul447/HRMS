@@ -38,6 +38,7 @@ from notificationapp.views import NotificationViewSet
 from timeoffreq.views import TimeoffRequestViewSetEmployee, DepartmentLeaveTypeDropdownView, PastTimeOffRequestViewSet
 from timeoff_management.views import ManagerTimeoffApprovalViewSet
 from usertimeoffbalance.views import TimeoffBalanceViewSet
+from decisionedtimeoff.views import DecisionedTimeOffViewSet
 
 
 # IMPORTS YOU NEED TO ADD:
@@ -59,6 +60,7 @@ router.register(r"timeoffrequests", TimeoffRequestViewSetEmployee, basename="tim
 router.register(r"past-timeoff-requests", PastTimeOffRequestViewSet, basename="past_timeoff_requests")
 router.register(r"manager-timeoff-approval", ManagerTimeoffApprovalViewSet, basename="manager_timeoff_approval")
 router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
+router.register(r"decisioned-timeoff", DecisionedTimeOffViewSet, basename="decisioned_timeoff")
 
 clock_router = DefaultRouter()
 clock_router.register(r"user-clock-data", UserClockDataAPIView, basename="clock_in_out_get")

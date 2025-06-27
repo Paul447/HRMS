@@ -77,7 +77,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if user.is_superuser:
             # Superusers see all pending requests
-            return TimeoffRequest.objects.filter(status="pending").select_related("employee", "requested_leave_type", "reference_pay_period", "employee__userprofile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("-created_at")
+            return TimeoffRequest.objects.filter(status="pending").select_related("employee", "requested_leave_type", "reference_pay_period", "employee__userprofile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("created_at")
 
         try:
             user_profile = UserProfile.objects.get(user=user)

@@ -4,9 +4,10 @@ from rest_framework import viewsets
 from timeoffreq.models import TimeoffRequest
 from rest_framework import permissions
 from .permissions import IsManagerOfDepartment
-
-# Create your views here.
-
+from department.models import UserProfile
+from django.utils import timezone
+from datetime import datetime, time
+import pytz
 
 class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -14,19 +15,47 @@ class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     serializer_class = DecisionedTimeOffSerializer
-    queryset = TimeoffRequest.objects.filter(status__in=["approved", "rejected"]).select_related("employee", "requested_leave_type__leave_type")
 
     def get_permissions(self):
         """
-        Instantiates and returns the list of permissions that this view requires.
-        Superusers will only require IsAuthenticated.
+        Superusers only require IsAuthenticated.
+        Others must also be managers.
         """
         if self.request.user.is_superuser:
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), IsManagerOfDepartment()]
 
     def get_queryset(self):
-        # Optionally filter by user or other criteria
+        """
+        Dynamically filters decisioned time-off requests from today onwards (Chicago local time).
+        Superusers see all, managers see their department, others see nothing.
+        """
+        # 1. Calculate "start of today" in UTC based on Chicago timezone
+        local_tz = pytz.timezone("America/Chicago")
+        now_local = timezone.now().astimezone(local_tz)
+        today_local_date = now_local.date()
+        start_of_today_local = datetime.combine(today_local_date, time.min)
+        start_of_today_localized = local_tz.localize(start_of_today_local)
+        start_of_today_utc = start_of_today_localized.astimezone(pytz.UTC)
+
+        # 2. Build base queryset
+        base_queryset = TimeoffRequest.objects.filter(
+            status__in=["approved", "rejected"],
+            start_date_time__gte=start_of_today_utc
+        ).select_related("employee", "requested_leave_type__leave_type").order_by("-reviewed_at")
+
         user = self.request.user
+
+        if not user.is_authenticated:
+            return TimeoffRequest.objects.none()
+
         if user.is_superuser:
-            return self.queryset.filter(employee=self.request.user) if self.request.user.is_authenticated else self.queryset.none()
+            return base_queryset
+
+        user_profile = UserProfile.objects.filter(user=user).first()
+        if user_profile and user_profile.is_manager:
+            return base_queryset.filter(
+                employee__userprofile__department=user_profile.department
+            )
+
+        return TimeoffRequest.objects.none()

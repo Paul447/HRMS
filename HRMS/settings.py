@@ -16,7 +16,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-print(f"DEBUGGING BASE_DIR: {BASE_DIR}")  # <--- ADD THIS
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,7 +33,7 @@ APP_DIRS = True
 
 # Application definition
 
-INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "django_filters"]
+INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "decisionedtimeoff", "django_filters"]
 
 COMPANY_NAME = "University Police Department"
 # settings.py
