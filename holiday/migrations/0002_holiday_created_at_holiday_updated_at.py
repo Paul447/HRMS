@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("holiday", "0001_initial"),
-    ]
+    dependencies = [("holiday", "0001_initial")]
 
-    operations = [
-        migrations.AddField(
-            model_name="holiday",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 14, 56, 12, 208516, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="holiday",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="holiday", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 14, 56, 12, 208516, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="holiday", name="updated_at", field=models.DateTimeField(auto_now=True))]

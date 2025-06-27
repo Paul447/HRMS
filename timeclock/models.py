@@ -15,75 +15,35 @@ from payperiod.models import PayPeriod
 # Assuming Holiday is defined in holiday/models.py or a similar path
 from holiday.models import Holiday
 
+
 class Clock(models.Model):
     """
     Represents a single clock-in/clock-out entry for a user, with automatic
     calculation of hours worked and assignment to a pay period.
     Handles timezone conversions and splitting of shifts spanning across midnights.
     """
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='clocks',
-        verbose_name="Employee"
-    )
-    clock_in_time = models.DateTimeField(
-        null=False,
-        blank=False,
-        verbose_name="Clock In Time",
-        help_text="The exact date and time the user clocked in (in UTC)."
-    )
-    clock_out_time = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Clock Out Time",
-        help_text="The exact date and time the user clocked out (in UTC). Can be empty if still clocked in."
-    )
-    hours_worked = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Hours Worked",
-        help_text="Automatically calculated total hours worked for this entry."
-    )
-    pay_period = models.ForeignKey(
-        'payperiod.PayPeriod',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='clocks',
-        verbose_name="Associated Pay Period",
-        help_text="The pay period to which this clock entry belongs. Assigned automatically."
-    )
-    is_holiday = models.BooleanField(
-        default=False,
-        verbose_name="Is Holiday",
-        help_text="Indicates if this clock entry is for a holiday. Used for special handling."
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Created At",
-        help_text="The date and time when this clock entry was created."
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Updated At",
-        help_text="The date and time when this clock entry was last updated."
-    )
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="clocks", verbose_name="Employee")
+    clock_in_time = models.DateTimeField(null=False, blank=False, verbose_name="Clock In Time", help_text="The exact date and time the user clocked in (in UTC).")
+    clock_out_time = models.DateTimeField(null=True, blank=True, verbose_name="Clock Out Time", help_text="The exact date and time the user clocked out (in UTC). Can be empty if still clocked in.")
+    hours_worked = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Hours Worked", help_text="Automatically calculated total hours worked for this entry.")
+    pay_period = models.ForeignKey("payperiod.PayPeriod", on_delete=models.SET_NULL, null=True, blank=True, related_name="clocks", verbose_name="Associated Pay Period", help_text="The pay period to which this clock entry belongs. Assigned automatically.")
+    is_holiday = models.BooleanField(default=False, verbose_name="Is Holiday", help_text="Indicates if this clock entry is for a holiday. Used for special handling.")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At", help_text="The date and time when this clock entry was created.")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At", help_text="The date and time when this clock entry was last updated.")
 
     class Meta:
         verbose_name = "Clock Entry"
         verbose_name_plural = "Clock Entries"
-        ordering = ['-clock_in_time']
+        ordering = ["-clock_in_time"]
 
     def __str__(self):
         """
         Returns a string representation of the clock entry, showing user and times.
         Times are displayed in the project's local timezone.
         """
-        local_clock_in = timezone.localtime(self.clock_in_time).strftime('%Y-%m-%d %H:%M')
-        local_clock_out = timezone.localtime(self.clock_out_time).strftime('%H:%M') if self.clock_out_time else 'N/A'
+        local_clock_in = timezone.localtime(self.clock_in_time).strftime("%Y-%m-%d %H:%M")
+        local_clock_out = timezone.localtime(self.clock_out_time).strftime("%H:%M") if self.clock_out_time else "N/A"
         return f"{self.user.username} - {local_clock_in} to {local_clock_out}"
 
     def clean(self):
@@ -141,15 +101,8 @@ class Clock(models.Model):
         subsequent_day_pay_period = PayPeriod.get_pay_period_for_date(subsequent_day_start_local)
         is_subsequent_day_holiday = Holiday.objects.filter(date=subsequent_day_start_local.date()).exists()
 
-        new_clock_entry = Clock(
-            user=self.user,
-            clock_in_time=subsequent_day_start_local.astimezone(pytz.utc),
-            clock_out_time=local_clock_out_time.astimezone(pytz.utc),
-            hours_worked=self._calculate_simple_hours(subsequent_day_start_local, local_clock_out_time),
-            pay_period=subsequent_day_pay_period,
-            is_holiday=is_subsequent_day_holiday,
-        )
-        new_clock_entry.save(calculate_hours=False) # Prevent re-calculation on new entry's save
+        new_clock_entry = Clock(user=self.user, clock_in_time=subsequent_day_start_local.astimezone(pytz.utc), clock_out_time=local_clock_out_time.astimezone(pytz.utc), hours_worked=self._calculate_simple_hours(subsequent_day_start_local, local_clock_out_time), pay_period=subsequent_day_pay_period, is_holiday=is_subsequent_day_holiday)
+        new_clock_entry.save(calculate_hours=False)  # Prevent re-calculation on new entry's save
 
     def _process_hours_calculation(self):
         """
@@ -179,7 +132,7 @@ class Clock(models.Model):
         pay periods, holiday status, and hours calculation.
         """
         # Pop the custom flag to prevent it from being passed to super().save()
-        calculate_hours_flag = kwargs.pop('calculate_hours', True)
+        calculate_hours_flag = kwargs.pop("calculate_hours", True)
 
         # 1. Prepare/Set Initial Attributes
         self._ensure_timezone_aware()
@@ -200,8 +153,6 @@ class Clock(models.Model):
             self._process_hours_calculation()
 
             # 4. Save again if any derived fields changed during processing
-            if self.hours_worked != original_hours_worked or \
-               self.clock_out_time != original_clock_out_time or \
-               self.is_holiday != original_is_holiday:
+            if self.hours_worked != original_hours_worked or self.clock_out_time != original_clock_out_time or self.is_holiday != original_is_holiday:
                 # Use update_fields to save only the changed fields, improving efficiency
-                self.save(update_fields=['hours_worked', 'clock_out_time', 'is_holiday'], calculate_hours=False)
+                self.save(update_fields=["hours_worked", "clock_out_time", "is_holiday"], calculate_hours=False)

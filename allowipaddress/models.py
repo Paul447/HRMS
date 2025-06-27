@@ -1,6 +1,7 @@
 # timeclock_security/models.py (or similar app name)
 from django.db import models
 
+
 class AllowIpAddress(models.Model):
     ip_address = models.GenericIPAddressField(unique=True)
     description = models.CharField(max_length=255, blank=True, null=True, help_text="e.g., 'Main Office IP'")

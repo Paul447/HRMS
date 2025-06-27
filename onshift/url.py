@@ -1,7 +1,5 @@
 # urls.py
 from django.urls import path
-from .views import  OnShiftFrontendView
+from .views import OnShiftFrontendView
 
-urlpatterns = [
-    path('on-shift-details/', OnShiftFrontendView.as_view(), name='on_shift_report'),
-]
+urlpatterns = [path("on-shift-details/", OnShiftFrontendView.as_view(), name="on_shift_report")]

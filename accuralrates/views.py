@@ -1,6 +1,6 @@
 from .serializer import AccuralRateSerializer
 from .models import AccrualRates
-from rest_framework import viewsets 
+from rest_framework import viewsets
 
 
 # Create your views here.
@@ -9,6 +9,3 @@ from rest_framework import viewsets
 class AccuralRateViewSet(viewsets.ModelViewSet):
     queryset = AccrualRates.objects.all()
     serializer_class = AccuralRateSerializer
-
-
-

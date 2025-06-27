@@ -1,6 +1,7 @@
 from django.db import models
 from department.models import Department
 
+
 class LeaveType(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,4 +23,4 @@ class DepartmentBasedLeaveType(models.Model):
     class Meta:
         verbose_name = "Department Leave Type"
         verbose_name_plural = "Department Leave Types"
-        unique_together = ('department', 'leave_type')
+        unique_together = ("department", "leave_type")

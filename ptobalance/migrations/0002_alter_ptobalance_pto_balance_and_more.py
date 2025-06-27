@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("ptobalance", "0001_initial"),
-        ("yearofexperience", "0003_alter_yearofexperience_years_of_experience"),
-    ]
+    dependencies = [("ptobalance", "0001_initial"), ("yearofexperience", "0003_alter_yearofexperience_years_of_experience")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="ptobalance",
-            name="pto_balance",
-            field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10),
-        ),
-        migrations.AlterField(
-            model_name="ptobalance",
-            name="year_of_experience",
-            field=models.ForeignKey(
-                editable=False,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="pto_balances",
-                to="yearofexperience.yearofexperience",
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="ptobalance", name="pto_balance", field=models.DecimalField(decimal_places=2, default=0.0, max_digits=10)), migrations.AlterField(model_name="ptobalance", name="year_of_experience", field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name="pto_balances", to="yearofexperience.yearofexperience"))]

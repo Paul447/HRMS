@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class Holiday(models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
@@ -15,4 +16,4 @@ class Holiday(models.Model):
     class Meta:
         verbose_name = "Holiday"
         verbose_name_plural = "Holidays"
-        ordering = ['date']
+        ordering = ["date"]

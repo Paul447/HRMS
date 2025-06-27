@@ -4,9 +4,10 @@ from django.contrib import admin
 # Register your models here.
 # from sickpolicy.models import SickLeaveProratedValue
 
+
 class SickLeaveProratedValueAdmin(admin.ModelAdmin):
-    readonly_fields = ['prorated_unverified_sick_leave', 'prorated_upfront_verified']
-    list_display = ['name', 'fte_value', 'prorated_unverified_sick_leave', 'prorated_upfront_verified']
+    readonly_fields = ["prorated_unverified_sick_leave", "prorated_upfront_verified"]
+    list_display = ["name", "fte_value", "prorated_unverified_sick_leave", "prorated_upfront_verified"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -17,13 +18,8 @@ class SickLeaveProratedValueAdmin(admin.ModelAdmin):
 
     def get_fields(self, request, obj=None):
         # Show all fields both while adding and editing
-        return [
-            'name',
-            'fte_value',
-            'prorated_unverified_sick_leave',
-            'prorated_upfront_verified',
-        ]
+        return ["name", "fte_value", "prorated_unverified_sick_leave", "prorated_upfront_verified"]
+
 
 class MaxSickValueAdmin(admin.ModelAdmin):
-    list_display = ['max_unverified_sick_leave', 'upfront_verified', 'accrued_rate','threshold_FVSL']
-    
+    list_display = ["max_unverified_sick_leave", "upfront_verified", "accrued_rate", "threshold_FVSL"]

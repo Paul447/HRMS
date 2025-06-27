@@ -9,6 +9,7 @@ from . import cookie_utils
 
 logger = logging.getLogger(__name__)
 
+
 class TokenRefreshMiddleware(MiddlewareMixin):
     """
     Handles refreshing JWT access and refresh tokens if they are expired
@@ -19,7 +20,7 @@ class TokenRefreshMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         access_token_from_cookie = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
         refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN_COOKIE_NAME)
-        login_url = reverse('frontend_login')
+        login_url = reverse("frontend_login")
 
         # Determine if access token needs refreshing
         needs_refresh = False
@@ -38,11 +39,7 @@ class TokenRefreshMiddleware(MiddlewareMixin):
 
             if new_access_token:
                 # Flag to check if the original request was a GET for an HTML page that got 401
-                was_html_get_401 = (
-                    request.method == 'GET' and
-                    response.status_code == 401 and
-                    'text/html' in request.META.get('HTTP_ACCEPT', '')
-                )
+                was_html_get_401 = request.method == "GET" and response.status_code == 401 and "text/html" in request.META.get("HTTP_ACCEPT", "")
 
                 final_response = response
                 if was_html_get_401:
@@ -54,19 +51,19 @@ class TokenRefreshMiddleware(MiddlewareMixin):
                 # Set the new tokens as cookies
                 cookie_utils.set_jwt_cookies(final_response, new_access_token, new_refresh_token_rotated)
                 logger.info("TokenRefreshMiddleware: New access/refresh tokens set in cookies.")
-                
-                if was_html_get_401:
-                    return final_response # Return the redirect response immediately
 
-            else: # Refresh token operation failed
+                if was_html_get_401:
+                    return final_response  # Return the redirect response immediately
+
+            else:  # Refresh token operation failed
                 logger.warning(f"TokenRefreshMiddleware: Failed to refresh token: {error}. Clearing cookies and initiating login flow.")
-                cookie_utils.delete_jwt_cookies(response) # Clear cookies on the original response
-                
+                cookie_utils.delete_jwt_cookies(response)  # Clear cookies on the original response
+
                 # If it was an HTML request, redirect to login page
-                if 'text/html' in request.META.get('HTTP_ACCEPT', ''):
+                if "text/html" in request.META.get("HTTP_ACCEPT", ""):
                     redirect_response = HttpResponseRedirect(login_url)
                     # Transfer cookie deletions to the new redirect response
                     cookie_utils.copy_cookies_to_response(response, redirect_response)
                     return redirect_response
-        
-        return response # Return the original response (potentially with new cookies)
+
+        return response  # Return the original response (potentially with new cookies)

@@ -9,21 +9,6 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
-    operations = [
-        migrations.CreateModel(
-            name='YearOfExperience',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('years_of_experience', models.FloatField(editable=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='experience', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Year of Experience',
-                'verbose_name_plural': 'Years of Experience',
-            },
-        ),
-    ]
+    operations = [migrations.CreateModel(name="YearOfExperience", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("years_of_experience", models.FloatField(editable=False)), ("user", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name="experience", to=settings.AUTH_USER_MODEL))], options={"verbose_name": "Year of Experience", "verbose_name_plural": "Years of Experience"})]

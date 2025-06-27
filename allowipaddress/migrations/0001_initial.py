@@ -9,36 +9,4 @@ class Migration(migrations.Migration):
 
     dependencies = []
 
-    operations = [
-        migrations.CreateModel(
-            name="AllowIpAddress",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("ip_address", models.GenericIPAddressField(unique=True)),
-                (
-                    "description",
-                    models.CharField(
-                        blank=True,
-                        help_text="e.g., 'Main Office IP'",
-                        max_length=255,
-                        null=True,
-                    ),
-                ),
-                ("is_active", models.BooleanField(default=True)),
-                ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("updated_at", models.DateTimeField(auto_now=True)),
-            ],
-            options={
-                "verbose_name": "Allowed IP Address",
-                "verbose_name_plural": "Allowed IP Addresses",
-            },
-        ),
-    ]
+    operations = [migrations.CreateModel(name="AllowIpAddress", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("ip_address", models.GenericIPAddressField(unique=True)), ("description", models.CharField(blank=True, help_text="e.g., 'Main Office IP'", max_length=255, null=True)), ("is_active", models.BooleanField(default=True)), ("created_at", models.DateTimeField(auto_now_add=True)), ("updated_at", models.DateTimeField(auto_now=True))], options={"verbose_name": "Allowed IP Address", "verbose_name_plural": "Allowed IP Addresses"})]

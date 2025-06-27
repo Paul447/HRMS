@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
+
 class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = PTOBalanceSerializer
@@ -24,19 +25,17 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         if not queryset.exists():
-            return Response({'detail': 'PTO balance not found.'}, status=404)
+            return Response({"detail": "PTO balance not found."}, status=404)
 
         serializer = self.get_serializer(queryset.first())
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-class PTOBalanceView(TemplateView,LoginRequiredMixin):
-    template_name = 'ptobalance_view.html'
-    login_url = 'frontend_login' 
+class PTOBalanceView(TemplateView, LoginRequiredMixin):
+    template_name = "ptobalance_view.html"
+    login_url = "frontend_login"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         return context
-        

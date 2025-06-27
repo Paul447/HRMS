@@ -8,6 +8,7 @@ from . import token_utils
 
 logger = logging.getLogger(__name__)
 
+
 class AuthStatusMiddleware(MiddlewareMixin):
     """
     Checks for an access token in cookies, verifies it, and
@@ -17,9 +18,9 @@ class AuthStatusMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
-        
-        login_url = reverse('frontend_login')
-        dashboard_url = reverse('dashboard')
+
+        login_url = reverse("frontend_login")
+        dashboard_url = reverse("dashboard")
 
         # If user is already authenticated and tries to access the login page, redirect them.
         if access_token and request.path == login_url:
@@ -43,4 +44,4 @@ class AuthStatusMiddleware(MiddlewareMixin):
             logger.debug("AuthStatusMiddleware: No access token found. Ensuring Authorization header is clear.")
             request.META.pop("HTTP_AUTHORIZATION", None)
 
-        return None # Continue processing the request
+        return None  # Continue processing the request

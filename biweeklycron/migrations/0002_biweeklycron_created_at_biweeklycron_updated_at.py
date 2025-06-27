@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("biweeklycron", "0001_initial"),
-    ]
+    dependencies = [("biweeklycron", "0001_initial")]
 
-    operations = [
-        migrations.AddField(
-            model_name="biweeklycron",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 14, 55, 24, 406786, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="biweeklycron",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="biweeklycron", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 14, 55, 24, 406786, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="biweeklycron", name="updated_at", field=models.DateTimeField(auto_now=True))]

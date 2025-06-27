@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("leavetype", "0001_initial"),
-    ]
+    dependencies = [("leavetype", "0001_initial")]
 
-    operations = [
-        migrations.AddField(
-            model_name="departmentbasedleavetype",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 15, 5, 12, 573930, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="departmentbasedleavetype",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="departmentbasedleavetype", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 15, 5, 12, 573930, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="departmentbasedleavetype", name="updated_at", field=models.DateTimeField(auto_now=True))]

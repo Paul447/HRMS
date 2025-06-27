@@ -8,31 +8,9 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('department', '0002_userprofile'),
-    ]
+    dependencies = [("department", "0002_userprofile")]
 
     operations = [
-        migrations.CreateModel(
-            name='LeaveType',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='DepartmentBasedLeaveType',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='department.department')),
-                ('leave_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='leavetype.leavetype')),
-            ],
-            options={
-                'verbose_name': 'Department Leave Type',
-                'verbose_name_plural': 'Department Leave Types',
-                'unique_together': {('department', 'leave_type')},
-            },
-        ),
+        migrations.CreateModel(name="LeaveType", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("name", models.CharField(max_length=100)), ("created_at", models.DateTimeField(auto_now_add=True)), ("updated_at", models.DateTimeField(auto_now=True))]),
+        migrations.CreateModel(name="DepartmentBasedLeaveType", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("department", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="department.department")), ("leave_type", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="leavetype.leavetype"))], options={"verbose_name": "Department Leave Type", "verbose_name_plural": "Department Leave Types", "unique_together": {("department", "leave_type")}}),
     ]

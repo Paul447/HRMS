@@ -6,31 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("timeclock", "0004_alter_clock_options"),
-    ]
+    dependencies = [("timeclock", "0004_alter_clock_options")]
 
-    operations = [
-        migrations.AddField(
-            model_name="clock",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 15, 5, 26, 440094, tzinfo=datetime.timezone.utc
-                ),
-                help_text="The date and time when this clock entry was created.",
-                verbose_name="Created At",
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="clock",
-            name="updated_at",
-            field=models.DateTimeField(
-                auto_now=True,
-                help_text="The date and time when this clock entry was last updated.",
-                verbose_name="Updated At",
-            ),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="clock", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 15, 5, 26, 440094, tzinfo=datetime.timezone.utc), help_text="The date and time when this clock entry was created.", verbose_name="Created At"), preserve_default=False), migrations.AddField(model_name="clock", name="updated_at", field=models.DateTimeField(auto_now=True, help_text="The date and time when this clock entry was last updated.", verbose_name="Updated At"))]

@@ -5,20 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("sickpolicy", "0004_alter_sickleaveproratedvalue_fte_value_and_more"),
-    ]
+    dependencies = [("sickpolicy", "0004_alter_sickleaveproratedvalue_fte_value_and_more")]
 
-    operations = [
-        migrations.AlterModelOptions(
-            name="sickleaveproratedvalue",
-            options={
-                "verbose_name": "Sick Leave Prorated Value",
-                "verbose_name_plural": "Sick Leave Prorated Values",
-            },
-        ),
-        migrations.AlterUniqueTogether(
-            name="sickleaveproratedvalue",
-            unique_together={("name", "fte_value")},
-        ),
-    ]
+    operations = [migrations.AlterModelOptions(name="sickleaveproratedvalue", options={"verbose_name": "Sick Leave Prorated Value", "verbose_name_plural": "Sick Leave Prorated Values"}), migrations.AlterUniqueTogether(name="sickleaveproratedvalue", unique_together={("name", "fte_value")})]

@@ -17,12 +17,14 @@ from rest_framework import status
 
 logger = logging.getLogger(__name__)
 
-                                         # Manager Time off Management Logic
+
+# Manager Time off Management Logic
 ############################################################################################################################################################################
 class IsManagerOfDepartment(permissions.BasePermission):
     """
     Custom permission to allow only managers of the specific department to access requests.
     """
+
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
@@ -46,11 +48,13 @@ class IsManagerOfDepartment(permissions.BasePermission):
         except UserProfile.DoesNotExist:
             return False
 
+
 class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet for managers to list pending time-off requests in their department
     and perform approve or reject actions.
     """
+
     serializer_class = TimeoffApproveRejectManager
     # permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment] # Removed here
     pagination_class = ManagerTimeOffManagementPagination
@@ -73,30 +77,17 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if user.is_superuser:
             # Superusers see all pending requests
-            return TimeoffRequest.objects.filter(
-                status='pending'
-            ).select_related(
-                'employee', 'requested_leave_type', 'reference_pay_period',
-                'employee__userprofile', 'requested_leave_type__department',
-                'requested_leave_type__leave_type'
-            ).order_by('-created_at')
+            return TimeoffRequest.objects.filter(status="pending").select_related("employee", "requested_leave_type", "reference_pay_period", "employee__userprofile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("-created_at")
 
         try:
             user_profile = UserProfile.objects.get(user=user)
             if user_profile.is_manager:
-                return TimeoffRequest.objects.filter(
-                    employee__userprofile__department=user_profile.department,
-                    status='pending'
-                ).exclude(employee=user).select_related(
-                    'employee', 'requested_leave_type', 'reference_pay_period',
-                    'employee__userprofile', 'requested_leave_type__department',
-                    'requested_leave_type__leave_type'
-                ).order_by('-created_at')
+                return TimeoffRequest.objects.filter(employee__userprofile__department=user_profile.department, status="pending").exclude(employee=user).select_related("employee", "requested_leave_type", "reference_pay_period", "employee__userprofile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("-created_at")
         except UserProfile.DoesNotExist:
             return TimeoffRequest.objects.none()
         return TimeoffRequest.objects.none()
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         """
         Approve a pending time-off request.
@@ -105,7 +96,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         timeoff_request = self.get_object()
         user = request.user
 
-        if timeoff_request.status != 'pending':
+        if timeoff_request.status != "pending":
             raise PermissionDenied("Only pending requests can be approved.")
 
         if not user.is_superuser:
@@ -116,7 +107,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
             except UserProfile.DoesNotExist:
                 raise PermissionDenied("You are not authorized to perform this action.")
 
-        timeoff_request.status = 'approved'
+        timeoff_request.status = "approved"
         timeoff_request.reviewer = user
         timeoff_request.reviewed_at = timezone.now()
         timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
@@ -124,7 +115,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         send_pto_notification_and_email(serializer.instance, timeoff_request.reviewer, timeoff_request.status)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def reject(self, request, pk=None):
         """
         Reject a pending time-off request.
@@ -133,7 +124,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         timeoff_request = self.get_object()
         user = request.user
 
-        if timeoff_request.status != 'pending':
+        if timeoff_request.status != "pending":
             raise PermissionDenied("Only pending requests can be rejected.")
 
         if not user.is_superuser:
@@ -144,7 +135,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
             except UserProfile.DoesNotExist:
                 raise PermissionDenied("You are not authorized to perform this action.")
 
-        timeoff_request.status = 'rejected'
+        timeoff_request.status = "rejected"
         timeoff_request.reviewer = user
         timeoff_request.reviewed_at = timezone.now()
         timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
@@ -153,20 +144,25 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         # Call the service function to handle notifications and emails
         send_pto_notification_and_email(serializer.instance, timeoff_request.reviewer, timeoff_request.status)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
     """
     Template view for the Time Off Management page.
     This view renders the template for the time off management interface.
     """
-    template_name = 'manage_timeoff.html'
-    login_url = 'login'  
-    
+
+    template_name = "manage_timeoff.html"
+    login_url = "login"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-                                         # Manager Time off Management Logic
+        # Manager Time off Management Logic
+
+
 ############################################################################################################################################################################
 
 
-                                         # SuperUser Time off Management Logic
+# SuperUser Time off Management Logic
 ############################################################################################################################################################################

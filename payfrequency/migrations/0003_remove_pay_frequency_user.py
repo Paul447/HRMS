@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('payfrequency', '0002_pay_frequency_delete_payfrequency'),
-    ]
+    dependencies = [("payfrequency", "0002_pay_frequency_delete_payfrequency")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='pay_frequency',
-            name='user',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="pay_frequency", name="user")]

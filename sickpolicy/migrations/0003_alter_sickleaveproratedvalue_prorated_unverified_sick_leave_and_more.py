@@ -5,27 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("sickpolicy", "0002_maxsickvalue_sickleaveproratedvalue_and_more"),
-    ]
+    dependencies = [("sickpolicy", "0002_maxsickvalue_sickleaveproratedvalue_and_more")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="sickleaveproratedvalue",
-            name="prorated_unverified_sick_leave",
-            field=models.DecimalField(
-                decimal_places=2,
-                help_text="Base unverified sick leave 64 hrs. Automatically Prorated by FTE. Don't Modify unless the policy changes maximum value.",
-                max_digits=5,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="sickleaveproratedvalue",
-            name="prorated_upfront_verified",
-            field=models.DecimalField(
-                decimal_places=2,
-                help_text="Base upfront verified sick leave 96 hrs. Automatically Prorated by FTE. Don't Modify unless the policy changes upfront verified sick leave value.",
-                max_digits=5,
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="sickleaveproratedvalue", name="prorated_unverified_sick_leave", field=models.DecimalField(decimal_places=2, help_text="Base unverified sick leave 64 hrs. Automatically Prorated by FTE. Don't Modify unless the policy changes maximum value.", max_digits=5)), migrations.AlterField(model_name="sickleaveproratedvalue", name="prorated_upfront_verified", field=models.DecimalField(decimal_places=2, help_text="Base upfront verified sick leave 96 hrs. Automatically Prorated by FTE. Don't Modify unless the policy changes upfront verified sick leave value.", max_digits=5))]

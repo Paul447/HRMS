@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("ptobalance", "0003_alter_ptobalance_pto_balance_and_more"),
-    ]
+    dependencies = [("ptobalance", "0003_alter_ptobalance_pto_balance_and_more")]
 
-    operations = [
-        migrations.AddField(
-            model_name="ptobalance",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 15, 5, 20, 75717, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="ptobalance",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="ptobalance", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 15, 5, 20, 75717, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="ptobalance", name="updated_at", field=models.DateTimeField(auto_now=True))]

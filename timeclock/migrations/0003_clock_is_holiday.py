@@ -5,14 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timeclock', '0002_alter_clock_options'),
-    ]
+    dependencies = [("timeclock", "0002_alter_clock_options")]
 
-    operations = [
-        migrations.AddField(
-            model_name='clock',
-            name='is_holiday',
-            field=models.BooleanField(default=False, help_text='Indicates if this clock entry is for a holiday. Used for special handling.', verbose_name='Is Holiday'),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="clock", name="is_holiday", field=models.BooleanField(default=False, help_text="Indicates if this clock entry is for a holiday. Used for special handling.", verbose_name="Is Holiday"))]

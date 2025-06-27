@@ -5,11 +5,13 @@ from .models import Notification
 
 User = get_user_model()
 
+
 # A simple serializer for the User model to avoid exposing sensitive details
 class UserPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name') # Customize fields as needed
+        fields = ("id", "username", "first_name", "last_name")  # Customize fields as needed
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     # Serialize the actor and recipient as nested user objects using our public serializer
@@ -19,17 +21,13 @@ class NotificationSerializer(serializers.ModelSerializer):
     # For the GenericForeignKey (content_object), we'll provide its string representation, ID, and model name.
     # This is a common and simple way to represent GFKs in an API.
     content_object_display = serializers.SerializerMethodField()
-    content_object_id = serializers.IntegerField(source='object_id', read_only=True)
-    content_type_model = serializers.CharField(source='content_type.model', read_only=True)
+    content_object_id = serializers.IntegerField(source="object_id", read_only=True)
+    content_type_model = serializers.CharField(source="content_type.model", read_only=True)
 
     class Meta:
         model = Notification
         # Specify all fields you want to expose in the API response
-        fields = (
-            'id', 'actor', 'recipient', 'verb', 'description',
-            'content_type_model', 'content_object_id', 'content_object_display',
-            'action_url', 'timestamp', 'read', 'level'
-        )
+        fields = ("id", "actor", "recipient", "verb", "description", "content_type_model", "content_object_id", "content_object_display", "action_url", "timestamp", "read", "level")
         # All these fields are read-only for API consumers. Notifications are created by backend logic.
         read_only_fields = fields
 

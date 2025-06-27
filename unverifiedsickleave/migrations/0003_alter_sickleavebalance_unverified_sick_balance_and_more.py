@@ -5,22 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        (
-            "unverifiedsickleave",
-            "0002_rename_verified_family_care_balance_sickleavebalance_used_fvsl",
-        ),
-    ]
+    dependencies = [("unverifiedsickleave", "0002_rename_verified_family_care_balance_sickleavebalance_used_fvsl")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="sickleavebalance",
-            name="unverified_sick_balance",
-            field=models.DecimalField(decimal_places=10, default=0.0, max_digits=13),
-        ),
-        migrations.AlterField(
-            model_name="sickleavebalance",
-            name="verified_sick_balance",
-            field=models.DecimalField(decimal_places=10, default=0.0, max_digits=14),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="sickleavebalance", name="unverified_sick_balance", field=models.DecimalField(decimal_places=10, default=0.0, max_digits=13)), migrations.AlterField(model_name="sickleavebalance", name="verified_sick_balance", field=models.DecimalField(decimal_places=10, default=0.0, max_digits=14))]

@@ -7,31 +7,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("accuralrates", "0002_alter_accrualrates_accrual_rate_and_more"),
-        ("employeetype", "0001_initial"),
-        ("payfrequency", "0003_remove_pay_frequency_user"),
-        ("ptobalance", "0002_alter_ptobalance_pto_balance_and_more"),
-        ("yearofexperience", "0003_alter_yearofexperience_years_of_experience"),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [("accuralrates", "0002_alter_accrualrates_accrual_rate_and_more"), ("employeetype", "0001_initial"), ("payfrequency", "0003_remove_pay_frequency_user"), ("ptobalance", "0002_alter_ptobalance_pto_balance_and_more"), ("yearofexperience", "0003_alter_yearofexperience_years_of_experience"), migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
-    operations = [
-        migrations.AlterField(
-            model_name="ptobalance",
-            name="pto_balance",
-            field=models.DecimalField(
-                decimal_places=2,
-                default=0.0,
-                max_digits=5,
-                validators=[django.core.validators.MaxValueValidator(340)],
-            ),
-        ),
-        migrations.AddConstraint(
-            model_name="ptobalance",
-            constraint=models.CheckConstraint(
-                condition=models.Q(("pto_balance__lte", 340)),
-                name="PTO_balance_max_340",
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="ptobalance", name="pto_balance", field=models.DecimalField(decimal_places=2, default=0.0, max_digits=5, validators=[django.core.validators.MaxValueValidator(340)])), migrations.AddConstraint(model_name="ptobalance", constraint=models.CheckConstraint(condition=models.Q(("pto_balance__lte", 340)), name="PTO_balance_max_340"))]

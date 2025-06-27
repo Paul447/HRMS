@@ -5,14 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("sickpolicy", "0005_alter_sickleaveproratedvalue_options_and_more"),
-    ]
+    dependencies = [("sickpolicy", "0005_alter_sickleaveproratedvalue_options_and_more")]
 
-    operations = [
-        migrations.RenameField(
-            model_name="maxsickvalue",
-            old_name="allow_verified_family_care_limit",
-            new_name="threshold_FVSL",
-        ),
-    ]
+    operations = [migrations.RenameField(model_name="maxsickvalue", old_name="allow_verified_family_care_limit", new_name="threshold_FVSL")]

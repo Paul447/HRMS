@@ -5,22 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("timeoffreq", "0001_initial"),
-    ]
+    dependencies = [("timeoffreq", "0001_initial")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="timeoffrequest",
-            name="time_off_duration",
-            field=models.DecimalField(
-                blank=True,
-                decimal_places=2,
-                default=0.0,
-                help_text="Duration in hours, automatically calculated based on start and end date/time",
-                max_digits=5,
-                null=True,
-                verbose_name="Time Off Duration",
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="timeoffrequest", name="time_off_duration", field=models.DecimalField(blank=True, decimal_places=2, default=0.0, help_text="Duration in hours, automatically calculated based on start and end date/time", max_digits=5, null=True, verbose_name="Time Off Duration"))]

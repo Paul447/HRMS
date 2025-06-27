@@ -7,21 +7,6 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
-    operations = [
-        migrations.CreateModel(
-            name='biweeklycron',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('run_date', models.DateField(unique=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('tag', models.CharField(max_length=100)),
-            ],
-            options={
-                'verbose_name': 'Biweekly Cron',
-                'verbose_name_plural': 'Biweekly Crons',
-            },
-        ),
-    ]
+    operations = [migrations.CreateModel(name="biweeklycron", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("run_date", models.DateField(unique=True)), ("is_active", models.BooleanField(default=True)), ("tag", models.CharField(max_length=100))], options={"verbose_name": "Biweekly Cron", "verbose_name_plural": "Biweekly Crons"})]

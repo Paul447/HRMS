@@ -7,22 +7,6 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
-    operations = [
-        migrations.CreateModel(
-            name='Holiday',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('date', models.DateField()),
-                ('description', models.TextField(blank=True, null=True)),
-            ],
-            options={
-                'verbose_name': 'Holiday',
-                'verbose_name_plural': 'Holidays',
-                'ordering': ['date'],
-            },
-        ),
-    ]
+    operations = [migrations.CreateModel(name="Holiday", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("name", models.CharField(max_length=100)), ("date", models.DateField()), ("description", models.TextField(blank=True, null=True))], options={"verbose_name": "Holiday", "verbose_name_plural": "Holidays", "ordering": ["date"]})]

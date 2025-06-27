@@ -6,27 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("accuralrates", "0001_initial"),
-    ]
+    dependencies = [("accuralrates", "0001_initial")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="accrualrates",
-            name="accrual_rate",
-            field=models.DecimalField(
-                decimal_places=2,
-                max_digits=4,
-                validators=[django.core.validators.MinValueValidator(0)],
-            ),
-        ),
-        migrations.AlterField(
-            model_name="accrualrates",
-            name="annual_accrual_rate",
-            field=models.DecimalField(
-                decimal_places=2,
-                max_digits=5,
-                validators=[django.core.validators.MinValueValidator(0)],
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="accrualrates", name="accrual_rate", field=models.DecimalField(decimal_places=2, max_digits=4, validators=[django.core.validators.MinValueValidator(0)])), migrations.AlterField(model_name="accrualrates", name="annual_accrual_rate", field=models.DecimalField(decimal_places=2, max_digits=5, validators=[django.core.validators.MinValueValidator(0)]))]

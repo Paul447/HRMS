@@ -5,16 +5,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("yearofexperience", "0002_alter_yearofexperience_options"),
-    ]
+    dependencies = [("yearofexperience", "0002_alter_yearofexperience_options")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="yearofexperience",
-            name="years_of_experience",
-            field=models.DecimalField(
-                decimal_places=2, default=0.0, editable=False, max_digits=4
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="yearofexperience", name="years_of_experience", field=models.DecimalField(decimal_places=2, default=0.0, editable=False, max_digits=4))]

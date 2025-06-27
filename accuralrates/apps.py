@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class AccuralratesConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'accuralrates'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "accuralrates"

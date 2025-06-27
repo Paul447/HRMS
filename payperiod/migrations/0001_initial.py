@@ -7,21 +7,6 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
-    operations = [
-        migrations.CreateModel(
-            name='PayPeriod',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_date', models.DateTimeField(help_text='The exact UTC date and time when this pay period begins.', verbose_name='Start Date and Time')),
-                ('end_date', models.DateTimeField(help_text='The exact UTC date and time when this pay period ends. Typically 23:59:59 on the end day of the period.', verbose_name='End Date and Time')),
-            ],
-            options={
-                'verbose_name': 'Pay Period',
-                'verbose_name_plural': 'Pay Periods',
-                'ordering': ['start_date'],
-            },
-        ),
-    ]
+    operations = [migrations.CreateModel(name="PayPeriod", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("start_date", models.DateTimeField(help_text="The exact UTC date and time when this pay period begins.", verbose_name="Start Date and Time")), ("end_date", models.DateTimeField(help_text="The exact UTC date and time when this pay period ends. Typically 23:59:59 on the end day of the period.", verbose_name="End Date and Time"))], options={"verbose_name": "Pay Period", "verbose_name_plural": "Pay Periods", "ordering": ["start_date"]})]

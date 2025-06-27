@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class LeaveTypeConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'leavetype'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "leavetype"

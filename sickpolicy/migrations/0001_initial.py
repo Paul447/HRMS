@@ -14,69 +14,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="SickPolicy",
             fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                (
-                    "name",
-                    models.CharField(
-                        help_text="Name of the sick policy E.g. 'Full-Time, Part-Time, 70 or 80% Sick Policy'",
-                        max_length=100,
-                        unique=True,
-                    ),
-                ),
-                (
-                    "fte_value",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=0.5,
-                        help_text="FTE value per SEMO policy: 1.0 for Full-Time, 0.5+ for Part-Time (must be > 0.5).",
-                        max_digits=3,
-                        validators=[django.core.validators.MinValueValidator(0.5)],
-                    ),
-                ),
-                (
-                    "max_unverified_sick_leave",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=64.0,
-                        help_text="Maximum unverified sick leave is prorated by FTE (e.g., 64 hrs for Full-Time, 32 hrs for Part-Time) and must be calculated based on the FTE value. Use reference Validation before crediting balance in the SickLeaveBalance model per policy.",
-                        max_digits=5,
-                    ),
-                ),
-                (
-                    "upfront_verified",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=96.0,
-                        help_text="Upfront verified sick leave is prorated based on FTE (e.g., 96 hrs at FTE 1.0, 48 hrs at 0.5 FTE), calculated from the FTE value. It should be initialized as the starting balance for currently hired users, with no validation required due to unlimited accrual.",
-                        max_digits=5,
-                    ),
-                ),
-                (
-                    "accrued_rate",
-                    models.DecimalField(
-                        decimal_places=10,
-                        default=2.4615384615,
-                        help_text="The fixed accrual rate is 2.4615384615, used to update the sick leave balance for all sick policies. It is not prorated based on the FTE value. While adaptable for future changes, this is the default rate as per current policy.",
-                        max_digits=11,
-                    ),
-                ),
-                (
-                    "allow_verified_family_care_limit",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=96.0,
-                        help_text="Allow verified family care limit: maximum 96 hours per employee per year, not prorated by FTE. The balance resets to 0 annually in the SickLeaveBalance model at year-end and is also tracked in a separate FamilyCareLeaveBalance model, where past logs are updated automatically via a cron job.",
-                        max_digits=5,
-                    ),
-                ),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(help_text="Name of the sick policy E.g. 'Full-Time, Part-Time, 70 or 80% Sick Policy'", max_length=100, unique=True)),
+                ("fte_value", models.DecimalField(decimal_places=2, default=0.5, help_text="FTE value per SEMO policy: 1.0 for Full-Time, 0.5+ for Part-Time (must be > 0.5).", max_digits=3, validators=[django.core.validators.MinValueValidator(0.5)])),
+                ("max_unverified_sick_leave", models.DecimalField(decimal_places=2, default=64.0, help_text="Maximum unverified sick leave is prorated by FTE (e.g., 64 hrs for Full-Time, 32 hrs for Part-Time) and must be calculated based on the FTE value. Use reference Validation before crediting balance in the SickLeaveBalance model per policy.", max_digits=5)),
+                ("upfront_verified", models.DecimalField(decimal_places=2, default=96.0, help_text="Upfront verified sick leave is prorated based on FTE (e.g., 96 hrs at FTE 1.0, 48 hrs at 0.5 FTE), calculated from the FTE value. It should be initialized as the starting balance for currently hired users, with no validation required due to unlimited accrual.", max_digits=5)),
+                ("accrued_rate", models.DecimalField(decimal_places=10, default=2.4615384615, help_text="The fixed accrual rate is 2.4615384615, used to update the sick leave balance for all sick policies. It is not prorated based on the FTE value. While adaptable for future changes, this is the default rate as per current policy.", max_digits=11)),
+                ("allow_verified_family_care_limit", models.DecimalField(decimal_places=2, default=96.0, help_text="Allow verified family care limit: maximum 96 hours per employee per year, not prorated by FTE. The balance resets to 0 annually in the SickLeaveBalance model at year-end and is also tracked in a separate FamilyCareLeaveBalance model, where past logs are updated automatically via a cron job.", max_digits=5)),
             ],
-        ),
+        )
     ]

@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("yearofexperience", "0003_alter_yearofexperience_years_of_experience"),
-    ]
+    dependencies = [("yearofexperience", "0003_alter_yearofexperience_years_of_experience")]
 
-    operations = [
-        migrations.AddField(
-            model_name="yearofexperience",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 15, 5, 31, 535191, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="yearofexperience",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="yearofexperience", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 15, 5, 31, 535191, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="yearofexperience", name="updated_at", field=models.DateTimeField(auto_now=True))]

@@ -9,70 +9,22 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ("sickpolicy", "0005_alter_sickleaveproratedvalue_options_and_more"),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [("sickpolicy", "0005_alter_sickleaveproratedvalue_options_and_more"), migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
             name="SickLeaveBalance",
             fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                (
-                    "unverified_sick_balance",
-                    models.DecimalField(decimal_places=2, default=0.0, max_digits=5),
-                ),
-                (
-                    "verified_sick_balance",
-                    models.DecimalField(decimal_places=2, default=0.0, max_digits=5),
-                ),
-                (
-                    "verified_family_care_balance",
-                    models.DecimalField(
-                        decimal_places=2,
-                        default=0.0,
-                        help_text="Verified family care leave balance, maximum 96 hours per employee per year, not prorated by FTE.",
-                        max_digits=5,
-                    ),
-                ),
-                (
-                    "is_new_hire",
-                    models.BooleanField(
-                        default=False,
-                        help_text="Indicates if the user is a new hire. If True, the verified sick leave balance will be initialized with the upfront verified sick leave from the SickLeaveProratedValue.",
-                    ),
-                ),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("unverified_sick_balance", models.DecimalField(decimal_places=2, default=0.0, max_digits=5)),
+                ("verified_sick_balance", models.DecimalField(decimal_places=2, default=0.0, max_digits=5)),
+                ("verified_family_care_balance", models.DecimalField(decimal_places=2, default=0.0, help_text="Verified family care leave balance, maximum 96 hours per employee per year, not prorated by FTE.", max_digits=5)),
+                ("is_new_hire", models.BooleanField(default=False, help_text="Indicates if the user is a new hire. If True, the verified sick leave balance will be initialized with the upfront verified sick leave from the SickLeaveProratedValue.")),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                (
-                    "sick_prorated",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="sick_leave_balances",
-                        to="sickpolicy.sickleaveproratedvalue",
-                    ),
-                ),
-                (
-                    "user",
-                    models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="sick_leave_balance",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
+                ("sick_prorated", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="sick_leave_balances", to="sickpolicy.sickleaveproratedvalue")),
+                ("user", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name="sick_leave_balance", to=settings.AUTH_USER_MODEL)),
             ],
-            options={
-                "verbose_name": "Sick Leave Balance",
-                "verbose_name_plural": "Sick Leave Balances",
-            },
-        ),
+            options={"verbose_name": "Sick Leave Balance", "verbose_name_plural": "Sick Leave Balances"},
+        )
     ]

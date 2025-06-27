@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class EmployeetypeConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'employeetype'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "employeetype"

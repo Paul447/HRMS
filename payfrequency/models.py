@@ -13,4 +13,3 @@ class Pay_Frequency(models.Model):
 
     def __str__(self):
         return self.frequency
-

@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('timeclock', '0003_clock_is_holiday'),
-    ]
+    dependencies = [("timeclock", "0003_clock_is_holiday")]
 
-    operations = [
-        migrations.AlterModelOptions(
-            name='clock',
-            options={'ordering': ['-clock_in_time'], 'verbose_name': 'Clock Entry', 'verbose_name_plural': 'Clock Entries'},
-        ),
-    ]
+    operations = [migrations.AlterModelOptions(name="clock", options={"ordering": ["-clock_in_time"], "verbose_name": "Clock Entry", "verbose_name_plural": "Clock Entries"})]

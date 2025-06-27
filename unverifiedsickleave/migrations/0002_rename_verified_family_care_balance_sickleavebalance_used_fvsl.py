@@ -5,14 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("unverifiedsickleave", "0001_initial"),
-    ]
+    dependencies = [("unverifiedsickleave", "0001_initial")]
 
-    operations = [
-        migrations.RenameField(
-            model_name="sickleavebalance",
-            old_name="verified_family_care_balance",
-            new_name="used_FVSL",
-        ),
-    ]
+    operations = [migrations.RenameField(model_name="sickleavebalance", old_name="verified_family_care_balance", new_name="used_FVSL")]

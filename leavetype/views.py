@@ -1,9 +1,8 @@
-from rest_framework import viewsets 
-from .models import  DepartmentBasedLeaveType
+from rest_framework import viewsets
+from .models import DepartmentBasedLeaveType
 from department.models import UserProfile
 from .serializer import DepartmentBasedLeaveTypeSerializer
 from rest_framework.permissions import IsAuthenticated
-
 
 
 # Create your views here.

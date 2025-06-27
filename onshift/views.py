@@ -13,24 +13,29 @@ from .serializer import UserOnShiftClockSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filter import OnsShiftClockFilter  # Import your custom filter
 
+
 class IsSuperuser(BasePermission):
     """
     Custom permission to only allow superusers to access certain views.
     """
+
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
 
+
 # Create your views here.
+
 
 class UserClockOnShiftViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A viewset to retrieve the clock-in/out data for users currently on shift.
     """
+
     permission_classes = [IsAuthenticated, IsSuperuser]
     serializer_class = UserOnShiftClockSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = OnsShiftClockFilter
-    queryset = Clock.objects.filter(clock_out_time__isnull=True).order_by('user__first_name', 'user__last_name')
+    queryset = Clock.objects.filter(clock_out_time__isnull=True).order_by("user__first_name", "user__last_name")
 
     def list(self, request, *args, **kwargs):
         """
@@ -41,13 +46,12 @@ class UserClockOnShiftViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
 class OnShiftFrontendView(TemplateView):
     """
     A frontend view to display users currently on shift.
     """
-    template_name = 'onshift.html'
+
+    template_name = "onshift.html"
     permission_classes = [IsAuthenticated, IsSuperuser]
 
     def get_context_data(self, **kwargs):

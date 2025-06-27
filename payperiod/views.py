@@ -10,6 +10,7 @@ from .models import PayPeriod
 from .serializer import PayPeriodSerializerForClockPunchReport
 from django.conf import settings
 
+
 # Pay period ViewSet For Clock Punch Report Which Return All Pay Periods upto Today’s Date
 class PayPeriodUptoTodayViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -22,20 +23,23 @@ class PayPeriodUptoTodayViewSet(viewsets.ReadOnlyModelViewSet):
         end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
         end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
 
-        return PayPeriod.objects.filter(start_date__lte=end_of_today_utc).order_by('-start_date')
+        return PayPeriod.objects.filter(start_date__lte=end_of_today_utc).order_by("-start_date")
+
 
 class PayPeriodViewSetForPastTimeOffRequest(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = PayPeriodSerializerForClockPunchReport
     queryset = PayPeriod.objects.all()
+
     def get_queryset(self):
         local_tz = pytz.timezone(settings.TIME_ZONE)
         today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
         end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
         end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
 
-        return PayPeriod.objects.filter(end_date__lte=end_of_today_utc).order_by('-start_date')
-    
+        return PayPeriod.objects.filter(end_date__lte=end_of_today_utc).order_by("-start_date")
+
+
 class PayPeriodViewSetForCurrentFutureTimeOffRequest(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = PayPeriodSerializerForClockPunchReport
@@ -46,5 +50,4 @@ class PayPeriodViewSetForCurrentFutureTimeOffRequest(viewsets.ReadOnlyModelViewS
         today_local_date = timezone.localtime(timezone.now(), timezone=local_tz).date()
         end_of_today_local = local_tz.localize(datetime.combine(today_local_date, datetime.max.time()))
         end_of_today_utc = end_of_today_local.astimezone(pytz.utc)
-        return PayPeriod.objects.filter(end_date__gte=end_of_today_utc).order_by('start_date')[:26]
-        
+        return PayPeriod.objects.filter(end_date__gte=end_of_today_utc).order_by("start_date")[:26]

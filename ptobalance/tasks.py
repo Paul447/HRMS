@@ -4,6 +4,7 @@ from biweeklycron.models import BiweeklyCron
 from django.utils.timezone import localdate
 from django.core.exceptions import ObjectDoesNotExist
 
+
 def update_pto_balance_monthly():
     """
     Updates the PTO balance for eligible full-time employees on a monthly basis.
@@ -23,18 +24,16 @@ def update_pto_balance_monthly():
     print(f"Running monthly PTO update at {datetime.now()}")
 
     # Query eligible full-time employees with monthly pay frequency and PTO < 340
-    for obj in PTOBalance.objects.filter(
-        employee_type__name="Full Time",
-        pay_frequency__frequency="Monthly",
-        pto_balance__lt=340
-    ):
+    for obj in PTOBalance.objects.filter(employee_type__name="Full Time", pay_frequency__frequency="Monthly", pto_balance__lt=340):
         # Add the monthly accrual to their current PTO balance without exceeding the cap
         obj.pto_balance = min(obj.pto_balance + obj.accrual_rate.accrual_rate, 340)
-        
+
         # Save the updated PTO balance
         obj.save()
 
     return "Monthly PTO updated"
+
+
 def update_pto_balance_biweekly():
     """
     Updates the PTO balance for eligible full-time employees with a biweekly pay frequency.
@@ -43,7 +42,7 @@ def update_pto_balance_biweekly():
     1. Checks if there is an active `biweeklycron` record for today's date.
        - This prevents the PTO update from running multiple times on the same day.
        - The `biweeklycron` model serves as a control mechanism for biweekly updates.
-    
+
     2. If an active record exists:
         - Filters full-time employees with biweekly pay frequency and PTO balance less than 340 hours.
         - Increases their PTO balance by their defined accrual rate.
@@ -59,7 +58,6 @@ def update_pto_balance_biweekly():
         str: A success message or a notice about missing records.
     """
     # Import placed inside function to avoid circular import issues
-    
 
     today = localdate()
 
@@ -68,11 +66,7 @@ def update_pto_balance_biweekly():
         record = BiweeklyCron.objects.get(run_date=today, is_active=True)
 
         # Filter eligible full-time, biweekly employees with PTO < 340
-        for obj in PTOBalance.objects.filter(
-            employee_type__name="Full Time",
-            pay_frequency__frequency="Biweekly",
-            pto_balance__lt=340
-        ):
+        for obj in PTOBalance.objects.filter(employee_type__name="Full Time", pay_frequency__frequency="Biweekly", pto_balance__lt=340):
             # Update and cap the PTO balance
             obj.pto_balance = min(obj.pto_balance + obj.accrual_rate.accrual_rate, 340)
             obj.save()

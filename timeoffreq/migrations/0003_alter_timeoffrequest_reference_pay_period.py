@@ -6,23 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("payperiod", "0002_payperiod_created_at_payperiod_updated_at"),
-        ("timeoffreq", "0002_alter_timeoffrequest_time_off_duration"),
-    ]
+    dependencies = [("payperiod", "0002_payperiod_created_at_payperiod_updated_at"), ("timeoffreq", "0002_alter_timeoffrequest_time_off_duration")]
 
-    operations = [
-        migrations.AlterField(
-            model_name="timeoffrequest",
-            name="reference_pay_period",
-            field=models.ForeignKey(
-                blank=True,
-                help_text="Pay period during which the time off is requested",
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="timeoff_requests",
-                to="payperiod.payperiod",
-                verbose_name="Pay Period",
-            ),
-        ),
-    ]
+    operations = [migrations.AlterField(model_name="timeoffrequest", name="reference_pay_period", field=models.ForeignKey(blank=True, help_text="Pay period during which the time off is requested", null=True, on_delete=django.db.models.deletion.CASCADE, related_name="timeoff_requests", to="payperiod.payperiod", verbose_name="Pay Period"))]

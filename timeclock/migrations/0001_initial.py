@@ -9,26 +9,19 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('payperiod', '0001_initial'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [("payperiod", "0001_initial"), migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
-            name='Clock',
+            name="Clock",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('clock_in_time', models.DateTimeField(help_text='The exact date and time the user clocked in (in UTC).', verbose_name='Clock In Time')),
-                ('clock_out_time', models.DateTimeField(blank=True, help_text='The exact date and time the user clocked out (in UTC). Can be empty if still clocked in.', null=True, verbose_name='Clock Out Time')),
-                ('hours_worked', models.DecimalField(blank=True, decimal_places=2, help_text='Automatically calculated total hours worked for this entry.', max_digits=5, null=True, verbose_name='Hours Worked')),
-                ('pay_period', models.ForeignKey(blank=True, help_text='The pay period to which this clock entry belongs. Assigned automatically.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='clocks', to='payperiod.payperiod', verbose_name='Associated Pay Period')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clocks', to=settings.AUTH_USER_MODEL, verbose_name='Employee')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("clock_in_time", models.DateTimeField(help_text="The exact date and time the user clocked in (in UTC).", verbose_name="Clock In Time")),
+                ("clock_out_time", models.DateTimeField(blank=True, help_text="The exact date and time the user clocked out (in UTC). Can be empty if still clocked in.", null=True, verbose_name="Clock Out Time")),
+                ("hours_worked", models.DecimalField(blank=True, decimal_places=2, help_text="Automatically calculated total hours worked for this entry.", max_digits=5, null=True, verbose_name="Hours Worked")),
+                ("pay_period", models.ForeignKey(blank=True, help_text="The pay period to which this clock entry belongs. Assigned automatically.", null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="clocks", to="payperiod.payperiod", verbose_name="Associated Pay Period")),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="clocks", to=settings.AUTH_USER_MODEL, verbose_name="Employee")),
             ],
-            options={
-                'verbose_name': 'Clock Entry',
-                'verbose_name_plural': 'Clock Entries',
-                'ordering': ['-clock_in_time'],
-            },
-        ),
+            options={"verbose_name": "Clock Entry", "verbose_name_plural": "Clock Entries", "ordering": ["-clock_in_time"]},
+        )
     ]

@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator
 # Create your models here.
 class AccrualRates(models.Model):
     EXPERIENCE_CHOICES = [(i, f"{i} Year(s)") for i in range(1, 12)]  # 1 to 11 years
-    year_of_experience = models.IntegerField(choices=EXPERIENCE_CHOICES)  
+    year_of_experience = models.IntegerField(choices=EXPERIENCE_CHOICES)
     accrual_rate = models.DecimalField(max_digits=4, decimal_places=2, validators=[MinValueValidator(0)])
     annual_accrual_rate = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)])
     employee_type = models.ForeignKey(EmployeeType, on_delete=models.CASCADE, related_name="accrual_rates")
@@ -18,7 +18,7 @@ class AccrualRates(models.Model):
     class Meta:
         verbose_name = "Accrual Rate"
         verbose_name_plural = "Accrual Rates"
-        unique_together = ('year_of_experience', 'employee_type', 'pay_frequency')  # Prevent duplicate entries
+        unique_together = ("year_of_experience", "employee_type", "pay_frequency")  # Prevent duplicate entries
 
     def __str__(self):
         return f"{self.year_of_experience} Years - {self.employee_type} - {self.pay_frequency}: {self.accrual_rate}"

@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from datetime import date
 
-User = get_user_model() # Best practice for referencing the User model
+User = get_user_model()  # Best practice for referencing the User model
+
 
 class YearOfExperience(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="experience")
@@ -10,6 +11,7 @@ class YearOfExperience(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def calculate_experience(self):
         """
         Calculate experience in years based on the user's `date_joined` (or a more
@@ -49,4 +51,3 @@ class YearOfExperience(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Experience: {self.years_of_experience} years"
-        

@@ -6,25 +6,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("payfrequency", "0003_remove_pay_frequency_user"),
-    ]
+    dependencies = [("payfrequency", "0003_remove_pay_frequency_user")]
 
-    operations = [
-        migrations.AddField(
-            model_name="pay_frequency",
-            name="created_at",
-            field=models.DateTimeField(
-                auto_now_add=True,
-                default=datetime.datetime(
-                    2025, 6, 16, 14, 56, 19, 33218, tzinfo=datetime.timezone.utc
-                ),
-            ),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="pay_frequency",
-            name="updated_at",
-            field=models.DateTimeField(auto_now=True),
-        ),
-    ]
+    operations = [migrations.AddField(model_name="pay_frequency", name="created_at", field=models.DateTimeField(auto_now_add=True, default=datetime.datetime(2025, 6, 16, 14, 56, 19, 33218, tzinfo=datetime.timezone.utc)), preserve_default=False), migrations.AddField(model_name="pay_frequency", name="updated_at", field=models.DateTimeField(auto_now=True))]

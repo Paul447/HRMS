@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('yearofexperience', '0001_initial'),
-    ]
+    dependencies = [("yearofexperience", "0001_initial")]
 
-    operations = [
-        migrations.AlterModelOptions(
-            name='yearofexperience',
-            options={},
-        ),
-    ]
+    operations = [migrations.AlterModelOptions(name="yearofexperience", options={})]
