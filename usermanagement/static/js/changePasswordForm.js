@@ -1,3 +1,5 @@
+// static/js/changePasswordForm.js
+
 import { NotificationService } from './notificationService.js'; // Import your notification service
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -135,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRFToken': csrfToken, // Mandatory for Django's CSRF protection
                     // Include Authorization header if you are using Token or JWT authentication
                     // Example for Token Authentication:
-                    'Authorization': `Token ${localStorage.getItem('token')}` // Adjust this line based on your auth method
+                    // 'Authorization': `Token ${localStorage.getItem('token')}` // Adjust this line based on your auth method
                     // For Session Authentication, the browser automatically sends the session cookie,
                     // and 'X-CSRFToken' is sufficient.
                 },
@@ -147,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) { // Check if the response status is 2xx (success)
                 NotificationService.showNotification(responseData.detail || 'Password changed successfully!', 'success');
                 // Clear the form fields after successful submission
+                // consoles.log('Password change successful:', responseData);
                 changePasswordForm.reset();
                 clearErrors(); // Also clear any displayed error messages
             } else {

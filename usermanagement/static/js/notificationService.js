@@ -1,3 +1,5 @@
+// static/js/notificationService.js
+
 /**
  * notificationService.js
  *
@@ -32,7 +34,8 @@ export function showNotification(message, type = 'info') {
     }
 
     // Reset all type-specific background classes and animation classes
-    globalNotification.className = 'global-notification-base opacity-0 transition-all duration-300 ease-out transform translate-x-full';
+    // Ensure that 'global-notification-base' is always present, as it defines the fixed position and initial state.
+    globalNotification.className = 'global-notification-base'; 
     globalNotification.classList.add('flex'); // Ensure flex display for content alignment
     notificationIcon.innerHTML = ''; // Clear previous icon
 
