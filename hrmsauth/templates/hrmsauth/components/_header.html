@@ -49,12 +49,53 @@
                 </div>
             </div>
         </div>
-        <div class="flex items-center space-x-2 cursor-pointer group">
-            <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-lg shadow-md group-hover:ring-2 group-hover:ring-primary-400 transition-all duration-200"
-                id="user-avatar">
-            </div>
-            <div class="hidden md:block">
-                <p class="text-base font-medium text-secondary-700 user-name" id="user-name"></p>
+
+        <div class="relative">
+            <button id="user-menu-button"
+                class="flex items-center space-x-2 cursor-pointer group p-1 rounded-full hover:bg-secondary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200"
+                aria-expanded="false" aria-haspopup="true">
+                <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-lg shadow-md group-hover:ring-2 group-hover:ring-primary-400 transition-all duration-200"
+                    id="user-avatar">
+                    </div>
+                <div class="hidden md:block">
+                    <p class="text-base font-medium text-secondary-700 user-name" id="user-name"></p>
+                </div>
+                <svg id="user-menu-arrow" xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-secondary-500 transform transition-transform duration-200"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <div id="user-menu-dropdown"
+                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg-2 py-1 z-20 hidden ring-1 ring-black ring-opacity-5 focus:outline-none origin-top-right animate-fade-in-up"
+                role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
+                <div class="px-4 py-2 border-b border-secondary-100">
+                    <p class="text-sm font-semibold text-secondary-800" id="dropdown-user-name">User Name</p>
+                    <p class="text-xs text-secondary-500" id="dropdown-user-role">Admin</p>
+                </div>
+                <a href="{% url 'change_password_template' %}"
+                    class="flex items-center space-x-3 py-2 px-4 text-sm text-secondary-700 hover:bg-primary-100 hover:text-primary-800 transition-colors duration-200"
+                    role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2h-5a2 2 0 01-2-2V9a2 2 0 012-2h5z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9v-2a2 2 0 00-2-2H9a2 2 0 00-2 2v2"></path>
+                    </svg>
+                    <span>Change Password</span>
+                </a>
+                <form action="{% url 'logout' %}" method="POST" class="w-full">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="flex items-center space-x-3 w-full text-left py-2 px-4 text-sm text-secondary-700 hover:bg-primary-100 hover:text-primary-800 transition-colors duration-200"
+                        role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
