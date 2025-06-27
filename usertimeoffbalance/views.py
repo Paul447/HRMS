@@ -66,5 +66,5 @@ class TimeOffBalanceTemplate(TemplateView, LoginRequiredMixin):
     template_name = "time_off_balance.html"
     login_url = 'frontend_login'
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            return context
+        context = super().get_context_data(**kwargs)
+        return context

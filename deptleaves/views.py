@@ -52,12 +52,11 @@ class DepartmentLeavesViewSet(viewsets.ReadOnlyModelViewSet):
             start_date_time__gte=datetime.now()
         ).order_by('start_date_time') # Order by start date for better readability
 
-class DepartmentTemplateView(LoginRequiredMixin, TemplateView):
+class DepartmentTemplateView(TemplateView,LoginRequiredMixin):
     template_name = "deptleaves.html"
-    login_url = 'login'  # name of your login route
+    login_url = 'frontend_login'
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
         return context

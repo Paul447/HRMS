@@ -31,7 +31,7 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 
-class PTOBalanceView(LoginRequiredMixin, TemplateView):
+class PTOBalanceView(TemplateView,LoginRequiredMixin):
     template_name = 'ptobalance_view.html'
     login_url = 'frontend_login' 
 
