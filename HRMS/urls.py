@@ -79,7 +79,9 @@ urlpatterns = [
     path("auth/timeoff/", include("timeoff_management.url")),
     path("auth/department/", include("deptleaves.url")),
     path("auth/time-off-balance/", include("usertimeoffbalance.url")),
+    path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls")),
     path("api/leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
+
     path("api/", include(router.urls)),
     path("api/clock/", include(clock_router.urls)),  # API for clock functionality
     # Admin URLs

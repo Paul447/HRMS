@@ -8,6 +8,10 @@ from department.models import UserProfile
 from django.utils import timezone
 from datetime import datetime, time
 import pytz
+from rest_framework import filters
+from .pagination import DecisionedTimeOffPagination 
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -15,7 +19,10 @@ class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     serializer_class = DecisionedTimeOffSerializer
-
+    pagination_class = DecisionedTimeOffPagination  # Use default pagination or set your custom one if needed
+    filter_backends = [filters.SearchFilter]  # Enable search functionality
+    search_fields = ["employee__first_name", "employee__last_name", "requested_leave_type__leave_type__name"]  # Fields to search against
+    
     def get_permissions(self):
         """
         Superusers only require IsAuthenticated.
@@ -59,3 +66,14 @@ class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         return TimeoffRequest.objects.none()
+    
+class DecisionedTimeOffViewSetFrontend(TemplateView, LoginRequiredMixin):
+    """
+    A TemplateView for rendering the decisioned time-off page.
+    """
+    template_name = "decisioned_timeoff.html"  # Adjust the path to your template
+    login_url = "frontend_login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
