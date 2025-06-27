@@ -39,6 +39,7 @@ from timeoffreq.views import TimeoffRequestViewSetEmployee, DepartmentLeaveTypeD
 from timeoff_management.views import ManagerTimeoffApprovalViewSet
 from usertimeoffbalance.views import TimeoffBalanceViewSet
 from decisionedtimeoff.views import DecisionedTimeOffViewSet
+from usermanagement.views import ChangePasswordView
 
 
 # IMPORTS YOU NEED TO ADD:
@@ -80,8 +81,9 @@ urlpatterns = [
     path("auth/department/", include("deptleaves.url")),
     path("auth/time-off-balance/", include("usertimeoffbalance.url")),
     path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls")),
+    path("auth/user-management/", include("usermanagement.urls")),
     path("api/leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
-
+    path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("api/", include(router.urls)),
     path("api/clock/", include(clock_router.urls)),  # API for clock functionality
     # Admin URLs

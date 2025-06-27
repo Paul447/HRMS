@@ -33,7 +33,7 @@ APP_DIRS = True
 
 # Application definition
 
-INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "decisionedtimeoff", "django_filters"]
+INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "decisionedtimeoff","usermanagement", "django_filters"]
 
 COMPANY_NAME = "University Police Department"
 # settings.py
@@ -123,7 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "hrmsauth" / "static", BASE_DIR / "payperiod" / "static", BASE_DIR / "timeclock" / "static", BASE_DIR / "leavetype" / "static", BASE_DIR / "department" / "static", BASE_DIR / "payfrequency" / "static", BASE_DIR / "employeetype" / "static", BASE_DIR / "yearofexperience" / "static", BASE_DIR / "accuralrates" / "static", BASE_DIR / "ptobalance" / "static", BASE_DIR / "holiday" / "static", BASE_DIR / "punchreport" / "static", BASE_DIR / "onshift" / "static", BASE_DIR / "timeoff_management" / "static"]
+STATICFILES_DIRS = [BASE_DIR / "hrmsauth" / "static", BASE_DIR / "payperiod" / "static", BASE_DIR / "timeclock" / "static", BASE_DIR / "leavetype" / "static", BASE_DIR / "department" / "static", BASE_DIR / "payfrequency" / "static", BASE_DIR / "employeetype" / "static", BASE_DIR / "yearofexperience" / "static", BASE_DIR / "accuralrates" / "static", BASE_DIR / "ptobalance" / "static", BASE_DIR / "holiday" / "static", BASE_DIR / "punchreport" / "static", BASE_DIR / "onshift" / "static", BASE_DIR / "timeoff_management" / "static",BASE_DIR / "usermanagement" / "static",]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 print(f"DEBUGGING MEDIA_ROOT: {MEDIA_ROOT}")
