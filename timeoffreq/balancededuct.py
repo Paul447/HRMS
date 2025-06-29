@@ -126,5 +126,5 @@ def perform_balance_deduction_on_approval(timeoff_request_instance, hours_to_ded
     elif leave_type_name == "PTO":
         _deduct_pto_balance(timeoff_request_instance, hours_to_deduct)
     else:
-
-        raise ValidationError(f"No balance deduction rule defined for leave type: '{leave_type_name}'.")
+        pass
+        # raise ValidationError(f"No balance deduction rule defined for leave type: '{leave_type_name}'.")
