@@ -11,7 +11,7 @@ from .utils import pto_document_upload_path
 from decimal import Decimal
 from payperiod.models import PayPeriod  # Assuming this model exists and works as expected
 from .balancededuct import perform_balance_deduction_on_approval
-from .notification import notification_and_email_trigger
+from timeoffreq.tasks import trigger_notification_and_email_task
 
 # Assuming this function exists and works as expected
 
@@ -128,7 +128,7 @@ class TimeoffRequest(models.Model):
     def post_save_hook(self, created, **kwargs):
         """Hook for additional notifications or actions after save."""
         if created:
-            notification_and_email_trigger(self)
+            trigger_notification_and_email_task.delay(self.pk)
             pass
         else:
             # If this is an update, handle accordingly
