@@ -11,7 +11,7 @@ from department.models import UserProfile
 from timeoffreq.models import TimeoffRequest
 from .serializer import TimeoffApproveRejectManager
 from rest_framework.decorators import action
-from .services import send_pto_notification_and_email
+from .tasks import send_pto_notification_and_email_task
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -112,7 +112,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         timeoff_request.reviewed_at = timezone.now()
         timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
         serializer = self.get_serializer(timeoff_request)
-        send_pto_notification_and_email(serializer.instance, timeoff_request.reviewer, timeoff_request.status)
+        send_pto_notification_and_email_task.delay(serializer.instance.id, timeoff_request.reviewer.id, timeoff_request.status)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
@@ -142,7 +142,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(timeoff_request)
 
         # Call the service function to handle notifications and emails
-        send_pto_notification_and_email(serializer.instance, timeoff_request.reviewer, timeoff_request.status)
+        send_pto_notification_and_email_task(serializer.instance, timeoff_request.reviewer, timeoff_request.status)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
