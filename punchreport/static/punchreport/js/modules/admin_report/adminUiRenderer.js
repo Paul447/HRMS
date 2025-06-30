@@ -201,7 +201,7 @@ export function renderAdminClockDataReport(containerElement, data) {
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap border-r border-gray-200 text-center">
                             ${entry ? `<span class="font-bold text-gray-900 text-base">
-                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.total_hours || 0).toFixed(2)} <span class="font-normal text-sm text-gray-600">hrs</span>
+                                ${Number((isPunch || isHoliday) ? entry.hours_worked : entry.time_off_duration || 0).toFixed(2)} <span class="font-normal text-sm text-gray-600">hrs</span>
                             </span>` : '<span class="text-gray-400 text-sm">0.00 <span class="font-normal text-xs">hrs</span></span>'}
                         </td>
                         <td class="px-4 py-2 whitespace-nowrap text-center">

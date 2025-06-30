@@ -119,7 +119,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_1_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.leave_type_display?.name || 'PTO', // Reverted to leave_type_display?.name || 'PTO'
+                type: entry?.leave_type  || 'PTO', // Reverted to leave_type  || 'PTO'
                 start: entry.start_date_time,
                 end: entry.end_date_time,
                 duration: Number(entry.time_off_duration || 0), // Changed to time_off_duration
@@ -150,7 +150,7 @@ export async function exportAdminReportToXLSX(data, filename) {
             ...(userData?.week_2_pto_entries || []).map(entry => ({
                 isPunch: false,
                 isHoliday: false,
-                type: entry?.leave_type_display?.name || 'PTO', // Reverted to leave_type_display?.name || 'PTO'
+                type: entry?.leave_type  || 'PTO', // Reverted to leave_type  || 'PTO'
                 start: entry.start_date_time,
                 end: entry.end_date_time,
                 duration: Number(entry.time_off_duration || 0), // Changed to time_off_duration
