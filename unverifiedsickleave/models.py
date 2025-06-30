@@ -49,28 +49,7 @@ class SickLeaveBalance(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Sick Leave Balance"
 
-    # This method is used to update the balance of verified sick leave balance and unverified sick leave balance based on the Sick Policy intender for the cron job to run biweekly.
-    def accrue_biweekly(self):
-        if self.sick_prorated.fte_value < 0.5:
-            raise ValueError("FTE must be greater than or equal to 0.5.")
 
-        max_unverified = self.sick_prorated.prorated_unverified_sick_leave
-        max_sick_value = MaxSickValue.objects.first()
-        accrual = max_sick_value.accrued_rate
-        if not accrual:
-            raise ValidationError("MaxSickValue instance not found. Please create one.")
-
-        if self.unverified_sick_balance < max_unverified:
-            room = max_unverified - self.unverified_sick_balance
-            to_add = min(room, accrual)
-            self.unverified_sick_balance += to_add
-            accrual -= to_add
-
-        if accrual > 0:
-            self.verified_sick_balance += accrual
-
-    def __str__(self):
-        return f"{self.user.username} - Unverified Sick Leave Balance : {self.unverified_sick_balance} | Verified Sick Leave Balance : {self.verified_sick_balance}"
 
     class Meta:
         verbose_name = "Sick Leave Balance"
