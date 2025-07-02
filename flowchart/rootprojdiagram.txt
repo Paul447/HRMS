@@ -1,0 +1,38 @@
+flowchart TD
+ subgraph JWT_Authentication_Middleware["JWT authentication middleware"]
+        F1("Auth Status")
+        F["JWT authentication middleware/"]
+        F2("Cookie Utils")
+        F3("Logout")
+        F4("Token Refresh")
+        F5("Token Utils")
+  end
+ subgraph Time_Clock_Security_Module["Time clock security module"]
+        G1("IP address Restriction Middleware")
+        G["Time clock security module/"]
+  end
+ subgraph Base_Folder_HRMS["HRMS"]
+    direction LR
+        B("HRMS/ - Project Folder")
+        A["HRMS/"]
+        C("urls.py")
+        D("settings.py")
+        E("celery.py")
+        JWT_Authentication_Middleware
+        Time_Clock_Security_Module
+        C1("Endpoint URLs")
+        C2("Template URLs")
+        H["Manages Entire Application In Project"]
+  end
+    A -- contains multiple folders --> B
+    B -- contains --> C & D & E
+    F -- consists of --> F1 & F2 & F3 & F4 & F5
+    G -- consists of --> G1
+    C -- includes all --> C1 & C2
+    B -- integrates --> F & G
+    D -- configures --> F & G & E
+    B -- manages --> H
+
+
+
+    B -- manages --> H

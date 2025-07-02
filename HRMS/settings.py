@@ -129,7 +129,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "hrmsauth" / "static", BASE_DIR / "payperiod" / "static", BASE_DIR / "timeclock" / "static", BASE_DIR / "leavetype" / "static", BASE_DIR / "department" / "static", BASE_DIR / "payfrequency" / "static", BASE_DIR / "employeetype" / "static", BASE_DIR / "yearofexperience" / "static", BASE_DIR / "accuralrates" / "static", BASE_DIR / "ptobalance" / "static", BASE_DIR / "holiday" / "static", BASE_DIR / "punchreport" / "static", BASE_DIR / "onshift" / "static", BASE_DIR / "timeoff_management" / "static",BASE_DIR / "usermanagement" / "static",]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 print(f"DEBUGGING MEDIA_ROOT: {MEDIA_ROOT}")
