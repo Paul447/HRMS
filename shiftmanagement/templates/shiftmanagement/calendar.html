@@ -1,0 +1,374 @@
+{# shiftmanagement/templates/shiftmanagement/calendar.html #}
+
+{% load shift_extras %} {# Load your custom filter at the very top #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Schedule Calendar</title>
+
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/>
+
+    <style>
+        /* General Body and Container */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        #calendar-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        /* Controls and Legend Layout */
+        .controls-and-legend {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 20px; /* Space between flex items */
+        }
+        .filters, .legend {
+            background-color: #f9f9f9;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Filters Styling */
+        .filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filters label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+        }
+        .filters select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            font-size: 0.95em;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .filters button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease;
+        }
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Legend Styling */
+        .legend h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 1.1em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend-color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* FullCalendar Specific Styles */
+        .fc-event {
+            font-size: 0.85em;
+            padding: 3px 5px;
+            border-radius: 4px;
+            line-height: 1.3;
+        }
+        /* Adjusted for eventContent usage */
+        .fc-event-main-content {
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+        .fc-event-main-content strong {
+            display: block; /* Ensures squad/shift type is on its own line */
+            font-size: 0.95em;
+        }
+        .fc-event-main-content span {
+            font-size: 0.75em; /* Smaller font for employee names */
+            display: block; /* Ensures names are on their own line */
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.8em !important;
+            color: #2c3e50;
+        }
+        .fc-button {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .fc-button:hover {
+            background-color: #5a6268 !important;
+            border-color: #545b62 !important;
+        }
+        .fc-daygrid-more-link {
+            font-size: 0.8em;
+            color: #007bff !important;
+        }
+        .fc-daygrid-more-link:hover {
+            text-decoration: underline;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: #333;
+            z-index: 1000;
+            border-radius: 8px;
+        }
+
+        /* Custom styling for squad divisions (optional, for visual clarity) */
+        .squad-A-event { background-color: #4CAF50; border-color: #4CAF50; }
+        .squad-B-event { background-color: #2196F3; border-color: #2196F3; }
+        .squad-C-event { background-color: #FF9800; border-color: #FF9800; }
+        .squad-D-event { background-color: #E91E63; border-color: #E91E63; }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .controls-and-legend {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filters, .legend {
+                width: 100%;
+                box-sizing: border-box; /* Include padding in width */
+            }
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filters select, .filters button {
+                width: 100%;
+                min-width: unset;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="calendar-container">
+        <h1>Shift Schedule Calendar</h1>
+
+        <div class="controls-and-legend">
+            <div class="filters">
+                <label for="squadFilter">Filter by Squad:</label>
+                <select id="squadFilter">
+                    <option value="">All Squads</option>
+                    {% for squad in squads %}
+                        <option value="{{ squad.id }}">{{ squad.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="employeeFilter">Filter by Employee:</label>
+                <select id="employeeFilter">
+                    <option value="">All Employees</option>
+                    {% for employee in employees %}
+                        <option value="{{ employee.id }}">{{ employee.user|get_display_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <button id="applyFilters">Apply Filters</button>
+                <button id="resetFilters">Reset Filters</button>
+            </div>
+
+            <div class="legend">
+                <h3>Squad Colors</h3>
+                {# Iterate directly over the Python dict passed from views.py #}
+                {% for squad_name, color in squad_color_map.items %}
+                    <div class="legend-item">
+                        <div class="legend-color-box" style="background-color: {{ color }};"></div>
+                        <span>Squad {{ squad_name }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id='calendar'></div>
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">Loading Calendar...</div>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var loadingOverlay = document.getElementById('loadingOverlay');
+            var squadFilter = document.getElementById('squadFilter');
+            var employeeFilter = document.getElementById('employeeFilter');
+            var applyFiltersBtn = document.getElementById('applyFilters');
+            var resetFiltersBtn = document.getElementById('resetFilters');
+
+            // allEvents stores the full dataset, parsed once from Django context
+            var allEvents = JSON.parse('{{ calendar_events_json|safe }}');
+            var calendar; // Declare calendar instance variable
+
+            function renderCalendar(eventsToDisplay) {
+                // Destroy existing calendar instance before creating a new one
+                if (calendar) {
+                    calendar.destroy();
+                }
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    height: 'auto',
+                    navLinks: true,
+                    editable: false,
+                    dayMaxEvents: true, // Show "more" link if too many events
+                    events: eventsToDisplay, // Pass the (filtered) events here
+                    
+                    // --- NEW: Custom event content rendering ---
+                    eventContent: function(arg) {
+                        let employeeNames = arg.event.extendedProps.employee_names || [];
+                        let employeeNamesText = employeeNames.length > 0 ? employeeNames.join(', ') : 'No Employees';
+                        
+                        // Create a custom element for the event content
+                        let html = `
+                            <div class="fc-event-main-content">
+                                <strong>Squad ${arg.event.extendedProps.squad_name} - ${arg.event.extendedProps.shift_type}</strong>
+                                <span class="fc-event-employee-names">
+                                    ${employeeNamesText}
+                                </span>
+                            </div>
+                        `;
+                        return { html: html };
+                    },
+                    // --- END NEW ---
+
+                    eventDidMount: function(info) {
+                        // Add custom class based on squad for more specific styling
+                        if (info.event.extendedProps && info.event.extendedProps.squad_name) {
+                            info.el.classList.add('squad-' + info.event.extendedProps.squad_name + '-event');
+                        }
+
+                        // Tippy.js tooltip for detailed event info
+                        let employeeNamesHtml = (info.event.extendedProps.employee_names || [])
+                                                    .map(name => `<li>${name}</li>`)
+                                                    .join('');
+                        if (employeeNamesHtml) {
+                            employeeNamesHtml = `<strong>Employees:</strong><ul>${employeeNamesHtml}</ul>`;
+                        } else {
+                            employeeNamesHtml = '<strong>Employees:</strong> N/A';
+                        }
+
+                        tippy(info.el, {
+                            content: `
+                                <strong>Squad:</strong> ${info.event.extendedProps.squad_name || 'N/A'}<br>
+                                <strong>Shift Type:</strong> ${info.event.extendedProps.shift_type || 'N/A'}<br>
+                                <strong>Start:</strong> ${new Date(info.event.start).toLocaleString()}<br>
+                                <strong>End:</strong> ${new Date(info.event.end).toLocaleString()}<br>
+                                ${employeeNamesHtml}
+                            `,
+                            allowHTML: true,
+                            animation: 'fade',
+                            placement: 'top',
+                            theme: 'light-border', // Requires Tippy.js theme CSS (included via CDN)
+                        });
+                    },
+                    
+                    eventClick: function(info) {
+                        let employeeNamesStr = (info.event.extendedProps.employee_names || []).join(', ');
+                        alert(`Shift Details:\nSquad: ${info.event.extendedProps.squad_name}\nShift Type: ${info.event.extendedProps.shift_type}\nEmployees: ${employeeNamesStr}\nStart: ${new Date(info.event.start).toLocaleString()}\nEnd: ${new Date(info.event.end).toLocaleString()}`);
+                    },
+                    
+                    // Show/hide loading overlay when calendar is processing events
+                    loading: function(isLoading) {
+                        if (isLoading) {
+                            loadingOverlay.style.display = 'flex';
+                        } else {
+                            loadingOverlay.style.display = 'none';
+                        }
+                    }
+                });
+                calendar.render();
+            }
+
+            // Initial render of the calendar with all events
+            renderCalendar(allEvents);
+
+            // Event listener for the "Apply Filters" button
+            applyFiltersBtn.addEventListener('click', function() {
+                var selectedSquadId = squadFilter.value;
+                var selectedEmployeeId = employeeFilter.value;
+
+                var filteredEvents = allEvents.filter(function(event) {
+                    var matchesSquad = (!selectedSquadId || String(event.extendedProps.squad_id) === selectedSquadId);
+                    // For employee filter, check if the selectedEmployeeId is in the array of employee_ids for the squad shift
+                    var matchesEmployee = (!selectedEmployeeId || (event.extendedProps.employee_ids && event.extendedProps.employee_ids.includes(parseInt(selectedEmployeeId))));
+                    return matchesSquad && matchesEmployee;
+                });
+                renderCalendar(filteredEvents);
+            });
+
+            // Event listener for the "Reset Filters" button
+            resetFiltersBtn.addEventListener('click', function() {
+                squadFilter.value = ''; // Reset squad dropdown
+                employeeFilter.value = ''; // Reset employee dropdown
+                renderCalendar(allEvents); // Re-render with all original events
+            });
+        });
+    </script>
+</body>
+</html>

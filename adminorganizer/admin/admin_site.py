@@ -46,6 +46,8 @@ from unverifiedsickleave.models import SickLeaveBalance
 # Leave Type Assignment
 from leavetype.admin import LeaveTypeAdmin, DepartmentBasedLeaveTypeAdmin
 from leavetype.models import LeaveType, DepartmentBasedLeaveType
+from shiftmanagement.admin import SquadAdmin , ShiftTypeAdmin, EmployeeAdmin, SquadShiftAdmin
+from shiftmanagement.models import Squad, ShiftType, Employee, SquadShift
 
 # Celery (Beat + Results) Models
 from django_celery_beat.models import (
@@ -99,7 +101,11 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(PTOBalance, "PTO Balances", "ptobalance"),
             create_model_entry(TimeoffRequest, "Time Off Requests", "timeoffreq"),
             create_model_entry(LeaveType, "Leave Types", "leavetype"),
-            create_model_entry(DepartmentBasedLeaveType, "Department Based Leave Types", "leavetype")
+            create_model_entry(DepartmentBasedLeaveType, "Department Based Leave Types", "leavetype"),
+            create_model_entry(Squad, "Squads", "shiftmanagement"),
+            create_model_entry(ShiftType, "Shift Types", "shiftmanagement"),
+            create_model_entry(Employee, "Employees", "shiftmanagement"), 
+            create_model_entry(SquadShift, "Shift Assignments", "shiftmanagement")  
         ]
         app_list.append({"name": "Leave & Balance", "app_label": "leave_balance_management", "has_module_perms": True, "models": leave_balance_models})
 
@@ -164,6 +170,12 @@ hrms_admin_site.register(SickLeaveProratedValue, SickLeaveProratedValueAdmin)
 hrms_admin_site.register(MaxSickValue, MaxSickValueAdmin)
 hrms_admin_site.register(SickLeaveBalance, SickLeaveBalanceAdmin)
 hrms_admin_site.register(TimeoffRequest, TimeoffreqAdmin)
+
+# Register Shift Management models
+hrms_admin_site.register(Squad, SquadAdmin)
+hrms_admin_site.register(ShiftType, ShiftTypeAdmin)
+hrms_admin_site.register(Employee, EmployeeAdmin)
+hrms_admin_site.register(SquadShift, SquadShiftAdmin)
 
 # Register Celery models
 hrms_admin_site.register(PeriodicTask)

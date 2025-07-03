@@ -84,6 +84,7 @@ urlpatterns = [
     path("auth/user-management/", include("usermanagement.urls")),
     path("api/leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
     path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path('shiftmanagement/', include('shiftmanagement.urls')),
     path("api/", include(router.urls)),
     path("api/clock/", include(clock_router.urls)),  # API for clock functionality
     # Admin URLs

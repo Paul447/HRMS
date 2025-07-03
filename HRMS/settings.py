@@ -38,7 +38,7 @@ APP_DIRS = True
 # Application definition
 
 INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "decisionedtimeoff","usermanagement", "django_filters", "django_celery_beat",
-    "django_celery_results",]
+    "django_celery_results","shiftmanagement"]
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 COMPANY_NAME = "University Police Department"
