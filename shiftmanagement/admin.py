@@ -29,249 +29,242 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_filter = ('squad',)
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
 
-@admin.register(SquadShift)
-class SquadShiftAdmin(admin.ModelAdmin):
-    """
-    Admin configuration for the SquadShift model.
-    Provides custom functionality for generating shifts based on a predefined pattern.
-    """
+class SquadShiftAdminConfig:
+    """Settings for SquadShift admin interface."""
     list_display = ('id', 'squad', 'shift_type', 'shift_start', 'shift_end')
     list_filter = ('squad', 'shift_type')
     search_fields = ('squad__name', 'shift_type__name')
     ordering = ('shift_start', 'squad__name')
-
     change_list_template = 'admin/shiftmanagement/squadshift/change_list.html'
 
-    # --- Configuration Constants for Shift Generation ---
-    # This defines a 14-day 'on' (1) / 'off' (0) pattern for Squads A & C.
-    # Squads B & D will follow the inverse of this pattern for their 'on'/'off' days.
-    # Example: if BASE_PATTERN[X] is 1, Squad A and C are 'on'. Squad B and D are 'off'.
-    # If BASE_PATTERN[X] is 0, Squad A and C are 'off'. Squad B and D are 'on'.
-    BASE_PATTERN = [1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0] 
+from datetime import datetime, time, timedelta
+import pytz
+from django.contrib import admin, messages
+from django.urls import path
+from django.shortcuts import redirect
+from .models import Squad, SquadShift, ShiftType
 
-    # A fixed reference date (e.g., a known start of a cycle for Squad A/C).
-    # All pattern calculations (day index, 28-day cycle) are relative to this date.
-    # It's crucial this remains constant for consistent pattern application across runs.
-    # Example: If July 1, 2024, 6 AM UTC is the start of Day 0 for Squad A's pattern.
+class ShiftGenerationConfig:
+    """Configuration for shift generation."""
     REFERENCE_DATE = datetime(2024, 7, 1, 6, 0, 0, tzinfo=pytz.UTC)
+    LOCAL_TIMEZONE = pytz.timezone('America/Chicago')
+    TARGET_DAYS = 14
+    MAX_SLOTS = (TARGET_DAYS + 60) * 2
+    DEBUG_ENABLED = True
 
-    # Local timezone for correct interpretation of 6 AM/6 PM boundaries.
-    # IMPORTANT: This should match your Django project's TIME_ZONE setting.
-    # We use settings.TIME_ZONE if available, otherwise default.
-    LOCAL_TIMEZONE = pytz.timezone(getattr(settings, 'TIME_ZONE', "America/Chicago"))
+    def __init__(self, base_pattern=None):
+        """Initialize with customizable base pattern."""
+        self.BASE_PATTERN = base_pattern or [1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]
+        self.validate()
 
-    # Target number of *new calendar days* for which to generate shifts.
-    TARGET_DAYS_TO_GENERATE = 14 
-    
-    # Maximum iterations to prevent infinite loops (generous safety net).
-    # Each iteration processes a 12-hour slot (Day or Night).
-    MAX_SLOTS_TO_CHECK = (TARGET_DAYS_TO_GENERATE + 60) * 2 # Added buffer for safety
+    def validate(self):
+        """Validate configuration settings."""
+        if not self.BASE_PATTERN:
+            raise ValueError("BASE_PATTERN must not be empty.")
+        if self.TARGET_DAYS <= 0:
+            raise ValueError("TARGET_DAYS must be positive.")
+        if self.MAX_SLOTS <= 0:
+            raise ValueError("MAX_SLOTS must be positive.")
 
-    # --- Debug Flag ---
-    # Set to True to enable verbose print statements during shift generation.
-    # REMEMBER TO SET TO False IN PRODUCTION!
-    DEBUG_GENERATION = True 
+class ShiftPattern:
+    """Handles shift pattern logic."""
+    def __init__(self, config):
+        self.config = config
 
-    def _debug_print(self, message):
-        """Helper to print messages only if DEBUG_GENERATION is True."""
-        if self.DEBUG_GENERATION:
-            print(f"[SHIFT_GEN_DEBUG] {message}")
+    def is_squad_on(self, squad_code, day_index):
+        """Determine if a squad is working based on the pattern."""
+        is_on = self.config.BASE_PATTERN[day_index] if squad_code in ['A', 'C'] else \
+                (1 - self.config.BASE_PATTERN[day_index])
+        return bool(is_on)
+
+    def get_shift_type(self, squad_code, day_index, is_first_half, day_shift, night_shift):
+        """Determine shift type for a squad."""
+        if squad_code in ['A', 'B']:
+            return day_shift if is_first_half else night_shift
+        return night_shift if is_first_half else day_shift
+
+class ShiftGenerationUtils:
+    """Helper methods for shift generation."""
+    def __init__(self, config):
+        self.config = config
+
+    def log_debug(self, message):
+        if self.config.DEBUG_ENABLED:
+            print(f"[DEBUG] {message}")
+
+    def get_next_shift_start(self):
+        """Calculate next shift start time (6 AM or 6 PM) in UTC."""
+        last_shift = SquadShift.objects.order_by('-shift_end').first()
+        local_tz = self.config.LOCAL_TIMEZONE
+
+        if last_shift:
+            last_end_local = last_shift.shift_end.astimezone(local_tz)
+            last_end_date = last_end_local.date()
+            if last_end_local.hour == 6:  # Night shift ended at 6 AM
+                next_start_local = local_tz.localize(datetime.combine(last_end_date, time(6, 0)))
+            elif last_end_local.hour == 18:  # Day shift ended at 6 PM
+                next_start_local = local_tz.localize(datetime.combine(last_end_date, time(18, 0)))
+            else:
+                next_start_local = local_tz.localize(
+                    datetime.combine(last_end_date + timedelta(days=1), time(6, 0))
+                )
+        else:
+            current_year = datetime.now(tz=pytz.UTC).year
+            next_start_local = local_tz.localize(datetime(current_year, 6, 29, 6, 0))
+
+        self.log_debug(f"Next shift starts: {next_start_local} (Local)")
+        return next_start_local.astimezone(pytz.UTC)
+
+    def get_existing_shifts(self):
+        """Retrieve existing shifts to avoid duplicates."""
+        shifts = SquadShift.objects.filter(
+            shift_start__gte=self.config.REFERENCE_DATE
+        ).values_list('squad__id', 'shift_start', 'shift_type__name')
+        shift_set = {(squad_id, start.replace(microsecond=0), shift_type_name)
+                     for squad_id, start, shift_type_name in shifts}
+        self.log_debug(f"Fetched {len(shift_set)} existing shifts.")
+        return shift_set
+
+    def ensure_shift_types(self):
+        """Ensure DAY and NIGHT shift types exist."""
+        day_shift, day_created = ShiftType.objects.get_or_create(name='DAY')
+        night_shift, night_created = ShiftType.objects.get_or_create(name='NIGHT')
+        if day_created:
+            self.log_debug("Created ShiftType: DAY")
+        if night_created:
+            self.log_debug("Created ShiftType: NIGHT")
+        return day_shift, night_shift
+
+class ShiftGenerator:
+    """Logic for generating squad shifts."""
+    def __init__(self, config, utils, pattern):
+        self.config = config
+        self.utils = utils
+        self.pattern = pattern
+
+    def generate_shifts(self):
+        """Generate shifts for the target period."""
+        self.utils.log_debug("Starting shift generation.")
+        day_shift, night_shift = self.utils.ensure_shift_types()
+        new_shifts = []
+        generated_count = 0
+        start_dt_utc = self.utils.get_next_shift_start()
+        start_dt_local = start_dt_utc.astimezone(self.config.LOCAL_TIMEZONE)
+        current_date = start_dt_local.date()
+        existing_shifts = self.utils.get_existing_shifts()
+        squads = list(Squad.objects.all())
+
+        if not squads:
+            self.utils.log_debug("No squads found. Aborting.")
+            return 0
+
+        self.utils.log_debug(f"Found {len(squads)} squads.")
+        end_date = current_date + timedelta(days=self.config.TARGET_DAYS)
+        self.utils.log_debug(f"Target end date: {end_date}")
+
+        iteration_count = 0
+        while current_date < end_date and iteration_count < self.config.MAX_SLOTS:
+            for hour in [6, 18]:  # 6 AM (DAY), 6 PM (NIGHT)
+                iteration_count += 1
+                slot_start_local = self.config.LOCAL_TIMEZONE.localize(
+                    datetime.combine(current_date, time(hour, 0))
+                )
+                slot_end_local = slot_start_local + timedelta(hours=12) if hour == 6 else \
+                    self.config.LOCAL_TIMEZONE.localize(
+                        datetime.combine(current_date + timedelta(days=1), time(6, 0))
+                    )
+                slot_start_utc = slot_start_local.astimezone(pytz.UTC)
+                slot_end_utc = slot_end_local.astimezone(pytz.UTC)
+                slot_type = 'DAY' if hour == 6 else 'NIGHT'
+
+                self.utils.log_debug(f"Processing slot: {slot_start_local.strftime('%Y-%m-%d %H:%M %Z%z')} ({slot_type})")
+
+                days_since_ref = (current_date - self.config.REFERENCE_DATE.date()).days
+                day_index = days_since_ref % len(self.config.BASE_PATTERN)
+                is_first_half = (days_since_ref % 28) < 14
+
+                for squad in squads:
+                    is_on = self.pattern.is_squad_on(squad.name, day_index)
+                    if not is_on:
+                        self.utils.log_debug(f"Squad {squad.name}: OFF on day index {day_index}.")
+                        continue
+
+                    shift_type = self.pattern.get_shift_type(
+                        squad.name, day_index, is_first_half, day_shift, night_shift
+                    )
+                    if shift_type.name != slot_type:
+                        self.utils.log_debug(f"Squad {squad.name}: Assigned {shift_type.name}, slot is {slot_type}. Skipping.")
+                        continue
+
+                    shift_id = (squad.id, slot_start_utc.replace(microsecond=0), shift_type.name)
+                    if shift_id not in existing_shifts:
+                        new_shifts.append(SquadShift(
+                            squad=squad,
+                            shift_type=shift_type,
+                            shift_start=slot_start_utc,
+                            shift_end=slot_end_utc
+                        ))
+                        generated_count += 1
+                        existing_shifts.add(shift_id)
+                        self.utils.log_debug(f"Added shift: {slot_start_local} to {slot_end_local}")
+
+            current_date += timedelta(days=1)
+
+        if new_shifts:
+            self.utils.log_debug(f"Creating {len(new_shifts)} new shifts.")
+            SquadShift.objects.bulk_create(new_shifts, ignore_conflicts=True)
+            self.utils.log_debug("Bulk creation completed.")
+        else:
+            self.utils.log_debug("No new shifts to create.")
+
+        self.utils.log_debug(f"Generation complete. Total generated: {generated_count}")
+        return generated_count
+
+class SquadShiftAdminConfig:
+    """Configuration for SquadShift admin interface."""
+    list_display = ('squad', 'shift_type', 'shift_start', 'shift_end')
+    list_filter = ('squad', 'shift_type')
+    search_fields = ('squad__name', 'shift_type__name')
+    ordering = ('-shift_start',)
+    change_list_template = 'admin/shiftmanagement/squadshift/change_list.html'
+
+@admin.register(SquadShift)
+class SquadShiftAdmin(admin.ModelAdmin):
+    """Admin interface for managing squad shifts."""
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        config = ShiftGenerationConfig()
+        self.utils = ShiftGenerationUtils(config)
+        self.pattern = ShiftPattern(config)
+        self.generator = ShiftGenerator(config, self.utils, self.pattern)
+        admin_config = SquadShiftAdminConfig()
+        self.list_display = admin_config.list_display
+        self.list_filter = admin_config.list_filter
+        self.search_fields = admin_config.search_fields
+        self.ordering = admin_config.ordering
+        self.change_list_template = admin_config.change_list_template
 
     def get_urls(self):
-        """
-        Extends the default admin URLs with a custom URL for shift generation.
-        """
+        """Add custom URL for shift generation."""
         urls = super().get_urls()
         custom_urls = [
             path(
-                'generate-shifts/', 
-                self.admin_site.admin_view(self.generate_shifts_view), 
+                'generate-shifts/',
+                self.admin_site.admin_view(self.generate_shifts_view),
                 name='shiftmanagement_squadshift_generate_shifts'
             ),
         ]
         return custom_urls + urls
 
     def generate_shifts_view(self, request):
-        """
-        Custom admin view triggered by the 'Generate Next Shifts' button.
-        It orchestrates the shift generation process.
-        """
+        """Handle shift generation via admin interface."""
         if request.method == 'POST':
-            generated_count = self._generate_shifts_logic()
-            if generated_count > 0:
-                messages.success(request, f"Successfully generated {generated_count} new squad shifts for the next cycle.")
+            count = self.generator.generate_shifts()
+            if count > 0:
+                messages.success(request, f"Generated {count} new squad shifts.")
             else:
-                messages.info(request, "No new squad shifts were generated. The schedule might already be up to date or no active squads.")
+                messages.info(request, "No new shifts generated. Schedule may be up to date or no squads found.")
             return redirect('admin:shiftmanagement_squadshift_changelist')
-        
-        messages.error(request, "Shift generation requires a POST request via the button.")
+
+        messages.error(request, "Shift generation requires a POST request.")
         return redirect('admin:shiftmanagement_squadshift_changelist')
-
-    def _get_next_generation_start_time(self):
-        """
-        Determines the UTC datetime from which new shifts should begin generation.
-        This is typically the start of the next 12-hour slot after the last existing shift.
-        """
-        last_squad_shift = SquadShift.objects.order_by('-shift_end').first()
-        
-        if last_squad_shift:
-            # Convert the last shift's end time to local timezone for boundary calculations.
-            last_end_dt_local = last_squad_shift.shift_end.astimezone(self.LOCAL_TIMEZONE)
-            
-            # Determine the *next* 12-hour slot (6 AM or 6 PM) based on the last shift's end.
-            if last_end_dt_local.hour == 6:  # Last shift ended at 6 AM (NIGHT shift), next is 6 AM same day (DAY)
-                next_start_dt_local = last_end_dt_local.replace(hour=6, minute=0, second=0, microsecond=0)
-            elif last_end_dt_local.hour == 18:  # Last shift ended at 6 PM (DAY shift), next is 6 PM same day (NIGHT)
-                next_start_dt_local = last_end_dt_local.replace(hour=18, minute=0, second=0, microsecond=0)
-            else:
-                # If time is misaligned (shouldn't happen), move to next 6 AM
-                next_start_dt_local = (last_end_dt_local + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
-            
-            self._debug_print(f"Last shift ended: {last_end_dt_local} (Local)")
-            self._debug_print(f"Next generation calculated to start from: {next_start_dt_local} (Local)")
-            return next_start_dt_local.astimezone(pytz.UTC)
-        else:
-            # If no shifts exist, start from a sensible initial date/time.
-            current_year = timezone.now().year
-            initial_start_dt_local = self.LOCAL_TIMEZONE.localize(datetime(current_year, 6, 29, 6, 0, 0)) 
-            self._debug_print(f"No existing shifts found. Starting generation from: {initial_start_dt_local} (Local)")
-            return initial_start_dt_local.astimezone(pytz.UTC)
-
-    def _get_existing_shifts_set(self):
-        """
-        Fetches existing SquadShift records from the REFERENCE_DATE onwards
-        and returns them as a set for efficient duplicate checking.
-        The shift_start datetime is normalized to remove microseconds for reliable comparison.
-        """
-        existing_shifts = SquadShift.objects.filter(
-            shift_start__gte=self.REFERENCE_DATE
-        ).values_list('squad__id', 'shift_start', 'shift_type__name')
-        
-        normalized_existing_shifts = set((squad_id, start.replace(microsecond=0), shift_type_name) 
-                                         for squad_id, start, shift_type_name in existing_shifts)
-        self._debug_print(f"Pre-fetched {len(normalized_existing_shifts)} existing shifts for duplicate check.")
-        return normalized_existing_shifts
-
-    def _get_shift_types(self):
-        """
-        Ensures Day and Night ShiftType objects exist in the database and returns them.
-        Creates them if they don't already exist.
-        """
-        day_shift, created_day = ShiftType.objects.get_or_create(name='DAY')
-        night_shift, created_night = ShiftType.objects.get_or_create(name='NIGHT')
-        if created_day: self._debug_print("Created new ShiftType: DAY")
-        if created_night: self._debug_print("Created new ShiftType: NIGHT")
-        return day_shift, night_shift
-
-    def _determine_squad_assignment(self, squad_code, pattern_day_index, is_first_14_days_of_28_cycle, day_shift, night_shift):
-        """
-        Determines if a squad is 'on' for a given day and which shift type (DAY/NIGHT)
-        they are assigned based on the 28-day rotation and 14-day base pattern.
-        
-        Returns:
-            tuple: (is_on_for_day: bool, assigned_shift_type: ShiftType or None)
-        """
-        # Determine if the current squad is 'on' or 'off' for this day.
-        # Squads A & C use BASE_PATTERN directly.
-        # Squads B & D use the inverse of BASE_PATTERN.
-        is_on_for_day = self.BASE_PATTERN[pattern_day_index] if squad_code in ['A', 'C'] else \
-                        (1 - self.BASE_PATTERN[pattern_day_index])
-
-        if not is_on_for_day:
-            self._debug_print(f"    Squad {squad_code}: OFF for day index {pattern_day_index}. (Pattern: {self.BASE_PATTERN[pattern_day_index] if squad_code in ['A', 'C'] else (1 - self.BASE_PATTERN[pattern_day_index])})")
-            return False, None # This squad is scheduled to be OFF for this day.
-
-        # Determine the specific shift type (DAY/NIGHT) this squad should work.
-        # This is based on the 28-day rotation:
-        # Squads A & B swap between Day/Night every 14 days.
-        # Squads C & D also swap, but inversely to A & B.
-        if squad_code in ['A', 'B']: # Squad Group 1
-            assigned_shift_type = day_shift if is_first_14_days_of_28_cycle else night_shift
-            self._debug_print(f"    Squad {squad_code}: Group 1. First 14 days of 28-day cycle: {is_first_14_days_of_28_cycle}. Assigned: {assigned_shift_type.name}")
-        else: # Squad Group 2 (C & D)
-            assigned_shift_type = night_shift if is_first_14_days_of_28_cycle else day_shift
-            self._debug_print(f"    Squad {squad_code}: Group 2. First 14 days of 28-day cycle: {is_first_14_days_of_28_cycle}. Assigned: {assigned_shift_type.name}")
-            
-        return True, assigned_shift_type
-
-    def _generate_shifts_logic(self):
-        """
-        Core logic to generate a rolling schedule of squad shifts for the next `TARGET_DAYS_TO_GENERATE` days.
-        """
-        self._debug_print("--- Starting Shift Generation Logic ---")
-        day_shift, night_shift = self._get_shift_types()
-        shifts_to_create = []
-        generated_count = 0
-        
-        earliest_generation_start_dt_utc = self._get_next_generation_start_time()
-        existing_squad_shifts_set = self._get_existing_shifts_set()
-        all_squads = list(Squad.objects.all())
-        if not all_squads:
-            self._debug_print("No squads found in the database. Aborting shift generation.")
-            return 0
-        self._debug_print(f"Found {len(all_squads)} active squads.")
-
-        target_end_dt_utc = earliest_generation_start_dt_utc + timedelta(days=self.TARGET_DAYS_TO_GENERATE)
-        self._debug_print(f"Target end date: {target_end_dt_utc.astimezone(self.LOCAL_TIMEZONE)}")
-
-        current_check_dt_utc = earliest_generation_start_dt_utc
-        iteration_count = 0
-
-        while current_check_dt_utc < target_end_dt_utc and iteration_count < self.MAX_SLOTS_TO_CHECK:
-            iteration_count += 1
-            
-            target_date_for_pattern = current_check_dt_utc.date()
-            days_since_reference = (target_date_for_pattern - self.REFERENCE_DATE.date()).days
-            pattern_day_index = days_since_reference % len(self.BASE_PATTERN)
-            is_first_14_days_of_28_cycle = (days_since_reference % 28) < 14
-
-            current_slot_local_dt = current_check_dt_utc.astimezone(self.LOCAL_TIMEZONE)
-            current_slot_hour = current_slot_local_dt.hour
-            current_slot_type_name = 'DAY' if current_slot_hour == 6 else 'NIGHT'
-
-            self._debug_print(f"\n--- Processing Slot: {current_slot_local_dt.strftime('%Y-%m-%d %H:%M %Z%z')} ({current_slot_type_name} Slot) ---")
-            self._debug_print(f"  Ref Date: {self.REFERENCE_DATE.date()} | Current Date: {target_date_for_pattern}")
-            self._debug_print(f"  Days Since Ref: {days_since_reference} | Pattern Index: {pattern_day_index} | First 14 days of 28-cycle: {is_first_14_days_of_28_cycle}")
-
-            for squad in all_squads:
-                self._debug_print(f"  Checking Squad: {squad.name}")
-                is_on, assigned_shift_type = self._determine_squad_assignment(
-                    squad.name, pattern_day_index, is_first_14_days_of_28_cycle, day_shift, night_shift
-                )
-
-                if not is_on:
-                    continue 
-
-                if assigned_shift_type.name == current_slot_type_name:
-                    self._debug_print(f"    Match! Squad {squad.name} assigned {assigned_shift_type.name} for {current_slot_type_name} slot.")
-                    shift_start_final = current_check_dt_utc
-                    shift_end_final = current_check_dt_utc + timedelta(hours=12)
-
-                    shift_identifier = (squad.id, shift_start_final.replace(microsecond=0), assigned_shift_type.name)
-
-                    if shift_identifier not in existing_squad_shifts_set:
-                        self._debug_print(f"      Shift {squad.name} {assigned_shift_type.name} at {shift_start_final.astimezone(self.LOCAL_TIMEZONE)} NOT found in existing set. Adding to create list.")
-                        shifts_to_create.append(SquadShift(
-                            squad=squad,
-                            shift_type=assigned_shift_type,
-                            shift_start=shift_start_final,
-                            shift_end=shift_end_final
-                        ))
-                        generated_count += 1
-                        existing_squad_shifts_set.add(shift_identifier)
-                    else:
-                        self._debug_print(f"      Shift {squad.name} {assigned_shift_type.name} at {shift_start_final.astimezone(self.LOCAL_TIMEZONE)} ALREADY EXISTS. Skipping.")
-                else:
-                    self._debug_print(f"    NO MATCH. Squad {squad.name} assigned {assigned_shift_type.name}, but slot is {current_slot_type_name}. Skipping.")
-
-            current_check_dt_utc += timedelta(hours=12)
-
-        if shifts_to_create:
-            self._debug_print(f"\nAttempting bulk_create for {len(shifts_to_create)} new shifts.")
-            SquadShift.objects.bulk_create(shifts_to_create, ignore_conflicts=True)
-            self._debug_print("Bulk create completed.")
-        else:
-            self._debug_print("\nNo shifts to create.")
-
-        self._debug_print(f"--- Shift Generation Finished. Total generated: {generated_count} ---")
-        return generated_count

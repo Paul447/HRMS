@@ -1,267 +1,269 @@
-{# shiftmanagement/templates/shiftmanagement/calendar.html #}
-
-{% load shift_extras %} {# Load your custom filter at the very top #}
-
+{% load shift_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shift Schedule Calendar</title>
-
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css' rel='stylesheet' />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/>
-
     <style>
-        /* General Body and Container */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f0f2f5;
-            color: #333;
+            padding: 0;
+            background-color: #f3f4f6;
         }
         #calendar-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 1400px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            position: relative;
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.2em;
-        }
-
-        /* Controls and Legend Layout */
-        .controls-and-legend {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 20px; /* Space between flex items */
-        }
-        .filters, .legend {
-            background-color: #f9f9f9;
-            padding: 15px 20px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        /* Filters Styling */
-        .filters {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .filters label {
-            font-weight: bold;
-            color: #555;
-            margin-right: 5px;
-        }
-        .filters select {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            font-size: 0.95em;
-            cursor: pointer;
-            min-width: 150px;
-        }
-        .filters button {
-            padding: 8px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: background-color 0.2s ease;
-        }
-        .filters button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Legend Styling */
-        .legend h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #555;
-            font-size: 1.1em;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .legend-color-box {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            margin-right: 10px;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        /* FullCalendar Specific Styles */
         .fc-event {
-            font-size: 0.85em;
-            padding: 3px 5px;
-            border-radius: 4px;
-            line-height: 1.3;
-        }
-        /* Adjusted for eventContent usage */
-        .fc-event-main-content {
-            white-space: normal;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 6px;
+            line-height: 1.5;
+            cursor: pointer;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.2;
         }
-        .fc-event-main-content strong {
-            display: block; /* Ensures squad/shift type is on its own line */
-            font-size: 0.95em;
-        }
-        .fc-event-main-content span {
-            font-size: 0.75em; /* Smaller font for employee names */
-            display: block; /* Ensures names are on their own line */
-        }
-
-        .fc-toolbar-title {
-            font-size: 1.8em !important;
-            color: #2c3e50;
+        .fc-timegrid-event .fc-event-main {
+            padding: 4px 8px;
         }
         .fc-button {
-            background-color: #6c757d !important;
-            border-color: #6c757d !important;
-            color: white !important;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            transition: all 0.2s ease;
+            border-radius: 6px;
         }
         .fc-button:hover {
-            background-color: #5a6268 !important;
-            border-color: #545b62 !important;
+            background-color: #2563eb !important;
+            border-color: #2563eb !important;
         }
         .fc-daygrid-more-link {
-            font-size: 0.8em;
-            color: #007bff !important;
+            color: #3b82f6 !important;
+            font-size: 0.85em;
         }
         .fc-daygrid-more-link:hover {
             text-decoration: underline;
         }
+        /* Match backend squad_color_map */
+        .squad-A-event { background-color:rgb(66, 255, 113); border-color:rgb(66, 255, 113); } /* Fallback for non-night shifts */
+        .squad-B-event { background-color:rgba(219, 160, 131, 0.72); border-color:rgba(219, 160, 131, 0.72); }
+        .squad-C-event { background-color:rgb(228, 181, 98); border-color:rgb(228, 181, 98); }
+        .squad-D-event { background-color:rgba(72, 236, 228, 0.8); border-color:rgba(72, 236, 228, 0.8); }
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+        .multi-select-container {
+            position: relative;
+        }
+        .multi-select-dropdown {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .multi-select-dropdown.open {
+            display: block;
+        }
+        .multi-select-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .multi-select-option:hover {
+            background-color: #f3f4f6;
+        }
+        .multi-select-option.selected {
+            background-color: #e5e7eb;
+            font-weight: 500;
+        }
         .loading-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.8);
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5em;
-            color: #333;
+            font-size: 1.2em;
+            color: #374151;
             z-index: 1000;
-            border-radius: 8px;
+            border-radius: 1rem;
         }
-
-        /* Custom styling for squad divisions (optional, for visual clarity) */
-        .squad-A-event { background-color: #4CAF50; border-color: #4CAF50; }
-        .squad-B-event { background-color: #2196F3; border-color: #2196F3; }
-        .squad-C-event { background-color: #FF9800; border-color: #FF9800; }
-        .squad-D-event { background-color: #E91E63; border-color: #E91E63; }
-
-
-        /* Responsive adjustments */
+        .fc-timegrid-slot-label {
+            font-size: 0.85em;
+        }
+        .fc-daygrid-day-number {
+            font-size: 0.9em;
+        }
         @media (max-width: 768px) {
+            #calendar-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
             .controls-and-legend {
                 flex-direction: column;
-                align-items: stretch;
+                gap: 1rem;
             }
             .filters, .legend {
                 width: 100%;
-                box-sizing: border-box; /* Include padding in width */
             }
-            .filters {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .filters select, .filters button {
-                width: 100%;
-                min-width: unset;
-            }
-            h1 {
-                font-size: 1.8em;
+            .fc-event {
+                font-size: 0.8em;
+                padding: 3px 6px;
             }
         }
     </style>
 </head>
 <body>
     <div id="calendar-container">
-        <h1>Shift Schedule Calendar</h1>
-
-        <div class="controls-and-legend">
-            <div class="filters">
-                <label for="squadFilter">Filter by Squad:</label>
-                <select id="squadFilter">
-                    <option value="">All Squads</option>
-                    {% for squad in squads %}
-                        <option value="{{ squad.id }}">{{ squad.name }}</option>
-                    {% endfor %}
-                </select>
-
-                <label for="employeeFilter">Filter by Employee:</label>
-                <select id="employeeFilter">
-                    <option value="">All Employees</option>
-                    {% for employee in employees %}
-                        <option value="{{ employee.id }}">{{ employee.user|get_display_name }}</option>
-                    {% endfor %}
-                </select>
-
-                <button id="applyFilters">Apply Filters</button>
-                <button id="resetFilters">Reset Filters</button>
-            </div>
-
-            <div class="legend">
-                <h3>Squad Colors</h3>
-                {# Iterate directly over the Python dict passed from views.py #}
-                {% for squad_name, color in squad_color_map.items %}
-                    <div class="legend-item">
-                        <div class="legend-color-box" style="background-color: {{ color }};"></div>
-                        <span>Squad {{ squad_name }}</span>
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Shift Schedule Calendar</h1>
+        <div class="controls-and-legend flex flex-col md:flex-row justify-between gap-4 mb-6">
+            <div class="filters bg-white p-4 rounded-lg shadow-sm flex-1">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Filters</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label for="searchFilter" class="block text-sm font-medium text-gray-700">Search</label>
+                        <input type="text" id="searchFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Search by squad, shift, or employee" />
                     </div>
-                {% endfor %}
+                    <div>
+                        <label for="squadFilter" class="block text-sm font-medium text-gray-700">Squad</label>
+                        <select id="squadFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            <option value="">All Squads</option>
+                            {% for squad in squads %}
+                                <option value="{{ squad.id }}">{{ squad.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="multi-select-container">
+                        <label for="employeeFilter" class="block text-sm font-medium text-gray-700">Employees</label>
+                        <div id="employeeFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-white cursor-pointer text-sm">
+                            Select Employees
+                        </div>
+                        <div id="employeeDropdown" class="multi-select-dropdown">
+                            {% for employee in employees %}
+                                <div class="multi-select-option" data-value="{{ employee.id }}">{{ employee.user|get_display_name }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button id="applyFilters" class="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">Apply Filters</button>
+                        <button id="resetFilters" class="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition text-sm">Reset Filters</button>
+                        <button id="exportCSV" class="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">Export to CSV</button>
+                    </div>
+                </div>
+            </div>
+            <div class="legend bg-white p-4 rounded-lg shadow-sm w-full md:w-1/4">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Squad Colors</h3>
+                <div class="space-y-2">
+                    {% for squad_name, color in squad_color_map.items %}
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 rounded mr-2" style="background-color: {{ color }};"></div>
+                            <span class="text-sm">Squad {{ squad_name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-
-        <div id='calendar'></div>
-        <div class="loading-overlay" id="loadingOverlay" style="display: none;">Loading Calendar...</div>
+        <div id="calendar" class="relative"></div>
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-2 text-gray-600" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading Calendar...
+            </div>
+        </div>
+        <div id="eventModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full modal modal-hidden">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Shift Details</h2>
+                <div class="space-y-2 text-sm">
+                    <p><strong>Squad:</strong> <span id="modalSquad"></span></p>
+                    <p><strong>Shift Type:</strong> <span id="modalShiftType"></span></p>
+                    <p><strong>Start:</strong> <span id="modalStart"></span></p>
+                    <p><strong>End:</strong> <span id="modalEnd"></span></p>
+                    <p><strong>Employees:</strong> <span id="modalEmployees"></span></p>
+                </div>
+                <button id="closeModal" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">Close</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
-
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var loadingOverlay = document.getElementById('loadingOverlay');
-            var squadFilter = document.getElementById('squadFilter');
-            var employeeFilter = document.getElementById('employeeFilter');
-            var applyFiltersBtn = document.getElementById('applyFilters');
-            var resetFiltersBtn = document.getElementById('resetFilters');
+            const calendarEl = document.getElementById('calendar');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const squadFilter = document.getElementById('squadFilter');
+            const employeeFilter = document.getElementById('employeeFilter');
+            const employeeDropdown = document.getElementById('employeeDropdown');
+            const searchFilter = document.getElementById('searchFilter');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+            const resetFiltersBtn = document.getElementById('resetFilters');
+            const exportCSVBtn = document.getElementById('exportCSV');
+            const eventModal = document.getElementById('eventModal');
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalSquad = document.getElementById('modalSquad');
+            const modalShiftType = document.getElementById('modalShiftType');
+            const modalStart = document.getElementById('modalStart');
+            const modalEnd = document.getElementById('modalEnd');
+            const modalEmployees = document.getElementById('modalEmployees');
 
-            // allEvents stores the full dataset, parsed once from Django context
-            var allEvents = JSON.parse('{{ calendar_events_json|safe }}');
-            var calendar; // Declare calendar instance variable
+            let selectedEmployees = [];
+            const allEvents = JSON.parse('{{ calendar_events_json|safe }}');
+            let calendar;
+
+            // Multi-select functionality
+            employeeFilter.addEventListener('click', function() {
+                employeeDropdown.classList.toggle('open');
+            });
+
+            document.querySelectorAll('.multi-select-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    if (selectedEmployees.includes(value)) {
+                        selectedEmployees = selectedEmployees.filter(id => id !== value);
+                        this.classList.remove('selected');
+                    } else {
+                        selectedEmployees.push(value);
+                        this.classList.add('selected');
+                    }
+                    employeeFilter.textContent = selectedEmployees.length > 0 
+                        ? `${selectedEmployees.length} Employee${selectedEmployees.length > 1 ? 's' : ''} Selected`
+                        : 'Select Employees';
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!employeeFilter.contains(e.target) && !employeeDropdown.contains(e.target)) {
+                    employeeDropdown.classList.remove('open');
+                }
+            });
 
             function renderCalendar(eventsToDisplay) {
-                // Destroy existing calendar instance before creating a new one
                 if (calendar) {
                     calendar.destroy();
                 }
@@ -273,101 +275,158 @@
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     },
+                    views: {
+                        timeGridWeek: {
+                            slotMinTime: '06:00:00',
+                            slotMaxTime: '30:00:00', // Show up to 6 AM next day
+                            slotDuration: '00:30:00',
+                            slotLabelFormat: {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                meridiem: 'short'
+                            }
+                        },
+                        timeGridDay: {
+                            slotMinTime: '06:00:00',
+                            slotMaxTime: '30:00:00',
+                            slotDuration: '00:30:00',
+                            slotLabelFormat: {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                meridiem: 'short'
+                            }
+                        }
+                    },
                     height: 'auto',
                     navLinks: true,
                     editable: false,
-                    dayMaxEvents: true, // Show "more" link if too many events
-                    events: eventsToDisplay, // Pass the (filtered) events here
-                    
-                    // --- NEW: Custom event content rendering ---
-                    eventContent: function(arg) {
-                        let employeeNames = arg.event.extendedProps.employee_names || [];
-                        let employeeNamesText = employeeNames.length > 0 ? employeeNames.join(', ') : 'No Employees';
-                        
-                        // Create a custom element for the event content
-                        let html = `
-                            <div class="fc-event-main-content">
-                                <strong>Squad ${arg.event.extendedProps.squad_name} - ${arg.event.extendedProps.shift_type}</strong>
-                                <span class="fc-event-employee-names">
-                                    ${employeeNamesText}
-                                </span>
-                            </div>
-                        `;
-                        return { html: html };
+                    dayMaxEvents: 4, // Show up to 4 events before "more" link
+                    eventTimeFormat: {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
                     },
-                    // --- END NEW ---
-
+                    events: eventsToDisplay,
+                    eventContent: function(arg) {
+                        const employeeNames = arg.event.extendedProps.employee_names || [];
+                        const employeeNamesText = employeeNames.length > 0 ? employeeNames.slice(0, 2).join(', ') + (employeeNames.length > 2 ? '...' : '') : 'No Employees';
+                        const shiftType = arg.event.extendedProps.shift_type;
+                        const isNightSplit = arg.event.start.getHours() >= 18 || arg.event.end.getHours() <= 6;
+                        const timeText = isNightSplit ? `( ${arg.event.start.getHours() >= 18 ? 'Dusk' : 'Dawn'})` : '';
+                        return { html: `
+                            <div class="fc-event-main-content">
+                                <strong>Squad ${arg.event.extendedProps.squad_name} - ${shiftType} ${timeText}</strong>
+                                <div class="text-xs">${employeeNamesText}</div>
+                            </div>
+                        ` };
+                    },
                     eventDidMount: function(info) {
-                        // Add custom class based on squad for more specific styling
-                        if (info.event.extendedProps && info.event.extendedProps.squad_name) {
-                            info.el.classList.add('squad-' + info.event.extendedProps.squad_name + '-event');
+                        if (info.event.extendedProps?.squad_name) {
+                            info.el.classList.add(`squad-${info.event.extendedProps.squad_name}-event`);
                         }
-
-                        // Tippy.js tooltip for detailed event info
-                        let employeeNamesHtml = (info.event.extendedProps.employee_names || [])
-                                                    .map(name => `<li>${name}</li>`)
-                                                    .join('');
-                        if (employeeNamesHtml) {
-                            employeeNamesHtml = `<strong>Employees:</strong><ul>${employeeNamesHtml}</ul>`;
-                        } else {
-                            employeeNamesHtml = '<strong>Employees:</strong> N/A';
-                        }
-
                         tippy(info.el, {
                             content: `
                                 <strong>Squad:</strong> ${info.event.extendedProps.squad_name || 'N/A'}<br>
                                 <strong>Shift Type:</strong> ${info.event.extendedProps.shift_type || 'N/A'}<br>
-                                <strong>Start:</strong> ${new Date(info.event.start).toLocaleString()}<br>
-                                <strong>End:</strong> ${new Date(info.event.end).toLocaleString()}<br>
-                                ${employeeNamesHtml}
+                                <strong>Start:</strong> ${new Date(info.event.start).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}<br>
+                                <strong>End:</strong> ${new Date(info.event.end).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}<br>
+                                <strong>Employees:</strong> ${(info.event.extendedProps.employee_names || []).join(', ') || 'N/A'}
                             `,
                             allowHTML: true,
                             animation: 'fade',
                             placement: 'top',
-                            theme: 'light-border', // Requires Tippy.js theme CSS (included via CDN)
+                            theme: 'light-border',
+                            maxWidth: 300
                         });
                     },
-                    
                     eventClick: function(info) {
-                        let employeeNamesStr = (info.event.extendedProps.employee_names || []).join(', ');
-                        alert(`Shift Details:\nSquad: ${info.event.extendedProps.squad_name}\nShift Type: ${info.event.extendedProps.shift_type}\nEmployees: ${employeeNamesStr}\nStart: ${new Date(info.event.start).toLocaleString()}\nEnd: ${new Date(info.event.end).toLocaleString()}`);
+                        modalSquad.textContent = info.event.extendedProps.squad_name || 'N/A';
+                        modalShiftType.textContent = info.event.extendedProps.shift_type || 'N/A';
+                        modalStart.textContent = new Date(info.event.start).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                        modalEnd.textContent = new Date(info.event.end).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                        modalEmployees.textContent = (info.event.extendedProps.employee_names || []).join(', ') || 'N/A';
+                        eventModal.classList.remove('hidden');
+                        setTimeout(() => {
+                            eventModal.querySelector('.modal').classList.remove('modal-hidden');
+                        }, 10);
                     },
-                    
-                    // Show/hide loading overlay when calendar is processing events
                     loading: function(isLoading) {
-                        if (isLoading) {
-                            loadingOverlay.style.display = 'flex';
-                        } else {
-                            loadingOverlay.style.display = 'none';
-                        }
+                        loadingOverlay.style.display = isLoading ? 'flex' : 'none';
                     }
                 });
                 calendar.render();
             }
 
-            // Initial render of the calendar with all events
-            renderCalendar(allEvents);
-
-            // Event listener for the "Apply Filters" button
-            applyFiltersBtn.addEventListener('click', function() {
-                var selectedSquadId = squadFilter.value;
-                var selectedEmployeeId = employeeFilter.value;
-
-                var filteredEvents = allEvents.filter(function(event) {
-                    var matchesSquad = (!selectedSquadId || String(event.extendedProps.squad_id) === selectedSquadId);
-                    // For employee filter, check if the selectedEmployeeId is in the array of employee_ids for the squad shift
-                    var matchesEmployee = (!selectedEmployeeId || (event.extendedProps.employee_ids && event.extendedProps.employee_ids.includes(parseInt(selectedEmployeeId))));
-                    return matchesSquad && matchesEmployee;
+            function applyFilters() {
+                const selectedSquadId = squadFilter.value;
+                const searchTerm = searchFilter.value.toLowerCase();
+                const filteredEvents = allEvents.filter(function(event) {
+                    const matchesSquad = !selectedSquadId || String(event.extendedProps.squad_id) === selectedSquadId;
+                    const matchesEmployee = selectedEmployees.length === 0 || 
+                        event.extendedProps.employee_ids?.some(id => selectedEmployees.includes(String(id)));
+                    const matchesSearch = !searchTerm ||
+                        event.extendedProps.squad_name.toLowerCase().includes(searchTerm) ||
+                        event.extendedProps.shift_type.toLowerCase().includes(searchTerm) ||
+                        (event.extendedProps.employee_names || []).some(name => name.toLowerCase().includes(searchTerm));
+                    return matchesSquad && matchesEmployee && matchesSearch;
                 });
                 renderCalendar(filteredEvents);
+            }
+
+            function resetFilters() {
+                squadFilter.value = '';
+                selectedEmployees = [];
+                searchFilter.value = '';
+                employeeFilter.textContent = 'Select Employees';
+                document.querySelectorAll('.multi-select-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                employeeDropdown.classList.remove('open');
+                renderCalendar(allEvents);
+            }
+
+            function exportToCSV() {
+                const headers = ['Squad', 'Shift Type', 'Start', 'End', 'Employees'];
+                const csvContent = [
+                    headers.join(','),
+                    ...calendar.getEvents().map(event => [
+                        event.extendedProps.squad_name,
+                        event.extendedProps.shift_type,
+                        new Date(event.start).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+                        new Date(event.end).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+                        `"${(event.extendedProps.employee_names || []).join(';')}"`
+                    ].map(field => `"${field.replace(/"/g, '""')}"`).join(','))
+                ].join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `shift_schedule_${new Date().toISOString().slice(0, 10)}.csv`;
+                link.click();
+            }
+
+            // Event listeners
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            resetFiltersBtn.addEventListener('click', resetFilters);
+            exportCSVBtn.addEventListener('click', exportToCSV);
+            closeModalBtn.addEventListener('click', function() {
+                eventModal.querySelector('.modal').classList.add('modal-hidden');
+                setTimeout(() => {
+                    eventModal.classList.add('hidden');
+                }, 300);
+            });
+            searchFilter.addEventListener('input', function() {
+                if (this.value === '') {
+                    applyFilters();
+                }
+            });
+            searchFilter.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
             });
 
-            // Event listener for the "Reset Filters" button
-            resetFiltersBtn.addEventListener('click', function() {
-                squadFilter.value = ''; // Reset squad dropdown
-                employeeFilter.value = ''; // Reset employee dropdown
-                renderCalendar(allEvents); // Re-render with all original events
-            });
+            // Initial render
+            renderCalendar(allEvents);
         });
     </script>
 </body>
