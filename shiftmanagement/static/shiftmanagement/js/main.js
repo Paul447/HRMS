@@ -2,7 +2,6 @@
 
 import { DOMElements } from './dom-elements.js';
 // We will pass vanillaSelectBox to setupMultiSelect, so no need to import it here
-import { setupMultiSelect } from './multi-select.js'; 
 import { fetchEvents, applyFilters, resetFilters } from './calendar-events.js';
 import { currentYear, currentMonth } from './calendar-renderer.js';
 

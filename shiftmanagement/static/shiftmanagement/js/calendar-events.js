@@ -14,14 +14,14 @@ export let paginationData = {};
  * @param {number} month
  */
 export async function fetchEvents(year, month) {
-    window.showLoading(); // Call the global function
+    // window.showLoading(); // Call the global function
     try {
         const response = await fetch(`/api/calendar-events/?year=${year}&month=${month}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('API Response:', data);
+        
 
         allEvents = data.calendar_events.map(event => ({
             ...event,

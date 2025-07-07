@@ -285,7 +285,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
             }
 
             const data = await response.json();
-            console.log('API response:', data); // Debug: Log the API response
+            
 
             // Handle both array and object responses
             const userData = Array.isArray(data) && data[0] ? data[0] : data;

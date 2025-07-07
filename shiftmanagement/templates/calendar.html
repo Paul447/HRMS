@@ -7,18 +7,152 @@
 {% block content %}
 {% load static %}
 
-{# Assuming your custom CSS is here for dashboard layout, etc. #}
-<link rel="stylesheet" href="{% static 'shiftmanagement/css/dashboard.css' %}">
+{# Include FullCalendar CSS for core styling #}
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' />
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css' rel='stylesheet' />
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/>
+{% comment %} <link rel="stylesheet" href="{% static 'shiftmanagement/css/dashboard.css' %}"> {% endcomment %}
 
-<div class="calendar-page-wrapper p-4 md:p-6 bg-gray-100 min-h-screen">
+{# Inline CSS to adapt to base application's styles #}
+<style>
+    #calendar-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        background-color: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        position: relative;
+    }
+    .fc-event {
+        font-size: 0.9em;
+        padding: 4px 8px;
+        border-radius: 6px;
+        line-height: 1.5;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 15px;
+    }
+    .fc-timegrid-event .fc-event-main {
+        padding: 4px 8px;
+        margin-bottom: 10px;
+    }
+    .fc-button {
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+    }
+    .fc-button:hover {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+    }
+    .fc-daygrid-more-link {
+        color: #3b82f6 !important;
+        font-size: 0.85em;
+    }
+    .fc-daygrid-more-link:hover {
+        text-decoration: underline;
+    }
+    /* Squad colors matching backend's squad_color_map */
+    .squad-A-event { background-color: #63b3ed; border-color: #63b3ed; } /* Light Blue */
+    .squad-B-event { background-color: #68d391; border-color: #68d391; } /* Light Green */
+    .squad-C-event { background-color: #f6ad55; border-color: #f6ad55; } /* Orange */
+    .squad-D-event { background-color: #fc8181; border-color: #fc8181; } /* Red */
+    .modal {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .modal-hidden {
+        opacity: 0;
+        transform: translateY(-20px);
+        pointer-events: none;
+    }
+    .multi-select-container {
+        position: relative;
+    }
+    .multi-select-dropdown {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 10;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+    }
+    .multi-select-dropdown.open {
+        display: block;
+    }
+    .multi-select-option {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .multi-select-option:hover {
+        background-color: #f3f4f6;
+    }
+    .multi-select-option.selected {
+        background-color: #bfdbfe;
+        font-weight: bold;
+    }
+    .multi-prev-month {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        border-radius: 1rem;
+        font-size: 1.1em;
+        color: #4a5568;
+    }
+    @media (max-width: 768px) {
+        #calendar-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+        .controls-and-legend {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .filters, .legend {
+            width: 100%;
+        }
+        .fc-event {
+            font-size: 0.8em;
+            padding: 3px 6px;
+            margin-bottom: 20px;
+        }
+        .month-nav-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div id="calendar-container">
     <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Shift Schedule Calendar</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="controls-and-legend flex flex-wrap gap-6 mb-6">
         {# Filters Section #}
-        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+        <div class="filters flex-1 min-w-[300px] bg-white p-6 rounded-lg shadow-lg">
             <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">Shift Filters</h3>
             <div class="space-y-4">
-                <div>
+                <div class="multi-select-container">
                     <label for="squadFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Squad:</label>
                     <select id="squadFilter" class="form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <option value="">All Squads</option>
@@ -35,43 +169,31 @@
                     <button id="resetFilters" class="px-5 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition ease-in-out duration-150 text-sm">
                         Reset Filters
                     </button>
-                    {# Removed: Export CSV Button #}
-                    {# Removed: Export Full Calendar (ICS) & Print Button #}
                 </div>
             </div>
         </div>
 
         {# Squad Colors Legend Section #}
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="legend flex-1 min-w-[250px] bg-white p-6 rounded-lg shadow-lg">
             <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">Squad Colors Legend</h3>
             <div class="space-y-3">
+                {% for squad, color in squad_color_map.items %}
                     <div class="flex items-center">
-                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #63b3ed;"></div>
-                        <span class="text-base text-gray-700 font-medium">Squad A</span>
+                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: {{ color }};"></div>
+                        <span class="text-base text-gray-700 font-medium">Squad {{ squad }}</span>
                     </div>
-                    <div class="flex items-center">
-                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #68d391;"></div>
-                        <span class="text-base text-gray-700 font-medium">Squad B</span>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #f6ad55;"></div>
-                        <span class="text-base text-gray-700 font-medium">Squad C</span>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #fc8181;"></div>
-                        <span class="text-base text-gray-700 font-medium">Squad D</span>
-                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 
-    {# Main Calendar Container #}
+    {# Main Calendar #}
     <div id="calendar" class="bg-white p-6 rounded-lg shadow-xl relative min-h-[600px]">
         {# FullCalendar will render here #}
     </div>
 
     {# Loading Overlay #}
-    <div id="loadingOverlay" class="fixed inset-0 bg-gray-200 bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+    <div id="loadingOverlay" class="loading-overlay opacity-0 pointer-events-none">
         <div class="flex flex-col items-center p-4 bg-white rounded-lg shadow-xl">
             <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -82,8 +204,8 @@
     </div>
 
     {# Event Details Modal #}
-    <div id="eventModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-[100] transition-opacity duration-300 opacity-0 pointer-events-none">
-        <div class="modal-content bg-white rounded-lg shadow-2xl p-8 w-full max-w-lg transform -translate-y-4 opacity-0 transition-all duration-300 ease-in-out">
+    <div id="eventModal" class="modal modal-hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-[100]">
+        <div class="modal-content bg-white rounded-lg shadow-2xl p-8 w-full max-w-lg">
             <h2 class="text-2xl font-bold text-gray-900 mb-5 border-b pb-3">Shift Details</h2>
             <div class="space-y-3 text-base text-gray-700">
                 <p><strong>Squad:</strong> <span id="modalSquad" class="font-semibold"></span></p>
@@ -106,38 +228,30 @@
 <script src="https://unpkg.com/tippy.js@6"></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
-<script src="https://unpkg.com/vanilla-select-box@latest/dist/vanillaSelectBox.min.js"></script>
+{% comment %} <script src="https://unpkg.com/vanilla-select-box@latest/dist/vanillaSelectBox.min.js"></script> {% endcomment %}
 
-{# Your custom JavaScript modules (ensure paths are correct relative to your staticfiles setup) #}
+{# Custom JavaScript #}
 <script type="module" src="{% static 'shiftmanagement/js/main.js' %}"></script>
 
-{# Inline JS for Modal & Loading Overlay toggling (alternative to dedicated JS if preferred, but usually better in JS files) #}
+{# Inline JavaScript for Modal and Loading Overlay #}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Handle modal display with transitions
         const eventModal = document.getElementById('eventModal');
         const modalContent = eventModal.querySelector('.modal-content');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         window.showEventModal = function() {
-            eventModal.classList.remove('opacity-0', 'pointer-events-none');
-            eventModal.classList.add('opacity-100');
-            modalContent.classList.remove('-translate-y-4', 'opacity-0');
-            modalContent.classList.add('translate-y-0', 'opacity-100');
+            eventModal.classList.remove('modal-hidden');
+            modalContent.classList.remove('transform', 'translateY(-20px)', 'opacity-0');
+            modalContent.classList.add('opacity-100');
         };
 
         window.hideEventModal = function() {
-            modalContent.classList.remove('translate-y-0', 'opacity-100');
-            modalContent.classList.add('-translate-y-4', 'opacity-0');
-            eventModal.classList.remove('opacity-100');
-            eventModal.classList.add('opacity-0');
-            // Give time for transition before hiding completely
+            modalContent.classList.add('transform', 'translateY(-20px)', 'opacity-0');
             setTimeout(() => {
-                eventModal.classList.add('pointer-events-none');
-            }, 300); 
+                eventModal.classList.add('modal-hidden');
+            }, 300);
         };
-
-        // Handle loading overlay display with transitions
-        const loadingOverlay = document.getElementById('loadingOverlay');
 
         window.showLoading = function() {
             loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
@@ -146,11 +260,7 @@
 
         window.hideLoading = function() {
             loadingOverlay.classList.remove('opacity-100');
-            loadingOverlay.classList.add('opacity-0');
-            // Give time for transition before hiding completely
-            setTimeout(() => {
-                loadingOverlay.classList.add('pointer-events-none');
-            }, 300);
+            loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
         };
     });
 </script>

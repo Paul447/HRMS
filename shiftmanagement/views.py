@@ -54,8 +54,7 @@ class CalendarEventViewSet(viewsets.ViewSet):
         squad_id_param = request.query_params.get('squad_id')
         all_events_for_year_flag = request.query_params.get('all_events') == 'true'
 
-        print(f"\n--- API Request Debug ---")
-        print(f"Received year_param: {year_param}, month_param: {month_param}, squad_id_param: {squad_id_param}, all_events_for_year_flag: {all_events_for_year_flag}")
+        
 
         current_year = None
         current_month = None
@@ -123,8 +122,7 @@ class CalendarEventViewSet(viewsets.ViewSet):
             display_start_date=display_start_date, 
             display_end_date=display_end_date
         )
-        print(f"Generated calendar_events count: {len(calendar_events)}")
-        print(f"--- API Request Debug End ---\n")
+       
 
         next_month_dt = self.local_tz.localize(datetime(current_year, current_month, 1)) + relativedelta(months=1)
         prev_month_dt = self.local_tz.localize(datetime(current_year, current_month, 1)) - relativedelta(months=1)
