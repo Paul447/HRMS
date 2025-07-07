@@ -77,11 +77,17 @@ class ShiftPattern:
                 (1 - self.config.BASE_PATTERN[day_index])
         return bool(is_on)
 
-    def get_shift_type(self, squad_code, day_index, is_first_half, day_shift, night_shift):
-        """Determine shift type for a squad."""
+    def get_shift_type(self, squad_code, day_index, days_since_ref, day_shift, night_shift):
+        """Determine shift type for a squad for a 28-day consistent cycle."""
+        # Calculate current 28-day cycle index
+        cycle_number = days_since_ref // 28
+        is_day_shift = (cycle_number % 2 == 0)  # Even cycles = DAY for A & B
+
         if squad_code in ['A', 'B']:
-            return day_shift if is_first_half else night_shift
-        return night_shift if is_first_half else day_shift
+            return day_shift if is_day_shift else night_shift
+        else:  # Squad C & D do opposite shift
+            return night_shift if is_day_shift else day_shift
+
 
 class ShiftGenerationUtils:
     """Helper methods for shift generation."""
@@ -188,10 +194,11 @@ class ShiftGenerator:
                     if not is_on:
                         self.utils.log_debug(f"Squad {squad.name}: OFF on day index {day_index}.")
                         continue
-
+                    days_since_ref = (current_date - self.config.REFERENCE_DATE.date()).days
                     shift_type = self.pattern.get_shift_type(
-                        squad.name, day_index, is_first_half, day_shift, night_shift
+                        squad.name, day_index, days_since_ref, day_shift, night_shift
                     )
+
                     if shift_type.name != slot_type:
                         self.utils.log_debug(f"Squad {squad.name}: Assigned {shift_type.name}, slot is {slot_type}. Skipping.")
                         continue
