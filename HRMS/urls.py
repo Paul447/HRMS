@@ -40,6 +40,7 @@ from timeoff_management.views import ManagerTimeoffApprovalViewSet
 from usertimeoffbalance.views import TimeoffBalanceViewSet
 from decisionedtimeoff.views import DecisionedTimeOffViewSet
 from usermanagement.views import ChangePasswordView
+from shiftmanagement.views import CalendarEventViewSet
 
 
 # IMPORTS YOU NEED TO ADD:
@@ -62,6 +63,7 @@ router.register(r"past-timeoff-requests", PastTimeOffRequestViewSet, basename="p
 router.register(r"manager-timeoff-approval", ManagerTimeoffApprovalViewSet, basename="manager_timeoff_approval")
 router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
 router.register(r"decisioned-timeoff", DecisionedTimeOffViewSet, basename="decisioned_timeoff")
+router.register(r"calendar-events", CalendarEventViewSet, basename="calendar_events")
 
 clock_router = DefaultRouter()
 clock_router.register(r"user-clock-data", UserClockDataAPIView, basename="clock_in_out_get")

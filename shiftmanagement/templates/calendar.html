@@ -1,0 +1,158 @@
+{% extends 'dashboard.html' %}
+
+{% block title %}Shift Schedule Calendar{% endblock %}
+
+{% block page_title %}Shift Schedule Calendar{% endblock %}
+
+{% block content %}
+{% load static %}
+
+{# Assuming your custom CSS is here for dashboard layout, etc. #}
+<link rel="stylesheet" href="{% static 'shiftmanagement/css/dashboard.css' %}">
+
+<div class="calendar-page-wrapper p-4 md:p-6 bg-gray-100 min-h-screen">
+    <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Shift Schedule Calendar</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {# Filters Section #}
+        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">Shift Filters</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="squadFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Squad:</label>
+                    <select id="squadFilter" class="form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <option value="">All Squads</option>
+                        {% for squad in squads %}
+                            <option value="{{ squad.id }}">{{ squad.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button id="applyFilters" class="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition ease-in-out duration-150 text-sm">
+                        Apply Filters
+                    </button>
+                    <button id="resetFilters" class="px-5 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition ease-in-out duration-150 text-sm">
+                        Reset Filters
+                    </button>
+                    {# Removed: Export CSV Button #}
+                    {# Removed: Export Full Calendar (ICS) & Print Button #}
+                </div>
+            </div>
+        </div>
+
+        {# Squad Colors Legend Section #}
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">Squad Colors Legend</h3>
+            <div class="space-y-3">
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #63b3ed;"></div>
+                        <span class="text-base text-gray-700 font-medium">Squad A</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #68d391;"></div>
+                        <span class="text-base text-gray-700 font-medium">Squad B</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #f6ad55;"></div>
+                        <span class="text-base text-gray-700 font-medium">Squad C</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-md mr-3 border border-gray-300" style="background-color: #fc8181;"></div>
+                        <span class="text-base text-gray-700 font-medium">Squad D</span>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    {# Main Calendar Container #}
+    <div id="calendar" class="bg-white p-6 rounded-lg shadow-xl relative min-h-[600px]">
+        {# FullCalendar will render here #}
+    </div>
+
+    {# Loading Overlay #}
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-200 bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="flex flex-col items-center p-4 bg-white rounded-lg shadow-xl">
+            <svg class="animate-spin h-8 w-8 text-blue-600 mb-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-gray-700 font-medium text-lg">Loading Calendar Data...</span>
+        </div>
+    </div>
+
+    {# Event Details Modal #}
+    <div id="eventModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-[100] transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="modal-content bg-white rounded-lg shadow-2xl p-8 w-full max-w-lg transform -translate-y-4 opacity-0 transition-all duration-300 ease-in-out">
+            <h2 class="text-2xl font-bold text-gray-900 mb-5 border-b pb-3">Shift Details</h2>
+            <div class="space-y-3 text-base text-gray-700">
+                <p><strong>Squad:</strong> <span id="modalSquad" class="font-semibold"></span></p>
+                <p><strong>Shift Type:</strong> <span id="modalShiftType" class="font-semibold"></span></p>
+                <p><strong>Start Time:</strong> <span id="modalStart" class="font-semibold"></span></p>
+                <p><strong>End Time:</strong> <span id="modalEnd" class="font-semibold"></span></p>
+                <p><strong>Assigned Employees:</strong> <span id="modalEmployees" class="font-semibold"></span></p>
+            </div>
+            <div class="mt-8 text-right">
+                <button id="closeModal" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition ease-in-out duration-150">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# External JavaScript Libraries #}
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
+<script src="https://unpkg.com/vanilla-select-box@latest/dist/vanillaSelectBox.min.js"></script>
+
+{# Your custom JavaScript modules (ensure paths are correct relative to your staticfiles setup) #}
+<script type="module" src="{% static 'shiftmanagement/js/main.js' %}"></script>
+
+{# Inline JS for Modal & Loading Overlay toggling (alternative to dedicated JS if preferred, but usually better in JS files) #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle modal display with transitions
+        const eventModal = document.getElementById('eventModal');
+        const modalContent = eventModal.querySelector('.modal-content');
+
+        window.showEventModal = function() {
+            eventModal.classList.remove('opacity-0', 'pointer-events-none');
+            eventModal.classList.add('opacity-100');
+            modalContent.classList.remove('-translate-y-4', 'opacity-0');
+            modalContent.classList.add('translate-y-0', 'opacity-100');
+        };
+
+        window.hideEventModal = function() {
+            modalContent.classList.remove('translate-y-0', 'opacity-100');
+            modalContent.classList.add('-translate-y-4', 'opacity-0');
+            eventModal.classList.remove('opacity-100');
+            eventModal.classList.add('opacity-0');
+            // Give time for transition before hiding completely
+            setTimeout(() => {
+                eventModal.classList.add('pointer-events-none');
+            }, 300); 
+        };
+
+        // Handle loading overlay display with transitions
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        window.showLoading = function() {
+            loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            loadingOverlay.classList.add('opacity-100');
+        };
+
+        window.hideLoading = function() {
+            loadingOverlay.classList.remove('opacity-100');
+            loadingOverlay.classList.add('opacity-0');
+            // Give time for transition before hiding completely
+            setTimeout(() => {
+                loadingOverlay.classList.add('pointer-events-none');
+            }, 300);
+        };
+    });
+</script>
+
+{% endblock %}

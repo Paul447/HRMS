@@ -1,0 +1,132 @@
+body {
+    font-family: 'Inter', sans-serif; /* Assuming Inter font is imported or a system fallback is desired */
+    margin: 0;
+    padding: 0;
+    background-color: #f3f4f6;
+}
+#calendar-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
+}
+.fc-event {
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 15px; /* This was causing spacing issues in month view, might need adjustment */
+}
+.fc-timegrid-event .fc-event-main {
+    padding: 4px 8px;
+    margin-bottom: 10px;
+}
+.fc-button {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+.fc-button:hover {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+.fc-daygrid-more-link {
+    color: #3b82f6 !important;
+    font-size: 0.85em;
+}
+.fc-daygrid-more-link:hover {
+    text-decoration: underline;
+}
+/* Update squad colors to match the backend's new ones for consistency */
+.squad-A-event { background-color: #63b3ed; border-color: #63b3ed; } /* Light Blue */
+.squad-B-event { background-color: #68d391; border-color: #68d391; } /* Light Green */
+.squad-C-event { background-color: #f6ad55; border-color: #f6ad55; } /* Orange */
+.squad-D-event { background-color: #fc8181; border-color: #fc8181; } /* Red */
+.modal {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.modal-hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+.multi-select-container {
+    position: relative;
+}
+.multi-select-dropdown {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none; /* Hidden by default */
+}
+.multi-select-dropdown.open {
+    display: block; /* Shown when 'open' class is added */
+}
+.multi-select-option {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.multi-select-option:hover {
+    background-color: #f3f4f6;
+}
+.multi-select-option.selected {
+    background-color: #bfdbfe; /* Light blue for selected items */
+    font-weight: bold;
+}
+.multi-prev-month {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border-radius: 1rem;
+    font-size: 1.1em;
+    color: #4a5568;
+}
+@media (max-width: 768px) {
+    #calendar-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    .controls-and-legend {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .filters, .legend {
+        width: 100%;
+    }
+    .fc-event {
+        font-size: 0.8em;
+        padding: 3px 6px;
+        margin-bottom: 20px; /* This was causing spacing issues in month view, might need adjustment */
+    }
+    .month-nav-buttons {
+        flex-direction: column;
+    }
+}
