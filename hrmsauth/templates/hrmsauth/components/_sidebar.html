@@ -246,6 +246,17 @@
                     <span>On Shift</span>
                 </a>
             </div>
+
+            <a href="{% url 'shiftmanagement:shift_calendar_view' %}"
+                class="flex items-center space-x-3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Shift</span>
+            </a>
         </div>
 
         <form action="{% url 'logout' %}" method="POST" class="w-full">

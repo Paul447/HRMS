@@ -6,5 +6,5 @@ from . import views
 app_name = 'shiftmanagement'
 
 urlpatterns = [
-    path('calendar/', views.ShiftCalendarView.as_view(), name='calendar'),
+    path('calendar/', views.ShiftCalendarView.as_view(), name='shift_calendar_view'),
 ]

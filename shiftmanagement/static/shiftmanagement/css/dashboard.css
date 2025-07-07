@@ -1,9 +1,3 @@
-body {
-    font-family: 'Inter', sans-serif; /* Assuming Inter font is imported or a system fallback is desired */
-    margin: 0;
-    padding: 0;
-    background-color: #f3f4f6;
-}
 #calendar-container {
     max-width: 1400px;
     margin: 2rem auto;
