@@ -34,5 +34,19 @@ def unverified_verified_update():
                 f"Unverified Sick Balance: {sickleavebalance.unverified_sick_balance}, "
                 f"Verified Sick Balance: {sickleavebalance.verified_sick_balance}"
             )
+def reset_used_family_verified_sick_leave():
+    """
+    Reset the used family verified sick leave balances for all users.
+    This function is intended to be run monthly.
+    """
+    try:
+        sickleavebalances = SickLeaveBalance.objects.all()
+        for sickleavebalance in sickleavebalances:
+            sickleavebalance.used_FVSL = Decimal('0.00')
+            sickleavebalance.save()
+            logger.info(f"Reset used family verified sick leave for {sickleavebalance.user.username}")
+    except Exception as e:
+        logger.error(f"Error resetting used family verified sick leave: {e}")
+        raise ValidationError("Failed to reset used family verified sick leave balances.") from e
 
 

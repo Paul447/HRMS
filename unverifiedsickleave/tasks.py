@@ -27,3 +27,18 @@ def update_unverified_verified_sick_leave():
     else: 
         logger.error(f"Skipping sick leave update for {today} as it is not a biweekly date since {reference_date}. Days since: {days_since}")
 
+@shared_task
+def reset_used_family_verified_sick_leave():
+    """
+    Task to reset used family verified sick leave balances.
+    
+    This task is intended to be run monthly to reset the used family verified sick leave balances.
+    """
+    logger.info("Starting reset of used family verified sick leave balances.")
+    try:
+        from .utils import reset_used_family_verified_sick_leave
+        reset_used_family_verified_sick_leave()
+        logger.info("Successfully reset used family verified sick leave balances.")
+    except Exception as e:
+        logger.error(f"Error resetting used family verified sick leave balances: {e}")
+

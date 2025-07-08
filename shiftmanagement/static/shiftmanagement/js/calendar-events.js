@@ -65,4 +65,4 @@ export function resetFilters() {
     DOMElements.squadFilter.value = '';
     // Removed employee filter reset
     applyFilters();
-}g
+}
