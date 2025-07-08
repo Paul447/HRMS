@@ -1,6 +1,4 @@
-// static/js/calendar-renderer.js
-
-import { DOMElements } from './dom-elements.js'; // Keep DOMElements import
+import { DOMElements } from './dom-elements.js';
 import { formatModalDate, getEmployeeDisplayNames } from './utils.js';
 import { fetchEvents } from './calendar-events.js';
 
@@ -101,11 +99,9 @@ export function renderCalendar(eventsToDisplay) {
             });
         },
         eventClick: function(info) {
-            // Call the global showEventModalDetails, which in turn uses window.showEventModal()
             window.showEventModalDetails(info.event.extendedProps, info.event.start, info.event.end);
         },
         loading: function(isLoading) {
-            // Call the global showLoading/hideLoading functions
             isLoading ? window.showLoading() : window.hideLoading();
         },
         datesSet: function(dateInfo) {
@@ -121,16 +117,6 @@ export function renderCalendar(eventsToDisplay) {
     calendarInstance.render();
 }
 
-// showEventModalDetails remains as an export for calendar-events.js to call it
-// It in turn calls the global window.showEventModal()
-export function showEventModalDetails(extendedProps, start, end) {
-    DOMElements.modalSquad.textContent = extendedProps.squad_name || 'N/A';
-    DOMElements.modalShiftType.textContent = extendedProps.shift_type || 'N/A';
-    DOMElements.modalStart.textContent = formatModalDate(start);
-    DOMElements.modalEnd.textContent = formatModalDate(end);
-    DOMElements.modalEmployees.textContent = getEmployeeDisplayNames(extendedProps.employee_names);
-    window.showEventModal(); // This calls the global function defined in calendar.html
-}
 window.showEventModalDetails = function(extendedProps, start, end) {
     DOMElements.modalSquad.textContent = extendedProps.squad_name || 'N/A';
     DOMElements.modalShiftType.textContent = extendedProps.shift_type || 'N/A';

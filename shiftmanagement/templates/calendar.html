@@ -7,12 +7,7 @@
 {% block content %}
 {% load static %}
 
-{# Include FullCalendar CSS for core styling #}
-<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' />
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-{% comment %} <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/> {% endcomment %}
-
-{# Inline CSS to adapt to base application's styles #}
+{# Inline critical CSS for immediate layout #}
 <style>
     #calendar-container {
         max-width: 1400px;
@@ -22,21 +17,6 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         padding: 2rem;
         position: relative;
-    }
-    .fc-event {
-        font-size: 0.9em;
-        padding: 4px 8px;
-        border-radius: 6px;
-        line-height: 1.5;
-        cursor: pointer;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 15px;
-    }
-    .fc-timegrid-event .fc-event-main {
-        padding: 4px 8px;
-        margin-bottom: 10px;
     }
     .fc-button {
         background-color: #3b82f6 !important;
@@ -48,18 +28,6 @@
         background-color: #2563eb !important;
         border-color: #2563eb !important;
     }
-    .fc-daygrid-more-link {
-        color: #3b82f6 !important;
-        font-size: 0.85em;
-    }
-    .fc-daygrid-more-link:hover {
-        text-decoration: underline;
-    }
-    /* Squad colors matching backend's squad_color_map */
-    .squad-A-event { background-color: #63b3ed; border-color: #63b3ed; } /* Light Blue */
-    .squad-B-event { background-color: #68d391; border-color: #68d391; } /* Light Green */
-    .squad-C-event { background-color: #f6ad55; border-color: #f6ad55; } /* Orange */
-    .squad-D-event { background-color: #fc8181; border-color: #fc8181; } /* Red */
     .modal {
         transition: opacity 0.3s ease, transform 0.3s ease;
     }
@@ -67,42 +35,6 @@
         opacity: 0;
         transform: translateY(-20px);
         pointer-events: none;
-    }
-    .multi-select-container {
-        position: relative;
-    }
-    .multi-select-dropdown {
-        position: absolute;
-        background-color: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        z-index: 10;
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        display: none;
-    }
-    .multi-select-dropdown.open {
-        display: block;
-    }
-    .multi-select-option {
-        padding: 0.5rem 0.75rem;
-        cursor: pointer;
-        font-size: 0.9em;
-    }
-    .multi-select-option:hover {
-        background-color: #f3f4f6;
-    }
-    .multi-select-option.selected {
-        background-color: #bfdbfe;
-        font-weight: bold;
-    }
-    .multi-prev-month {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 1rem;
     }
     .loading-overlay {
         position: absolute;
@@ -131,16 +63,18 @@
         .filters, .legend {
             width: 100%;
         }
-        .fc-event {
-            font-size: 0.8em;
-            padding: 3px 6px;
-            margin-bottom: 20px;
-        }
         .month-nav-buttons {
             flex-direction: column;
         }
     }
 </style>
+
+{# External CSS Libraries - FullCalendar CSS is critical, Tippy.js CSS can be deferred #}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" media="print" onload="this.media='all'"/>
+{# Externalize custom CSS #}
+<link rel="stylesheet" href="{% static 'shiftmanagement/css/calendar-styles.css' %}">
+
 
 <div id="calendar-container">
     <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Shift Schedule Calendar</h1>
@@ -221,7 +155,7 @@
     </div>
 </div>
 
-{# External JavaScript Libraries #}
+{# External JavaScript Libraries - Deferred #}
 <script src="https://unpkg.com/@popperjs/core@2" defer></script>
 <script src="https://unpkg.com/tippy.js@6" defer></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js' defer></script>
@@ -231,7 +165,7 @@
 {# Custom JavaScript #}
 <script type="module" src="{% static 'shiftmanagement/js/main.js' %}"></script>
 
-{# Inline JavaScript for Modal and Loading Overlay #}
+{# Inline JavaScript for Modal and Loading Overlay - essential functions #}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const eventModal = document.getElementById('eventModal');

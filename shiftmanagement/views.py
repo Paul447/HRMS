@@ -11,7 +11,7 @@ import pytz
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
-class ShiftCalendarView(LoginRequiredMixin, TemplateView):
+class ShiftCalendarView(TemplateView):
     template_name = 'calendar.html'
 
     def get_context_data(self, **kwargs):

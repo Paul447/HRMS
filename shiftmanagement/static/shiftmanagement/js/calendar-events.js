@@ -1,8 +1,5 @@
-// static/js/calendar-events.js
-
-// Removed showLoading, hideLoading from import list
 import { DOMElements } from './dom-elements.js';
-import { getSelectedEmployees, setSelectedEmployees } from './multi-select.js';
+// Removed multi-select specific imports as employeeFilter is not present
 import { renderCalendar } from './calendar-renderer.js';
 
 export let allEvents = [];
@@ -14,14 +11,13 @@ export let paginationData = {};
  * @param {number} month
  */
 export async function fetchEvents(year, month) {
-    // window.showLoading(); // Call the global function
+    window.showLoading(); // Call the global function
     try {
         const response = await fetch(`/api/calendar-events/?year=${year}&month=${month}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        
 
         allEvents = data.calendar_events.map(event => ({
             ...event,
@@ -30,9 +26,10 @@ export async function fetchEvents(year, month) {
                 employee_names: Array.isArray(event.extendedProps.employee_names)
                     ? event.extendedProps.employee_names
                     : (event.extendedProps.employee_names ? [event.extendedProps.employee_names] : []),
-                employee_ids: Array.isArray(event.extendedProps.employee_ids)
-                    ? event.extendedProps.employee_ids.map(String)
-                    : (event.extendedProps.employee_ids ? [String(event.extendedProps.employee_ids)] : [])
+                // Employee IDs are not used for filtering anymore without the multi-select
+                // employee_ids: Array.isArray(event.extendedProps.employee_ids)
+                //     ? event.extendedProps.employee_ids.map(String)
+                //     : (event.extendedProps.employee_ids ? [String(event.extendedProps.employee_ids)] : [])
             }
         }));
         paginationData = data.pagination;
@@ -50,13 +47,13 @@ export async function fetchEvents(year, month) {
  */
 export function applyFilters() {
     const selectedSquadId = DOMElements.squadFilter.value;
-    const selectedEmployees = getSelectedEmployees();
+    // Removed employee filtering as multi-select is not present
+    // const selectedEmployees = getSelectedEmployees();
 
     const filteredEvents = allEvents.filter(event => {
         const matchesSquad = !selectedSquadId || String(event.extendedProps.squad_id) === selectedSquadId;
-        const matchesEmployee = selectedEmployees.length === 0 ||
-            event.extendedProps.employee_ids?.some(id => selectedEmployees.includes(id));
-        return matchesSquad && matchesEmployee;
+        // Only squad filter remains
+        return matchesSquad;
     });
     renderCalendar(filteredEvents);
 }
@@ -66,6 +63,6 @@ export function applyFilters() {
  */
 export function resetFilters() {
     DOMElements.squadFilter.value = '';
-    setSelectedEmployees([]);
+    // Removed employee filter reset
     applyFilters();
-}
+}g

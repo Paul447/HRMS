@@ -77,7 +77,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS to send header
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_TRUSTED_ORIGINS = ["https://5f52-2600-6c40-1cf0-9130-d4e2-5500-3515-ce.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS = ['https://f011c68f097f.ngrok-free.app',]
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Human Resource Management System API",

@@ -1,5 +1,3 @@
-// static/js/utils.js
-
 /**
  * Formats a date string for display in the modal.
  * @param {string} dateString - The date string (e.g., ISO 8601).
@@ -22,5 +20,3 @@ export const getEmployeeDisplayNames = (employeeNames) => {
         ? employeeNames.join(', ')
         : 'N/A';
 };
-
-// --- generateICS function removed ---

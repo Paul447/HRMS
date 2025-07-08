@@ -1,0 +1,63 @@
+.fc-event {
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 15px;
+}
+.fc-timegrid-event .fc-event-main {
+    padding: 4px 8px;
+    margin-bottom: 10px;
+}
+.fc-daygrid-more-link {
+    color: #3b82f6 !important;
+    font-size: 0.85em;
+}
+.fc-daygrid-more-link:hover {
+    text-decoration: underline;
+}
+/* Squad colors matching backend's squad_color_map */
+.squad-A-event { background-color: #63b3ed; border-color: #63b3ed; } /* Light Blue */
+.squad-B-event { background-color: #68d391; border-color: #68d391; } /* Light Green */
+.squad-C-event { background-color: #f6ad55; border-color: #f6ad55; } /* Orange */
+.squad-D-event { background-color: #fc8181; border-color: #fc8181; } /* Red */
+.multi-select-container {
+    position: relative;
+}
+.multi-select-dropdown {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+.multi-select-dropdown.open {
+    display: block;
+}
+.multi-select-option {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.multi-select-option:hover {
+    background-color: #f3f4f6;
+}
+.multi-select-option.selected {
+    background-color: #bfdbfe;
+    font-weight: bold;
+}
+.multi-prev-month {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
