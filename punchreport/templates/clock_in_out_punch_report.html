@@ -49,7 +49,12 @@
         </div>
     </div>
 
-
-{% load static %}
-<script type="module" src="{% static 'punchreport/js/timeclock_punch.js' %}"></script>
+    {% comment %}
+        Load excel.min.js via CDN ONLY on this page.
+        Ensure you use the correct CDN URL for your specific library (e.g., SheetJS).
+        The 'defer' and 'crossorigin' attributes are important.
+    {% endcomment %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" defer crossorigin></script>
+    {% load static %}
+    <script type="module" src="{% static 'punchreport/js/timeclock_punch.js' %}" defer></script>
 {% endblock %}

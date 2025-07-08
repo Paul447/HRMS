@@ -31,16 +31,5 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("Element with ID 'closeModal' not found.");
     }
 
-    // Setup multi-select only if the element and vanillaSelectBox are available
-    // if (DOMElements.employeeFilter) {
-    //     if (typeof window.vanillaSelectBox === 'function') {
-    //         setupMultiSelect(window.vanillaSelectBox); // Pass the constructor
-    //     } else {
-    //         console.error("vanillaSelectBox library not loaded or not a constructor. Employee multi-select not initialized.");
-    //     }
-    // } else {
-    //     console.warn("Element with ID 'employeeFilter' not found. Multi-select not initialized.");
-    // }
-
     fetchEvents(currentYear, currentMonth);
 });

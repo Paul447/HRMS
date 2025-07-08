@@ -10,9 +10,7 @@
 {# Include FullCalendar CSS for core styling #}
 <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' />
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-<link href='https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css' rel='stylesheet' />
-<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/>
-{% comment %} <link rel="stylesheet" href="{% static 'shiftmanagement/css/dashboard.css' %}"> {% endcomment %}
+{% comment %} <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/> {% endcomment %}
 
 {# Inline CSS to adapt to base application's styles #}
 <style>
@@ -224,11 +222,11 @@
 </div>
 
 {# External JavaScript Libraries #}
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://unpkg.com/tippy.js@6"></script>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js'></script>
-{% comment %} <script src="https://unpkg.com/vanilla-select-box@latest/dist/vanillaSelectBox.min.js"></script> {% endcomment %}
+<script src="https://unpkg.com/@popperjs/core@2" defer></script>
+<script src="https://unpkg.com/tippy.js@6" defer></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js' defer></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js' defer></script>
+
 
 {# Custom JavaScript #}
 <script type="module" src="{% static 'shiftmanagement/js/main.js' %}"></script>
