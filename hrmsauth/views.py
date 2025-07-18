@@ -16,8 +16,15 @@ from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from department.models import UserProfile
+from rest_framework.request import Request
+from django.http import HttpResponse
+from rest_framework.viewsets import ReadOnlyModelViewSet
+from .throttles import LoginRateThrottle
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsUnauthenticated
 
 
 # from .serializer import (
@@ -42,28 +49,42 @@ COOKIE_SETTINGS = {"httponly": True, "secure": not settings.DEBUG, "samesite": "
 # -----------------------------
 
 
+
 class TokenObtainPairView(TokenObtainPairView):
     """
     Custom login view using SimpleJWT.
     Stores access and refresh tokens in HttpOnly cookies.
+    Applies login throttling.
     """
+    permission_classes = [IsUnauthenticated]  # Ensure only unauthenticated users can access this view
+    throttle_classes = [LoginRateThrottle]
 
     @method_decorator(csrf_protect, name="dispatch")
     def post(self, request, *args, **kwargs):
+        # Check throttling before processing login
+        for throttle in self.get_throttles():
+            if not throttle.allow_request(request, self):
+                logger.warning(f"Throttled login attempt from IP: {request.META.get('REMOTE_ADDR')}")
+                self.throttled(request, throttle.wait())
+
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             access = serializer.validated_data.get("access")
             refresh = serializer.validated_data.get("refresh")
-            response = redirect("/auth/dashboard/")
 
-            # Set cookies
-            response.set_cookie("hjjlzz_avrlu", access, **COOKIE_SETTINGS, max_age=900)  # 15 min
-            response.set_cookie("ylmylzo_avrlu", refresh, **COOKIE_SETTINGS, max_age=604800)  # 7 days
+            response = Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+            response.set_cookie("hjjlzz_avrlu", access, **COOKIE_SETTINGS, max_age=900)      # 15 minutes
+            response.set_cookie("ylmylzo_avrlu", refresh, **COOKIE_SETTINGS, max_age=604800) # 7 days
+
             return response
-        except Exception:
-            messages.error(request, "Invalid username or password.")
-            return redirect("/auth/login/")
+
+        except Exception as e:
+            logger.info(f"Failed login attempt: {str(e)} from IP: {request.META.get('REMOTE_ADDR')}")
+            return Response(
+                {"detail": "Invalid username or password."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
 
 # -----------------------------
@@ -91,7 +112,8 @@ class LogoutView(APIView):
     pass
 
 
-class UserInfoViewSet(ViewSet):
+
+class UserInfoViewSet(ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):  # routers use `list` for GET /user-info/
@@ -121,8 +143,12 @@ class IsSuperUser(BasePermission):
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 class FrontendLoginView(APIView):
-    def get(self, request):
-        return render(request, "login.html")
+    def get(self, request: Request) -> HttpResponse:
+        try:
+            return render(request, "login.html")
+        except Exception as e:
+            # Optional: Log the error if needed
+            return Response({"error": "Unable to load login page"}, status=500)
 
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')

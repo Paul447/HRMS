@@ -22,7 +22,6 @@ CELERY_RESULT_BACKEND = 'django-db'  # Store results in DB
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -37,93 +36,223 @@ APP_DIRS = True
 
 # Application definition
 
-INSTALLED_APPS = ["django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles", "django_extensions", "rest_framework", "rest_framework_simplejwt", "rest_framework_simplejwt.token_blacklist", "corsheaders", "payfrequency", "employeetype", "yearofexperience", "accuralrates", "ptobalance", "timeclock", "biweeklycron", "drf_spectacular", "hrmsauth", "department", "leavetype", "payperiod", "holiday", "punchreport", "onshift", "timeoff_management", "adminorganizer", "deptleaves", "allowipaddress", "notificationapp", "sickpolicy", "unverifiedsickleave", "timeoffreq", "usertimeoffbalance", "decisionedtimeoff","usermanagement", "django_filters", "django_celery_beat",
-    "django_celery_results","shiftmanagement"]
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_extensions",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
+    "payfrequency",
+    "employeetype",
+    "yearofexperience",
+    "accuralrates",
+    "ptobalance",
+    "timeclock",
+    "biweeklycron",
+    "drf_spectacular",
+    "hrmsauth",
+    "department",
+    "leavetype",
+    "payperiod",
+    "holiday",
+    "punchreport",
+    "onshift",
+    "timeoff_management",
+    "adminorganizer",
+    "deptleaves",
+    "allowipaddress",
+    "notificationapp",
+    "sickpolicy",
+    "unverifiedsickleave",
+    "timeoffreq",
+    "usertimeoffbalance",
+    "decisionedtimeoff",
+    "usermanagement",
+    "django_filters",
+    "django_celery_beat",
+    "django_celery_results",
+    "shiftmanagement",
+    "ipware",
+]
+
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+IPWARE_TRUSTED_PROXIES = ["127.0.0.1"]
+
+# Enable safe IP lookup order
+IPWARE_META_PRECEDENCE_ORDER = (
+    "HTTP_X_FORWARDED_FOR",
+    "REMOTE_ADDR",
+)
+
+# Optional: Log a warning if spoofing is detected
+IPWARE_PROXY_COUNT = 1 
+print("IPWARE_TRUSTED_PROXIES:", IPWARE_TRUSTED_PROXIES)
+
+
+# 3. If your proxy sets X-Forwarded-Host and you want Django to use it for request.get_host()
+USE_X_FORWARDED_HOST = True
+
 COMPANY_NAME = "University Police Department"
-# settings.py
+
 HTML_MINIFY = True
+
 SPECTACULAR_SETTINGS = {
     "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
     "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
     "REDOC_DIST": "SIDECAR",
     # OTHER SETTINGS
 }
-MIDDLEWARE = ["django.middleware.security.SecurityMiddleware", "django.contrib.sessions.middleware.SessionMiddleware", "django.middleware.common.CommonMiddleware", "django.middleware.csrf.CsrfViewMiddleware", "django.contrib.auth.middleware.AuthenticationMiddleware", "django.contrib.messages.middleware.MessageMiddleware", "django.middleware.clickjacking.XFrameOptionsMiddleware", "HRMS.jwt_auth_middleware.logout_middleware.LogoutMiddleware", "HRMS.jwt_auth_middleware.auth_status_middleware.AuthStatusMiddleware", "HRMS.jwt_auth_middleware.token_refresh_middleware.TokenRefreshMiddleware", "HRMS.timeclock_security.middleware.IPAddressRestrictionMiddleware"]  # Must run early to handle logout path  # Sets up auth header for DRF  #  # Custom middleware for time clock
-MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
+
+MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # inserted at index 0
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "HRMS.jwt_auth_middleware.logout_middleware.LogoutMiddleware",
+    "HRMS.jwt_auth_middleware.auth_status_middleware.AuthStatusMiddleware",
+    "HRMS.jwt_auth_middleware.token_refresh_middleware.TokenRefreshMiddleware",
+    "HRMS.timeclock_security.middleware.IPAddressRestrictionMiddleware",
+]  # Must run early to handle logout path and auth setup
+
 CORS_ALLOW_ALL_ORIGINS = True
 
-
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    # 'DEFAULT_RENDERER_CLASSES': [
-    # 'rest_framework.renderers.JSONRenderer',
-    # ]
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',  # For unauthenticated users
+        'rest_framework.throttling.UserRateThrottle',  # For authenticated users
+    ],
+    # Uncomment and customize throttle rates if needed
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '100/hour',
+        'login': '5/minute',  # Custom throttle for login attempts
+    }
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587  # Common ports: 587 (TLS), 465 (SSL)
-EMAIL_USE_TLS = True  # Use TLS (Transport Layer Security) for encryption
-EMAIL_USE_SSL = False  # Use SSL (Secure Sockets Layer) for encryption
-EMAIL_HOST_USER = "pandeysubesh137@gmail.com"  # e.g., your email address if using Gmail
-EMAIL_HOST_PASSWORD = "sagr tmhd haar bber"  #
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = "pandeysubesh137@gmail.com"
+EMAIL_HOST_PASSWORD = "sagr tmhd haar bber"  # <-- Consider using environment variables for security
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 
 CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS to send header
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_TRUSTED_ORIGINS = ['https://f011c68f097f.ngrok-free.app',]
+CSRF_TRUSTED_ORIGINS = ['https://2c15dd26add0.ngrok-free.app']
 
-SPECTACULAR_SETTINGS = {
+SPECTACULAR_SETTINGS.update({
     "TITLE": "Human Resource Management System API",
     "DESCRIPTION": "Your project description",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+})
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=1440),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_COOKIE": "hjjlzz_avrlu",
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "UPDATE_LAST_LOGIN": True,
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "BLACKLIST_ENABLED": True,
 }
 
-
-SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(minutes=15), "REFRESH_TOKEN_LIFETIME": timedelta(minutes=1440), "ROTATE_REFRESH_TOKENS": True, "BLACKLIST_AFTER_ROTATION": True, "AUTH_HEADER_TYPES": ("Bearer",), "AUTH_COOKIE": "hjjlzz_avrlu", "AUTH_COOKIE_HTTP_ONLY": True, "UPDATE_LAST_LOGIN": True, "USER_ID_FIELD": "id", "USER_ID_CLAIM": "user_id"}  # The field on your User model used as ID  # The claim name in the token for the user ID
 ACCESS_TOKEN_COOKIE_NAME = "hjjlzz_avrlu"
 REFRESH_TOKEN_COOKIE_NAME = "ylmylzo_avrlu"
 
-
 ROOT_URLCONF = "HRMS.urls"
 
-TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates", "DIRS": [], "APP_DIRS": True, "OPTIONS": {"context_processors": ["django.template.context_processors.debug", "django.template.context_processors.request", "django.contrib.auth.context_processors.auth", "django.contrib.messages.context_processors.messages"]}}]
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    }
+]
 
 WSGI_APPLICATION = "HRMS.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.mysql", "NAME": "HRMS", "USER": "root", "PASSWORD": "dpspassword", "HOST": "localhost", "PORT": "3306", "OPTIONS": {"charset": "utf8mb4", "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"}}}
-LOGGING = {"version": 1, "disable_existing_loggers": False, "handlers": {"console": {"class": "logging.StreamHandler"}}, "loggers": {"": {"handlers": ["console"], "level": "DEBUG"}}}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "HRMS",
+        "USER": "root",
+        "PASSWORD": "dpspassword",
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"": {"handlers": ["console"], "level": "DEBUG"}},
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [{"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"}, {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"}, {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"}, {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"}]
-
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "America/chicago"
-
-# USE_I18N = True
+TIME_ZONE = "America/Chicago"
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -131,8 +260,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-print(f"DEBUGGING MEDIA_ROOT: {MEDIA_ROOT}")
 
+print(f"DEBUGGING MEDIA_ROOT: {MEDIA_ROOT}")
 print(f"DEBUG FINAL CHECK: settings.DEBUG is set to {DEBUG}")
 
 # Default primary key field type
