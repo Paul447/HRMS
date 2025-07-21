@@ -141,7 +141,7 @@ REST_FRAMEWORK = {
     # Uncomment and customize throttle rates if needed
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/minute',
-        'user': '100/hour',
+        'user': '300/hour',
         'login': '5/minute',  # Custom throttle for login attempts
     }
 }

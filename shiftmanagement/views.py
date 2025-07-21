@@ -1,5 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from .models import Squad, Employee, SquadShift
@@ -10,40 +8,74 @@ from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from department.models import UserProfile
+from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.response import Response
+from django.shortcuts import redirect
 
-class ShiftCalendarView(TemplateView):
+class IsLawEnforcementDepartment(BasePermission):
+    """
+    Custom permission to only allow users from the Law Enforcement department.
+    """
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            return user_profile.department.name == "Law Enforcement"
+        except UserProfile.DoesNotExist:
+            return False
+
+class ShiftCalendarView(APIView):
     template_name = 'calendar.html'
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated, IsLawEnforcementDepartment]
+    login_url = 'frontend_login'
+
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return Response(context, template_name=self.template_name)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {}
         event_generator = CalendarEventGenerator()
         
         local_tz = pytz.timezone("America/Chicago")
         now = timezone.now().astimezone(local_tz)
-        current_year = now.year
-        current_month = now.month
+        current_year, current_month = now.year, now.month
         
-        start_date_of_month = local_tz.localize(datetime(current_year, current_month, 1, 0, 0, 0))
-        end_date_of_month = start_date_of_month + relativedelta(months=1) - timezone.timedelta(microseconds=1)
+        start_date = local_tz.localize(datetime(current_year, current_month, 1))
+        end_date = start_date + relativedelta(months=1) - timezone.timedelta(microseconds=1)
         
-        initial_shifts_queryset = SquadShift.objects.select_related('squad', 'shift_type').filter(
-            shift_start__lt=end_date_of_month + timezone.timedelta(days=1),
-            shift_end__gt=start_date_of_month - timezone.timedelta(days=1)
+        shifts = SquadShift.objects.select_related('squad', 'shift_type').filter(
+            shift_start__lt=end_date + timezone.timedelta(days=1),
+            shift_end__gt=start_date - timezone.timedelta(days=1)
         ).order_by('shift_start')
 
-        calendar_events = event_generator.generate_calendar_events(
-            initial_shifts_queryset, 
-            display_start_date=start_date_of_month, 
-            display_end_date=end_date_of_month
+        events = event_generator.generate_calendar_events(
+            shifts, display_start_date=start_date, display_end_date=end_date
         )
         
-        context['calendar_events_json'] = json.dumps(calendar_events)
-        context['squads'] = Squad.objects.all().order_by('name')
-        context['employees'] = Employee.objects.select_related('user').order_by('user__first_name', 'user__last_name')
-        context['squad_color_map'] = event_generator.squad_color_map
+        context.update({
+            'calendar_events_json': json.dumps(events),
+            'squads': Squad.objects.all().order_by('name'),
+            'employees': Employee.objects.select_related('user').order_by('user__first_name', 'user__last_name'),
+            'squad_color_map': event_generator.squad_color_map
+        })
         return context
 
+
 class CalendarEventViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsLawEnforcementDepartment]
     local_tz = pytz.timezone("America/Chicago")
 
     def list(self, request):

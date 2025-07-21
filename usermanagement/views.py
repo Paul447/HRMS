@@ -2,8 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.response import Response
+from django.shortcuts import redirect
 
 from .serializer import ChangePasswordSerializer # Import your serializer
 from django.utils.decorators import method_decorator
@@ -43,9 +45,17 @@ class ChangePasswordView(APIView):
 
 @method_decorator(csrf_protect, name='dispatch')
 class ChangePasswordTemplateAPIView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = 'change_password.html'
-
-    def get(self, request):
-        # Render the template for authenticated user
-        return render(request, self.template_name)
+    login_url = 'frontend_login'
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Render the change password template.
+        """
+        return Response(template_name=self.template_name)
