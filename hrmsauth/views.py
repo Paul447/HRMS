@@ -6,16 +6,18 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework import status
 from department.models import UserProfile
 from rest_framework.request import Request
 from django.http import HttpResponse, HttpRequest 
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.renderers import TemplateHTMLRenderer
 from .throttles import LoginRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsUnauthenticated
+from rest_framework.exceptions import NotAuthenticated
 
 
 # from .serializer import (
@@ -145,8 +147,15 @@ class FrontendLoginView(APIView):
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')
 class DashboardView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = "dashboard.html"
+    login_url = "frontend_login"  # Django URL name
 
-    def get(self, request: HttpRequest, *args, **kwargs):
-        return render(request, self.template_name)
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)

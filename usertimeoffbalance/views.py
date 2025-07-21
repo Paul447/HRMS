@@ -9,6 +9,12 @@ from rest_framework import filters
 from timeoff_management.views import IsManagerOfDepartment
 from rest_framework import permissions
 from department.models import UserProfile
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.renderers import TemplateHTMLRenderer
+from django.shortcuts import redirect
+
 
 
 class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
@@ -55,14 +61,25 @@ class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset.none()
 
 
-class TimeOffBalanceTemplate(TemplateView, LoginRequiredMixin):
+class TimeOffBalanceTemplate(APIView):
     """
     A TemplateView for rendering the time-off balance page.
     """
-
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "time_off_balance.html"
     login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+    
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Render the time-off balance template.
+        """
+        return Response(template_name=self.template_name)
+
+

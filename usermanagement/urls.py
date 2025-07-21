@@ -1,4 +1,4 @@
 from django.urls import path
-from usermanagement.views import change_password_template_view
+from usermanagement.views import ChangePasswordTemplateAPIView
 
-urlpatterns = [path('change-password/', change_password_template_view, name='change_password_template'),]
+urlpatterns = [path('change-password/', ChangePasswordTemplateAPIView.as_view(), name='change_password_template'),]

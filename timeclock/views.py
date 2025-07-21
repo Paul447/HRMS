@@ -10,6 +10,8 @@ from django.utils import timezone
 from django.conf import settings
 import pytz
 from rest_framework import viewsets
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import NotAuthenticated
 
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
@@ -19,6 +21,7 @@ from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from decimal import Decimal
 from rest_framework.permissions import BasePermission
 
+from django.shortcuts import render, redirect
 # Import helper functions
 from .utils import get_pay_period_week_boundaries, get_user_weekly_summary
 
@@ -112,12 +115,20 @@ class UserClockDataAPIView(ViewSet):
         return Response({"message": "User clock data retrieved successfully.", "pay_period": PayPeriodSerializerForClockPunchReport(pay_period).data, "week_number": week_number, "week_boundaries": formatted_week_boundaries, **user_data}, status=status.HTTP_200_OK)  # Use the formatted boundaries here  # Unpack user_data directly into the response
 
 
-class UserClockDataFrontendView(TemplateView):
-    template_name = "clock_in_out.html"
+class UserClockDataFrontendView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
+    template_name = "clock_in_out.html"
+    login_url = "frontend_login"  # Django URL name
 
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)
+
 
 
 # TODO: Add the comment field in the clock model and allow users to add comments when clocking in/out, which will let the user know about what is the status.

@@ -1,10 +1,11 @@
 # Punch Report Views.py
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
+from rest_framework.renderers import TemplateHTMLRenderer
 from django.utils import timezone
 from django.conf import settings
 from datetime import datetime
@@ -12,6 +13,7 @@ import pytz
 from django.contrib.auth.models import User
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission
+from rest_framework.exceptions import NotAuthenticated
 from payperiod.models import PayPeriod
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from .utils import get_pay_period_week_boundaries, get_user_weekly_summary
@@ -28,17 +30,23 @@ class IsSuperuser(BasePermission):
         return request.user and request.user.is_superuser
 
 
-class ClockInOutPunchReportView(TemplateView, LoginRequiredMixin):
+class ClockInOutPunchReportView(APIView):
     """
     A view to render the clock in/out punch report page.
     This is a frontend view that will be served to users.
     """
-
-    template_name = "clock_in_out_punch_report.html"
+    renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
+    template_name = "clock_in_out_punch_report.html"
+    login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)
 
 
 class PunchReportViewSet(viewsets.ViewSet):

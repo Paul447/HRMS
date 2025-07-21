@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from rest_framework import permissions
 
@@ -14,6 +14,10 @@ from rest_framework.decorators import action
 from .tasks import send_pto_notification_and_email_task
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied, NotAuthenticated
+from rest_framework.permissions import IsAuthenticated  
+from rest_framework.views import APIView
+from rest_framework.renderers import TemplateHTMLRenderer
 
 logger = logging.getLogger(__name__)
 
@@ -146,19 +150,23 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class TimeOffTemplateView(TemplateView, LoginRequiredMixin):
+class TimeOffTemplateView(APIView):
     """
     Template view for the Time Off Management page.
     This view renders the template for the time off management interface.
     """
-
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "manage_timeoff.html"
-    login_url = "login"
+    login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-        # Manager Time off Management Logic
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)
 
 
 ############################################################################################################################################################################

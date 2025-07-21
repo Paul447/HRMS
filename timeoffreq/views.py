@@ -7,15 +7,17 @@ from .models import TimeoffRequest
 from .serializer import TimeoffRequestSerializerEmployee, TimeoffApproveRejectManager
 from department.models import UserProfile
 from payperiod.models import PayPeriod  # Add this import for PayPeriod
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotAuthenticated
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from leavetype.models import DepartmentBasedLeaveType
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect
 
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model  # Import to get the User model
+from rest_framework.renderers import TemplateHTMLRenderer  # Import for TemplateHTMLRenderer
 
 User = get_user_model()
 
@@ -229,29 +231,45 @@ class DepartmentLeaveTypeDropdownView(APIView):
         return Response(data)
 
 
-class TimeOffRequestView(TemplateView, LoginRequiredMixin):
+class TimeOffRequestView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "timeoff_request.html"
     login_url = "frontend_login"
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
 
-class TimeOffRequestDetailsView(TemplateView, LoginRequiredMixin):
-
+class TimeOffRequestDetailsView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "timeoff_request_view.html"
     login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)   
 
 
-class GetPastTimeOffRequestsView(TemplateView, LoginRequiredMixin):
+class GetPastTimeOffRequestsView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "get_past_timeoff_requests_view.html"
-    login_url = "frontend_login"
+    login_url = "frontend_login"  # Django URL name
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)

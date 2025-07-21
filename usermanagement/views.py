@@ -6,7 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from .serializer import ChangePasswordSerializer # Import your serializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import ensure_csrf_cookie
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class ChangePasswordView(APIView):
     """
     An API endpoint for changing a user's password.
@@ -37,10 +41,11 @@ class ChangePasswordView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@login_required
-def change_password_template_view(request):
-    """
-    Renders the change password HTML template.
-    Requires the user to be logged in.
-    """
-    return render(request, 'change_password.html')
+@method_decorator(csrf_protect, name='dispatch')
+class ChangePasswordTemplateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    template_name = 'change_password.html'
+
+    def get(self, request):
+        # Render the template for authenticated user
+        return render(request, self.template_name)

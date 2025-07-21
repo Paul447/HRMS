@@ -12,6 +12,12 @@ from rest_framework import filters
 from .pagination import DecisionedTimeOffPagination 
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.exceptions import NotAuthenticated
+from django.shortcuts import redirect
+from rest_framework.renderers import TemplateHTMLRenderer
+
 
 class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -67,13 +73,22 @@ class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
 
         return TimeoffRequest.objects.none()
     
-class DecisionedTimeOffViewSetFrontend(TemplateView, LoginRequiredMixin):
+class DecisionedTimeOffViewSetFrontend(APIView):
     """
     A TemplateView for rendering the decisioned time-off page.
     """
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [permissions.IsAuthenticated]
     template_name = "decisioned_timeoff.html"  # Adjust the path to your template
     login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Render the decisioned time-off template.
+        """
+        return Response(template_name=self.template_name)

@@ -13,6 +13,11 @@ from .serializer import UserOnShiftClockSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filter import OnsShiftClockFilter  # Import your custom filter
 
+# Removed incorrect import of IsAuthenticated from django.permissions
+from django.shortcuts import redirect
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.views import APIView
 
 class IsSuperuser(BasePermission):
     """
@@ -46,14 +51,22 @@ class UserClockOnShiftViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class OnShiftFrontendView(TemplateView):
+class OnShiftFrontendView(APIView):
     """
     A frontend view to display users currently on shift.
     """
 
-    template_name = "onshift.html"
     permission_classes = [IsAuthenticated, IsSuperuser]
+    template_name = "onshift.html"
+    renderer_classes = [TemplateHTMLRenderer]
+    login_url = "frontend_login"
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
 
-    def get_context_data(self, **kwargs):
-
-        return super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        """
+        Render the on-shift template.
+        """
+        return Response(template_name=self.template_name)

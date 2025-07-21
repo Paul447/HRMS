@@ -7,9 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import permissions
 from .pagination import DepartmentLeavesPagination
 from rest_framework import filters  # Import filters
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
-from django.core.exceptions import PermissionDenied
+from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import NotAuthenticated
+from django.shortcuts import redirect
+from rest_framework.response import Response
+
 
 
 class IsTimeOffUser(permissions.BasePermission):
@@ -53,10 +57,16 @@ class DepartmentLeavesViewSet(viewsets.ReadOnlyModelViewSet):
         return self.serializer_class.Meta.model.objects.filter(status="approved", requested_leave_type__department=user_profile.department, start_date_time__gte=datetime.now()).order_by("start_date_time")  # Order by start date for better readability
 
 
-class DepartmentTemplateView(TemplateView, LoginRequiredMixin):
+class DepartmentTemplateView(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    permission_classes = [IsAuthenticated]
     template_name = "deptleaves.html"
     login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return redirect(self.login_url)
+        return super().handle_exception(exc)
+
+    def get(self, request, *args, **kwargs):
+        return Response(template_name=self.template_name)
