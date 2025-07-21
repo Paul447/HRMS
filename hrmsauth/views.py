@@ -1,26 +1,17 @@
 # views.py
-
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from django.conf import settings
-from django.shortcuts import redirect
-from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
-from django.urls import reverse
-from rest_framework_simplejwt.tokens import AccessToken, TokenError
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.viewsets import ViewSet
 from department.models import UserProfile
 from rest_framework.request import Request
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest 
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from .throttles import LoginRateThrottle
 from rest_framework.permissions import IsAuthenticated
@@ -153,18 +144,9 @@ class FrontendLoginView(APIView):
 
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')
-class DashboardView(TemplateView):
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
     template_name = "dashboard.html"
 
-    def dispatch(self, request, *args, **kwargs):
-        access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
-
-        if not access_token:
-            return redirect(reverse("frontend_login"))
-
-        try:
-            AccessToken(access_token).verify()
-        except TokenError:
-            return redirect(reverse("frontend_login"))
-
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request: HttpRequest, *args, **kwargs):
+        return render(request, self.template_name)

@@ -7,9 +7,9 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from rest_framework import status
-from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -31,11 +31,20 @@ class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PTOBalanceView(TemplateView, LoginRequiredMixin):
+class PTOBalanceView(APIView):
+    permission_classes = [IsAuthenticated]
     template_name = "ptobalance_view.html"
-    login_url = "frontend_login"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        queryset = PTOBalance.objects.filter(user=user)
 
-        return context
+        if not queryset.exists():
+            context = {"error": "We couldn’t retrieve your PTO balance at this time."}
+            return render(request, self.template_name, context, status=404)
+
+        serializer = PTOBalanceSerializer(queryset.first())
+        context = {
+            "ptobalance": serializer.data
+        }
+        return render(request, self.template_name, context)
