@@ -36,6 +36,8 @@ class AuthStatusMiddleware(MiddlewareMixin):
         if access_token:
             if token_utils.verify_access_token(access_token):
                 request.META["HTTP_AUTHORIZATION"] = f"Bearer {access_token}"
+                print(f"AuthStatusMiddleware: Access token {access_token} is valid. Injecting into Authorization header.")
+                print(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
                 logger.debug("AuthStatusMiddleware: Valid access token injected into Authorization header.")
             else:
                 logger.info("AuthStatusMiddleware: Invalid/expired access token. Clearing Authorization header.")

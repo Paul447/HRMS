@@ -75,6 +75,7 @@
                 return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
             }
 
+
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
@@ -101,9 +102,6 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        // Tokens received: store or redirect
-                        localStorage.setItem('access_token', data.access);
-                        localStorage.setItem('refresh_token', data.refresh);
                         window.location.href = '/auth/dashboard/';
                     } else {
                         errorBox.textContent = data.detail || 'Invalid login credentials';

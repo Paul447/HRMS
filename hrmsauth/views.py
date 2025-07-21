@@ -50,6 +50,7 @@ COOKIE_SETTINGS = {"httponly": True, "secure": not settings.DEBUG, "samesite": "
 
 
 
+
 class TokenObtainPairView(TokenObtainPairView):
     """
     Custom login view using SimpleJWT.
