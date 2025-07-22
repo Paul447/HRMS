@@ -68,8 +68,8 @@ class TokenObtainPairView(TokenObtainPairView):
             refresh = serializer.validated_data.get("refresh")
 
             response = Response({"message": "Login successful"}, status=status.HTTP_200_OK)
-            response.set_cookie("hjjlzz_avrlu", access, **COOKIE_SETTINGS, max_age=900)      # 15 minutes
-            response.set_cookie("ylmylzo_avrlu", refresh, **COOKIE_SETTINGS, max_age=604800) # 7 days
+            response.set_cookie("hjjlzz_avrlu", access, **COOKIE_SETTINGS, max_age=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds())      # 15 minutes
+            response.set_cookie("ylmylzo_avrlu", refresh, **COOKIE_SETTINGS, max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()) # 7 days
 
             return response
 

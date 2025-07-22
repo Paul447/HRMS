@@ -52,10 +52,6 @@ class ClockSerializerForPunchReportMain(serializers.ModelSerializer):
             return timezone.localtime(obj.clock_out_time).strftime("%a %m/%d %H:%M %p")
         return None
 
-    class Meta:
-        model = Clock
-        fields = "__all__"  # Or specify fields like ['id', 'user', 'clock_in_time', 'clock_out_time', 'hours_worked', 'pay_period']
-        read_only_fields = ["hours_worked"]  # Assuming hours_worked is calculated and not set directly by client
 
 
 User = get_user_model()
