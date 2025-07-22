@@ -40,8 +40,11 @@ class DepartmentLeavesViewSet(viewsets.ReadOnlyModelViewSet):
     Can be filtered by user's first name or last name.
     """
 
+    def get_permissions(self):
+        if self.request.user.is_superuser:
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsTimeOffUser()]
     serializer_class = DepartmentLeavesSerializer
-    permission_classes = [IsAuthenticated, IsTimeOffUser]
     pagination_class = DepartmentLeavesPagination
     filter_backends = [filters.SearchFilter]  # Add SearchFilter
     search_fields = ["employee__first_name", "employee__last_name"]  # Fields to search against

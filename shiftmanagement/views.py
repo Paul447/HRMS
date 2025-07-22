@@ -33,8 +33,12 @@ class IsLawEnforcementDepartment(BasePermission):
 class ShiftCalendarView(APIView):
     template_name = 'calendar.html'
     renderer_classes = [TemplateHTMLRenderer]
-    permission_classes = [IsAuthenticated, IsLawEnforcementDepartment]
     login_url = 'frontend_login'
+
+    def get_permissions(self):
+        if self.request.user.is_superuser:
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsLawEnforcementDepartment()]
 
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):
@@ -75,8 +79,12 @@ class ShiftCalendarView(APIView):
 
 
 class CalendarEventViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated, IsLawEnforcementDepartment]
     local_tz = pytz.timezone("America/Chicago")
+
+    def get_permissions(self):
+        if self.request.user.is_superuser:
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsLawEnforcementDepartment()]
 
     def list(self, request):
         event_generator = CalendarEventGenerator(local_timezone=self.local_tz.zone)

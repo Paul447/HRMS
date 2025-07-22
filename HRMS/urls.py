@@ -20,17 +20,16 @@ from django.urls import path
 from django.urls import include
 from rest_framework.routers import DefaultRouter
 from hrmsauth.views import *
-from department.api import register_userprofile as register_userprofile
 from hrmsauth.views import UserInfoViewSet
 from punchreport.views import PunchReportViewSet
 from payperiod.views import PayPeriodUptoTodayViewSet, PayPeriodViewSetForPastTimeOffRequest, PayPeriodViewSetForCurrentFutureTimeOffRequest
+from django.views.generic.base import RedirectView  # Import RedirectView
 
 # from django.contrib.auth import views as auth_views
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from adminorganizer.admin.admin_site import hrms_admin_site
 from timeclock.views import UserClockDataAPIView, ClockInOutCreate
-from department.views import UserProfileViewSet
 from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
@@ -73,6 +72,7 @@ clock_router.register(r"on-shift", UserClockOnShiftViewSet, basename="on_shift")
 
 urlpatterns = [
     # Auth Custom Admin Site URLS
+    path('', RedirectView.as_view(url='/auth/login', permanent=False)),
     path("auth/", include("hrmsauth.url")),
     path("auth/ptobalance/", include("ptobalance.url")),
     path("auth/timeoffreq/", include("timeoffreq.urls")),
