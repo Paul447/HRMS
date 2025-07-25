@@ -17,8 +17,8 @@ class AuthStatusMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         access_token = request.COOKIES.get(settings.ACCESS_TOKEN_COOKIE_NAME)
-        login_url = reverse("frontend_login")
-        dashboard_url = reverse("dashboard")
+        login_url = reverse("hrmsauth:frontend_login")
+        dashboard_url = reverse("hrmsauth:dashboard")
 
         # Validate redirect URLs
         host = request.get_host()

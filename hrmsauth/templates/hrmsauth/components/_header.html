@@ -74,7 +74,7 @@
                     <p class="text-sm font-semibold text-secondary-800" id="dropdown-user-name">User Name</p>
                     <p class="text-xs text-secondary-500" id="dropdown-user-role">Admin</p>
                 </div>
-                <a href="{% url 'change_password_template' %}"
+                <a href="{% url 'usermanagement:change_password_template' %}"
                     class="flex items-center space-x-3 py-2 px-4 text-sm text-secondary-700 hover:bg-primary-100 hover:text-primary-800 transition-colors duration-200"
                     role="menuitem">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,7 +83,7 @@
                     </svg>
                     <span>Change Password</span>
                 </a>
-                <form action="{% url 'logout' %}" method="POST" class="w-full">
+                <form action="{% url 'hrmsauth:logout' %}" method="POST" class="w-full">
                     {% csrf_token %}
                     <button type="submit"
                         class="flex items-center space-x-3 w-full text-left py-2 px-4 text-sm text-secondary-700 hover:bg-primary-100 hover:text-primary-800 transition-colors duration-200"

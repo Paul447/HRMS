@@ -22,7 +22,7 @@
         </button>
     </div>
     <nav class="mt-6 px-3 space-y-1">
-        <a href="{% url 'dashboard' %}"
+        <a href="{% url 'hrmsauth:dashboard' %}"
             class="flex items-center space-x-3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white shadow-sm bg-primary-900/30">
             <svg xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
@@ -33,7 +33,7 @@
             <span>Dashboard Home</span>
         </a>
 
-        <a href="{% url 'clock_in_out' %}"
+        <a href="{% url 'timeclock:clock_in_out' %}"
             class="flex items-center space-x-3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5 text-primary-400 group-hover:text-white transition-transform duration-200 group-hover:scale-110"
@@ -64,7 +64,7 @@
                 </svg>
             </button>
             <div id="userDetailsSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
-                <a href="{% url 'ptobalance' %}"
+                <a href="{% url 'ptobalance:ptobalance' %}"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +96,7 @@
                 </svg>
             </button>
             <div id="timeOffSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
-                <a href="{% url 'timeoff_request_view' %}" id="timeoff_details"
+                <a href="{% url 'timeoffreq:timeoff_request_view' %}" id="timeoff_details"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +105,7 @@
                     </svg>
                     <span>Leave Details</span>
                 </a>
-                <a href="{% url 'timeoff_request' %}" id="timeoffrequest"
+                <a href="{% url 'timeoffreq:timeoff_request' %}" id="timeoffrequest"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@
                     </svg>
                     <span>Leave Request</span>
                 </a>
-                <a href="{% url 'past_timeoff_requests' %}" id="timeoffhistory"
+                <a href="{% url 'timeoffreq:past_timeoff_requests' %}" id="timeoffhistory"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,7 +122,7 @@
                     </svg>
                     <span>Leave History</span>
                 </a>
-                <a href="{% url 'department_leaves_template' %}" id="departmentLeavesLink"
+                <a href="{% url 'deptleaves:department_leaves_template' %}" id="departmentLeavesLink"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,7 +154,7 @@
                 </svg>
             </button>
             <div id="groupsSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
-                <a href="{% url 'clock_in_out_punch_report' %}"
+                <a href="{% url 'punchreport:clock_in_out_punch_report' %}"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -186,7 +186,7 @@
                 </svg>
             </button>
             <div id="managerToolsSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
-                <a href="{% url 'timeoff_management_template' %}" id="timeOffManagementLinkManager"
+                <a href="{% url 'timeoff_management:timeoff_management_template' %}" id="timeOffManagementLinkManager"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -195,7 +195,7 @@
                     </svg>
                     <span>Time Off Pending</span>
                 </a>
-                <a href="{% url 'time_off_balance_template' %}" id="timeoffBalanceLinkManager"
+                <a href="{% url 'timeoffbalance:time_off_balance_template' %}" id="timeoffBalanceLinkManager"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -204,7 +204,7 @@
                     </svg>
                     <span>Time Off Balance</span>
                 </a>
-                <a href="{% url 'decisioned-timeoff' %}" id="decisionedTimeoffLinkManager"
+                <a href="{% url 'decisionedtimeoff:decisioned-timeoff' %}" id="decisionedTimeoffLinkManager"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-blue-700 active:bg-blue-600 transition-all duration-200 group text-gray-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,7 +236,7 @@
                 </svg>
             </button>
             <div id="admintoolsSubmenu" class="mt-1 ml-8 space-y-0.5 hidden">
-                <a href="{% url 'on_shift_report' %}" id="onShiftReportLink"
+                <a href="{% url 'onshift:on_shift_report' %}" id="onShiftReportLink"
                     class="flex items-center space-x-3 py-2 px-4 rounded-lg text-sm hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-400 group-hover:text-white"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,7 +259,7 @@
 </a>
         </div>
 
-        <form action="{% url 'logout' %}" method="POST" class="w-full">
+        <form action="{% url 'hrmsauth:logout' %}" method="POST" class="w-full">
             {% csrf_token %}
             <button type="submit"
                 class="flex items-center space-x-3 mt-6 border-t border-primary-800 py-3 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group w-full text-left text-primary-200 hover:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2 focus:ring-offset-primary-900">

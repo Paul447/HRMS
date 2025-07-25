@@ -1,103 +1,133 @@
 """
-URL configuration for HRMS project.
+URL configuration for the HRMS project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+This file defines the URL patterns for the Django project, including:
+- API endpoints under /api/v1/ (versioned API with DRF routers)
+- App-specific routes under /auth/ (e.g., authentication, time-off requests, punch reports)
+- Custom admin site at /admin/
+- Static and media file serving for development
+- Root redirect to login page
 """
 
 from django.contrib import admin
-from django.urls import path
-from django.urls import include
+from django.urls import path, include
+from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
+
 from rest_framework.routers import DefaultRouter
-from hrmsauth.views import *
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
+
+# Custom Admin Site
+from adminorganizer.admin.admin_site import hrms_admin_site
+
+# ViewSets
 from hrmsauth.views import UserInfoViewSet
 from punchreport.views import PunchReportViewSet
-from payperiod.views import PayPeriodUptoTodayViewSet, PayPeriodViewSetForPastTimeOffRequest, PayPeriodViewSetForCurrentFutureTimeOffRequest
-from django.views.generic.base import RedirectView  # Import RedirectView
-
-# from django.contrib.auth import views as auth_views
-from drf_spectacular.views import SpectacularSwaggerView
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from adminorganizer.admin.admin_site import hrms_admin_site
+from payperiod.views import (
+    PayPeriodUptoTodayViewSet,
+    PayPeriodViewSetForPastTimeOffRequest,
+    PayPeriodViewSetForCurrentFutureTimeOffRequest,
+)
 from timeclock.views import UserClockDataAPIView, ClockInOutCreate
 from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from notificationapp.views import NotificationViewSet
-from timeoffreq.views import TimeoffRequestViewSetEmployee, DepartmentLeaveTypeDropdownView, PastTimeOffRequestViewSet
+from timeoffreq.views import (
+    TimeoffRequestViewSetEmployee,
+    PastTimeOffRequestViewSet,
+    DepartmentLeaveTypeDropdownView,
+)
 from timeoff_management.views import ManagerTimeoffApprovalViewSet
 from usertimeoffbalance.views import TimeoffBalanceViewSet
 from decisionedtimeoff.views import DecisionedTimeOffViewSet
 from usermanagement.views import ChangePasswordView
 from shiftmanagement.views import CalendarEventViewSet
 
+# ==========================
+# MAIN API ROUTER (v1)
+# ==========================
 
-# IMPORTS YOU NEED TO ADD:
-from django.conf import settings  # Import settings
-from django.conf.urls.static import static  # Import static file serving helper
+api_v1_router = DefaultRouter()
 
-router = DefaultRouter()
+# --- User & Profile ---
+api_v1_router.register(r"user-info", UserInfoViewSet, basename="user_info")
 
-# router.register(r'clock', ClockDataViewSet, basename='clock')
-router.register(r"user_info", UserInfoViewSet, basename="user_info")
-router.register(r"punch-report", PunchReportViewSet, basename="punch_report")
-router.register(r"pay-period", PayPeriodUptoTodayViewSet, basename="pay_period_upto_today")
-router.register(r"past-pay-period", PayPeriodViewSetForPastTimeOffRequest, basename="past_pay_period")
-router.register(r"current-future-pay-period", PayPeriodViewSetForCurrentFutureTimeOffRequest, basename="current_future_pay_period")
-router.register(r"ptobalance", PTOBalanceViewSet, basename="ptobalance")
-router.register(r"department-leaves", DepartmentLeavesViewSet, basename="department_leaves")
-router.register(r"notifications", NotificationViewSet, basename="notification")
-router.register(r"timeoffrequests", TimeoffRequestViewSetEmployee, basename="timeoffrequests")
-router.register(r"past-timeoff-requests", PastTimeOffRequestViewSet, basename="past_timeoff_requests")
-router.register(r"manager-timeoff-approval", ManagerTimeoffApprovalViewSet, basename="manager_timeoff_approval")
-router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
-router.register(r"decisioned-timeoff", DecisionedTimeOffViewSet, basename="decisioned_timeoff")
-router.register(r"calendar-events", CalendarEventViewSet, basename="calendar_events")
+# --- Punch & Pay Period ---
+api_v1_router.register(r"punch-report", PunchReportViewSet, basename="punch_report")
+api_v1_router.register(r"pay-period", PayPeriodUptoTodayViewSet, basename="pay_period_upto_today")
+api_v1_router.register(r"past-pay-period", PayPeriodViewSetForPastTimeOffRequest, basename="past_pay_period")
+api_v1_router.register(r"future-pay-period", PayPeriodViewSetForCurrentFutureTimeOffRequest, basename="future_pay_period")
 
+# --- PTO & Leave Balance ---
+api_v1_router.register(r"pto-balance", PTOBalanceViewSet, basename="pto_balance")
+api_v1_router.register(r"department-leaves", DepartmentLeavesViewSet, basename="department_leaves")
+api_v1_router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
+
+# --- Time Off Management ---
+api_v1_router.register(r"timeoff-requests", TimeoffRequestViewSetEmployee, basename="timeoff_requests")
+api_v1_router.register(r"past-timeoff-requests", PastTimeOffRequestViewSet, basename="past_timeoff_requests")
+api_v1_router.register(r"manager-timeoff-approval", ManagerTimeoffApprovalViewSet, basename="manager_timeoff_approval")
+api_v1_router.register(r"decisioned-timeoff", DecisionedTimeOffViewSet, basename="decisioned_timeoff")
+api_v1_router.register(r"calendar-events", CalendarEventViewSet, basename="calendar_events")
+
+# --- Notification ---
+api_v1_router.register(r"notifications", NotificationViewSet, basename="notifications")
+
+# --- Clock-Specific ---
 clock_router = DefaultRouter()
-clock_router.register(r"user-clock-data", UserClockDataAPIView, basename="clock_in_out_get")
-clock_router.register(r"clock-in-out", ClockInOutCreate, basename="clock_in_out_post")
+clock_router.register(r"user-clock-data", UserClockDataAPIView, basename="user_clock_data")
+clock_router.register(r"clock-in-out", ClockInOutCreate, basename="clock_in_out")
 clock_router.register(r"on-shift", UserClockOnShiftViewSet, basename="on_shift")
 
+# ==========================
+# API v1 ROUTES
+# ==========================
+
+api_v1_patterns = [
+    path("", include(api_v1_router.urls)),
+    path("clock/", include(clock_router.urls)),
+    path("leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
+    path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+]
+
+# ==========================
+# MAIN URLPATTERNS
+# ==========================
 
 urlpatterns = [
-    # Auth Custom Admin Site URLS
-    path('', RedirectView.as_view(url='/auth/login', permanent=False)),
-    path("auth/", include("hrmsauth.url")),
-    path("auth/ptobalance/", include("ptobalance.url")),
-    path("auth/timeoffreq/", include("timeoffreq.urls")),
-    path("auth/clock/", include("timeclock.url")),
-    path("auth/punchreport/", include("punchreport.url")),
-    path("auth/onshift/", include("onshift.url")),
-    path("auth/timeoff/", include("timeoff_management.url")),
-    path("auth/department/", include("deptleaves.url")),
-    path("auth/time-off-balance/", include("usertimeoffbalance.url")),
-    path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls")),
-    path("auth/user-management/", include("usermanagement.urls")),
-    path("api/leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
-    path("api/change-password/", ChangePasswordView.as_view(), name="change-password"),
-    path('auth/shiftmanagement/', include('shiftmanagement.urls')),
-    path("api/", include(router.urls)),
-    path("api/clock/", include(clock_router.urls)),  # API for clock functionality
-    # Admin URLs
+    # Redirect root to login page for unauthenticated users
+    path("", RedirectView.as_view(url="/auth/login/", permanent=False)),
+    
+    # Admin site
     path("admin/", hrms_admin_site.urls),
-    # Yaml schema generation # Api Documentation Related URLS
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    
+    # App module URLs (all require authentication unless specified in app URLs)
+    path("auth/", include("hrmsauth.url", namespace="hrmsauth")),
+    path("auth/pto-balance/", include("ptobalance.url", namespace="ptobalance")),
+    path("auth/timeoff-request/", include("timeoffreq.urls", namespace="timeoffreq")),
+    path("auth/clock/", include("timeclock.url", namespace="timeclock")),
+    path("auth/punch-report/", include("punchreport.url", namespace="punchreport")),
+    path("auth/on-shift/", include("onshift.url", namespace="onshift")),
+    path("auth/timeoff-management/", include("timeoff_management.url", namespace="timeoff_management")),
+    path("auth/department/", include("deptleaves.url", namespace="deptleaves")),
+    path("auth/timeoff-balance/", include("usertimeoffbalance.url", namespace="usertimeoffbalance")),
+    path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls", namespace="decisionedtimeoff")),
+    path("auth/user-management/", include("usermanagement.urls", namespace="usermanagement")),
+    path("auth/shift-management/", include("shiftmanagement.urls", namespace="shiftmanagement")),
+    
+    # Versioned API (v1)
+    path("api/v1/", include((api_v1_patterns, "v1"), namespace="v1")),
 ]
+
+# Serve media files during development only; in production, configure web server (e.g., Nginx) to serve media files.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    # It's also good practice to serve static files this way in development,
-    # though collectstatic is used in production.
-    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) # Optional, but good for dev

@@ -32,13 +32,14 @@ class NotificationSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_content_object_display(self, obj):
-        """
-        Returns the string representation of the related content_object.
-        This leverages the __str__ method of the linked model.
-        """
-        if obj.content_object:
-            return str(obj.content_object)
+        try:
+            if obj.content_object:
+                return str(obj.content_object)
+        except Exception:
+            # Could log the error here if needed
+            return None
         return None
+
 
     # Optional: If you need to include data about the content_object itself,
     # you'd use conditional serialization or a custom field.

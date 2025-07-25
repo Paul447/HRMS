@@ -17,13 +17,13 @@ class LogoutMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
-        if request.path == reverse("logout"):
+        if request.path == reverse("hrmsauth:logout"):
             logger.debug("Logout path requested. Clearing Authorization header.")
             request.META.pop("HTTP_AUTHORIZATION", None)
         return None
 
     def process_response(self, request, response):
-        if request.path == reverse("logout"):
+        if request.path == reverse("hrmsauth:logout"):
             refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN_COOKIE_NAME)
             login_url = reverse("frontend_login")
 
