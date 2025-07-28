@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const toastContainer = document.getElementById('toast-container');
 
         // Base API endpoint for fetching requests
-        const API_BASE_ENDPOINT = '/api/manager-timeoff-approval/';
+        const API_BASE_ENDPOINT = '/api/v1/manager-timeoff-approval/';
         const ITEMS_PER_PAGE = 10; // Assuming the backend pagination uses 10 items per page
 
         let currentPage = 1;

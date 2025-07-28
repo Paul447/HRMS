@@ -13,7 +13,7 @@ export let paginationData = {};
 export async function fetchEvents(year, month) {
     window.showLoading(); // Call the global function
     try {
-        const response = await fetch(`/api/calendar-events/?year=${year}&month=${month}`);
+        const response = await fetch(`/api/v1/calendar-events/?year=${year}&month=${month}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

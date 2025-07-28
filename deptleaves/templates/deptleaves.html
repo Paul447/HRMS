@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextPageButton = document.getElementById('nextPage');
     const paginationInfo = document.getElementById('paginationInfo');
     let currentPage = 1;
-    const API_ENDPOINT = '/api/department-leaves/'; // Ensure this matches your API URL for the DepartmentLeavesViewSet
+    const API_ENDPOINT = '/api/v1/department-leaves/'; // Ensure this matches your API URL for the DepartmentLeavesViewSet
     const ITEMS_PER_PAGE = 10; // Adjust based on your API's pagination settings
 
     // Debounce function to limit the rate of function execution

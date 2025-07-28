@@ -25,7 +25,7 @@ class LogoutMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         if request.path == reverse("hrmsauth:logout"):
             refresh_token = request.COOKIES.get(settings.REFRESH_TOKEN_COOKIE_NAME)
-            login_url = reverse("frontend_login")
+            login_url = reverse("hrmsauth:frontend_login")
 
             # Validate redirect URL
             if not url_has_allowed_host_and_scheme(login_url, allowed_hosts={request.get_host()}):

@@ -9,7 +9,7 @@ import { smartFetch } from '../punchreport/apiService.js'; // Assuming apiServic
  */
 export async function getPayPeriodsAdmin() {
     try {
-        const response = await smartFetch('/api/pay-period/', {
+        const response = await smartFetch('/api/v1/pay-period/', {
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
@@ -32,7 +32,7 @@ export async function getPayPeriodsAdmin() {
  */
 export async function getClockDataAdmin(payPeriodId) {
     try {
-        const response = await smartFetch(`/api/punch-report/?pay_period_id=${payPeriodId}`, {
+        const response = await smartFetch(`/api/v1/punch-report/?pay_period_id=${payPeriodId}`, {
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });

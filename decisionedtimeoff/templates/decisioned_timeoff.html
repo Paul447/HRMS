@@ -164,7 +164,7 @@
 
         currentPage = page; // Update current page globally
 
-        let url = `/api/decisioned-timeoff/?page=${currentPage}`;
+        let url = `/api/v1/decisioned-timeoff/?page=${currentPage}`;
         if (searchTerm) {
             url += `&search=${encodeURIComponent(searchTerm)}`;
         }
@@ -263,10 +263,10 @@
 
         try {
             // Fetch ALL data from the API, overriding pagination
-            // Assuming your API endpoint /api/decisioned-timeoff/ can accept a ?page_size=all
+            // Assuming your API endpoint /api/v1/decisioned-timeoff/ can accept a ?page_size=all
             // parameter to return all records. If not, you'll need to paginate manually
             // or create a dedicated non-paginated endpoint on the backend for export.
-            const response = await fetch('/api/decisioned-timeoff/?page_size=all');
+            const response = await fetch('/api/v1/decisioned-timeoff/?page_size=all');
             if (!response.ok) {
                 const errorDetails = await response.text();
                 throw new Error(`HTTP error! Status: ${response.status} - ${errorDetails}`);

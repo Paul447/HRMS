@@ -44,7 +44,7 @@ async function smartFetch(url, options = {}, isRetry = false) {
  */
 export async function fetchPTORequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    let url = '/api/timeoffrequests/';
+    let url = '/api/v1/timeoffrequests/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }
@@ -72,7 +72,7 @@ export async function fetchPTORequests(payPeriodId = null) {
  */
 export async function fetchPAYPeriods() {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch('/api/current-future-pay-period/', {
+    const response = await smartFetch('/api/v1/current-future-pay-period/', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -96,7 +96,7 @@ export async function fetchPAYPeriods() {
  */
 export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    let url = '/api/timeoffrequests/summary/';
+    let url = '/api/v1/timeoffrequests/summary/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }
@@ -124,7 +124,7 @@ export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
  */
 export async function deletePTORequest(requestId) {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch(`/api/timeoffrequests/${requestId}/`, {
+    const response = await smartFetch(`/api/v1/timeoffrequests/${requestId}/`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {

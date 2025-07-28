@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
             // Make the API call to your DRF endpoint
-            const response = await fetch('/api/change-password/', { // <--- **IMPORTANT:** Ensure this matches your DRF URL
+            const response = await fetch('/api/v1/change-password/', { // <--- **IMPORTANT:** Ensure this matches your DRF URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

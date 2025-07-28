@@ -52,6 +52,7 @@ class TokenObtainPairView(TokenObtainPairView):
     """
     permission_classes = [IsUnauthenticated]  # Ensure only unauthenticated users can access this view
     throttle_classes = [LoginRateThrottle]
+    versioning_class = None  # Disable versioning for this view 
 
     @method_decorator(csrf_protect, name="dispatch")
     def post(self, request, *args, **kwargs):
@@ -99,6 +100,7 @@ class RefreshTokenView(TokenRefreshView):
 # -----------------------------
 @method_decorator(csrf_protect, name="dispatch")
 class LogoutView(APIView):
+    versioning_class = None  # Disable versioning for this view
     """
     Everything in this view is handled by the middleware. This is just a placeholder. Used for the logout URL.
     """
@@ -137,6 +139,7 @@ class IsSuperUser(BasePermission):
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 class FrontendLoginView(APIView):
+    versioning_class = None
     def get(self, request: Request) -> HttpResponse:
         try:
             return render(request, "login.html")
@@ -147,10 +150,11 @@ class FrontendLoginView(APIView):
 
 # @method_decorator(ensure_csrf_cookie, name='dispatch')
 class DashboardView(APIView):
+    versioning_class = None
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = "dashboard.html"
-    login_url = "frontend_login"  # Django URL name
+    login_url = "hrmsauth:frontend_login"  # Django URL name
 
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):

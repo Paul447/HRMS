@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function fetchAndRenderPTOBalance() {
     try {
-        const response = await smartFetch('/api/ptobalance/', {
+        const response = await smartFetch('/api/v1/ptobalance/', {
             headers: {
                 'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/json'

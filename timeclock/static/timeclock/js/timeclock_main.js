@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
  */
 async function fetchAndRenderClockData(DOMElements, csrftoken) {
     try {
-        const response = await smartFetch('/api/clock/user-clock-data/', {
+        const response = await smartFetch('/api/v1/clock/user-clock-data/', {
             headers: {
                 'X-CSRFToken': csrftoken,
                 'Content-Type': 'application/json'

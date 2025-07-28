@@ -189,7 +189,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
         if (this.userNameElement) this.userNameElement.textContent = '';
 
         try {
-        const response = await fetch('/api/user_info/', {
+        const response = await fetch('/api/v1/user-info/', {
         method: 'GET',
         headers: {
         'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
             }
 
             try {
-            const response = await fetch('/api/user_info/', {
+            const response = await fetch('/api/v1/user-info/', {
             method: 'GET',
             headers: {
             'Content-Type': 'application/json',
@@ -389,7 +389,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
                 */
                 async fetchNotifications() {
                 try {
-                const response = await fetch('/api/notifications/unread/');
+                const response = await fetch('/api/v1/notifications/unread/');
                 if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -502,8 +502,8 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
                 event.stopPropagation();
                 const id = event.currentTarget.dataset.id;
                 const isCurrentlyRead = event.currentTarget.dataset.read === 'true';
-                const endpoint = isCurrentlyRead ? `/api/notifications/${id}/mark_as_unread/` :
-                `/api/notifications/${id}/mark_as_read/`;
+                const endpoint = isCurrentlyRead ? `/api/v1/notifications/${id}/mark_as_unread/` :
+                `/api/v1/notifications/${id}/mark_as_read/`;
                 try {
                 const response = await fetch(endpoint, {
                 method: 'POST',
@@ -532,7 +532,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
                 }
                 const id = event.currentTarget.dataset.id;
                 try {
-                const response = await fetch(`/api/notifications/${id}/delete/`, {
+                const response = await fetch(`/api/v1/notifications/${id}/delete/`, {
                 method: 'DELETE',
                 headers: {
                 'X-CSRFToken': this.CSRF_TOKEN,
@@ -557,7 +557,7 @@ for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (c
                 async markAllNotificationsAsRead() {
                 if (this.markAllReadButton && this.markAllReadButton.disabled) return;
                 try {
-                const response = await fetch('/api/notifications/mark_all_as_read/', {
+                const response = await fetch('/api/v1/notifications/mark_all_as_read/', {
                 method: 'POST',
                 headers: {
                 'X-CSRFToken': this.CSRF_TOKEN,

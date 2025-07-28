@@ -16,8 +16,8 @@ import { FormHandler } from './modules/timeoffrequest/formHandler.js'; // Ensure
 
 // Define API Endpoints used by various modules
 const API_ENDPOINTS = {
-    LEAVE_TYPES: '/api/leave-type-dropdown/', // Endpoint for fetching leave types for dropdown
-    SUBMIT_REQUEST: '/api/timeoffrequests/' // Endpoint for submitting/updating time off requests
+    LEAVE_TYPES: '/api/v1/leave-type-dropdown/', // Endpoint for fetching leave types for dropdown
+    SUBMIT_REQUEST: '/api/v1/timeoffrequests/' // Endpoint for submitting/updating time off requests
 };
 
 let dom = {}; // Global object to store DOM element references
