@@ -111,6 +111,7 @@ class LogoutView(APIView):
 
 class UserInfoViewSet(ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
+    versioning_class = None  # Disable versioning for this view
 
     def list(self, request):  # routers use `list` for GET /user-info/
         user = request.user

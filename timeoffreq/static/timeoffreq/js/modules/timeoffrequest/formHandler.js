@@ -101,8 +101,8 @@ export const FormHandler = (function() {
     async function populateFormForUpdate(id, domElements, showLoadingStateFn, hideLoadingStateFn, showNotificationFn) {
         // Assume API_ENDPOINTS is available in the scope (from timeOffReq.js)
         const API_ENDPOINTS = {
-            LEAVE_TYPES: '/api/leave-type-dropdown/',
-            SUBMIT_REQUEST: '/api/timeoffrequests/'
+            LEAVE_TYPES: '/api/v1/leave-type-dropdown/',
+            SUBMIT_REQUEST: '/api/v1/timeoff-requests/'
         };
 
         showLoadingStateFn(domElements.submitButton, domElements.submitButtonText, domElements.loadingSpinner, 'Loading Data...');

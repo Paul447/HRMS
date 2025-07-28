@@ -120,6 +120,7 @@ class UserClockDataFrontendView(APIView):
     permission_classes = [IsAuthenticated]
     template_name = "clock_in_out.html"
     login_url = "frontend_login"  # Django URL name
+    versioning_class = None
 
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):

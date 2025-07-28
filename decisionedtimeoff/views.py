@@ -80,7 +80,8 @@ class DecisionedTimeOffViewSetFrontend(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [permissions.IsAuthenticated]
     template_name = "decisioned_timeoff.html"  # Adjust the path to your template
-    login_url = "frontend_login"
+    login_url = "hrmsauth:frontend_login"
+    versioning_class = None
 
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):

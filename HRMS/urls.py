@@ -63,6 +63,7 @@ api_v1_router.register(r"punch-report", PunchReportViewSet, basename="punch_repo
 api_v1_router.register(r"pay-period", PayPeriodUptoTodayViewSet, basename="pay_period_upto_today")
 api_v1_router.register(r"past-pay-period", PayPeriodViewSetForPastTimeOffRequest, basename="past_pay_period")
 api_v1_router.register(r"future-pay-period", PayPeriodViewSetForCurrentFutureTimeOffRequest, basename="future_pay_period")
+api_v1_router.register(r"current-future-pay-period", PayPeriodViewSetForCurrentFutureTimeOffRequest, basename="current_future_pay_period")
 
 # --- PTO & Leave Balance ---
 api_v1_router.register(r"pto-balance", PTOBalanceViewSet, basename="pto_balance")
@@ -94,9 +95,6 @@ api_v1_patterns = [
     path("clock/", include(clock_router.urls)),
     path("leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
 # ==========================
@@ -123,7 +121,9 @@ urlpatterns = [
     path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls", namespace="decisionedtimeoff")),
     path("auth/user-management/", include("usermanagement.urls", namespace="usermanagement")),
     path("auth/shift-management/", include("shiftmanagement.urls", namespace="shiftmanagement")),
-    
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # Versioned API (v1)
     path("api/v1/", include((api_v1_patterns, "v1"), namespace="v1")),
 ]

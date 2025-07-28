@@ -33,7 +33,7 @@
         </h2>
     </div>
 
-    <form id="timeOffRequestForm" class="space-y-7" method="POST" action="{% url 'timeoff_request' %}" enctype="multipart/form-data">
+    <form id="timeOffRequestForm" class="space-y-7" method="POST" action="{% url 'timeoffreq:timeoff_request' %}" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div>

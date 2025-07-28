@@ -67,7 +67,7 @@ export async function smartFetch(url, options = {}, isRetry = false) {
  */
 export async function fetchPayPeriods() {
     try {
-        const response = await smartFetch('/api/past-pay-period/', {
+        const response = await smartFetch('/api/v1/past-pay-period/', {
             method: 'GET',
         });
         if (!response.ok) {
@@ -90,7 +90,7 @@ export async function fetchPayPeriods() {
  * @throws {Error} If the API call fails.
  */
 export async function fetchPastPtoRequests(payPeriodId = null) {
-    let url = '/api/past-timeoff-requests/';
+    let url = '/api/v1/past-timeoff-requests/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }

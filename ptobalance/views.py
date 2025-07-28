@@ -39,8 +39,9 @@ class PTOBalanceView(APIView):
 
     permission_classes = [IsAuthenticated]
     template_name = "ptobalance_view.html"
+    versioning_class = None  # Disable versioning for this view
 
-    login_url = "frontend_login"  # Django URL name
+    login_url = "hrmsauth:frontend_login"  # Django URL name
 
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):
