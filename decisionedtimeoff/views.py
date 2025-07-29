@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotAuthenticated
 from django.shortcuts import redirect
 from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.permissions import IsAuthenticated  
 
 
 class DecisionedTimeOffViewSet(viewsets.ReadOnlyModelViewSet):
@@ -78,9 +79,9 @@ class DecisionedTimeOffViewSetFrontend(APIView):
     A TemplateView for rendering the decisioned time-off page.
     """
     renderer_classes = [TemplateHTMLRenderer]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     template_name = "decisioned_timeoff.html"  # Adjust the path to your template
-    login_url = "frontend_login"
+    login_url = "hrmsauth:frontend_login"
     versioning_class = None
 
     def handle_exception(self, exc):

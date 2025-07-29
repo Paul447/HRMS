@@ -68,7 +68,7 @@ class TimeOffBalanceTemplate(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = "time_off_balance.html"
-    login_url = "frontend_login"
+    login_url = "hrmsauth:frontend_login"
     versioning_class = None  # Disable versioning for this view
 
     def handle_exception(self, exc):

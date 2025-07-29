@@ -119,7 +119,7 @@ class UserClockDataFrontendView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = "clock_in_out.html"
-    login_url = "frontend_login"  # Django URL name
+    login_url = "hrmsauth:frontend_login"  # Django URL name
     versioning_class = None
 
     def handle_exception(self, exc):

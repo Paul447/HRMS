@@ -48,7 +48,7 @@ class ChangePasswordTemplateAPIView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
     template_name = 'change_password.html'
-    login_url = 'frontend_login'
+    login_url = 'hrmsauth:frontend_login'
     versioning_class = None  # Disable versioning for this view
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):
