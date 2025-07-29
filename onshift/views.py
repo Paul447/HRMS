@@ -41,7 +41,7 @@ class UserClockOnShiftViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = OnsShiftClockFilter
     queryset = Clock.objects.filter(clock_out_time__isnull=True).order_by("user__first_name", "user__last_name")
-
+    
     def list(self, request, *args, **kwargs):
         """
         List all users currently on shift (i.e., clocked in but not out).
@@ -60,6 +60,7 @@ class OnShiftFrontendView(APIView):
     template_name = "onshift.html"
     renderer_classes = [TemplateHTMLRenderer]
     login_url = "frontend_login"
+    versioning_class = None  # Disable versioning for this view
     def handle_exception(self, exc):
         if isinstance(exc, NotAuthenticated):
             return redirect(self.login_url)

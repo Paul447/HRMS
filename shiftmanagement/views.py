@@ -34,7 +34,7 @@ class ShiftCalendarView(APIView):
     template_name = 'calendar.html'
     renderer_classes = [TemplateHTMLRenderer]
     login_url = 'frontend_login'
-
+    versioning_class = None  # Disable versioning for this view
     def get_permissions(self):
         if self.request.user.is_superuser:
             return [IsAuthenticated()]

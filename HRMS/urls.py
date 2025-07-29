@@ -95,6 +95,9 @@ api_v1_patterns = [
     path("clock/", include(clock_router.urls)),
     path("leave-type-dropdown/", DepartmentLeaveTypeDropdownView.as_view(), name="leave-type-dropdown"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
 # ==========================
@@ -104,10 +107,8 @@ api_v1_patterns = [
 urlpatterns = [
     # Redirect root to login page for unauthenticated users
     path("", RedirectView.as_view(url="/auth/login/", permanent=False)),
-    
     # Admin site
     path("admin/", hrms_admin_site.urls),
-    
     # App module URLs (all require authentication unless specified in app URLs)
     path("auth/", include("hrmsauth.url", namespace="hrmsauth")),
     path("auth/pto-balance/", include("ptobalance.url", namespace="ptobalance")),
@@ -121,9 +122,6 @@ urlpatterns = [
     path("auth/decisioned-timeoff/", include("decisionedtimeoff.urls", namespace="decisionedtimeoff")),
     path("auth/user-management/", include("usermanagement.urls", namespace="usermanagement")),
     path("auth/shift-management/", include("shiftmanagement.urls", namespace="shiftmanagement")),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # Versioned API (v1)
     path("api/v1/", include((api_v1_patterns, "v1"), namespace="v1")),
 ]
