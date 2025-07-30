@@ -1,11 +1,9 @@
 from django.contrib import admin, messages
-from django.urls import path
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.utils import timezone
-from django.conf import settings  # Import settings to use TIME_ZONE
 
 from .models import Clock
-from payperiod.models import PayPeriod
+
 
 
 @admin.register(Clock)

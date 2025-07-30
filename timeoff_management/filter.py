@@ -1,9 +1,6 @@
 # time_off/filters.py
-import django_filters
 from django_filters import rest_framework as filters
-from django.utils import timezone
 from timeoffreq.models import TimeoffRequest
-from payperiod.models import PayPeriod
 
 
 class TimeOffRequestFilterSuperUser(filters.FilterSet):

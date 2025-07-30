@@ -1,7 +1,6 @@
 from datetime import datetime
 import logging
 from django.db import transaction
-from django.db.models import F
 from .models import YearOfExperience
 from ptobalance.models import PTOBalance
 from ptobalance.admin import PTOBalanceAdmin

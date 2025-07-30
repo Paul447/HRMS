@@ -1,7 +1,6 @@
 # utils.py
 from datetime import datetime, timedelta
 import pytz
-from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
 from django.db.models import Sum

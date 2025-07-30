@@ -5,7 +5,6 @@ from django.utils import timezone
 import pytz
 from datetime import datetime, timedelta, time
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from .utils import pto_document_upload_path
 from decimal import Decimal

@@ -4,18 +4,14 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import TimeoffRequest
-from .serializer import TimeoffRequestSerializerEmployee, TimeoffApproveRejectManager
+from .serializer import TimeoffRequestSerializerEmployee
 from department.models import UserProfile
 from payperiod.models import PayPeriod  # Add this import for PayPeriod
-from rest_framework.exceptions import ValidationError, NotAuthenticated
+from rest_framework.exceptions import  NotAuthenticated
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from leavetype.models import DepartmentBasedLeaveType
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
-
-from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import redirect
 from django.contrib.auth import get_user_model  # Import to get the User model
 from rest_framework.renderers import TemplateHTMLRenderer  # Import for TemplateHTMLRenderer
 

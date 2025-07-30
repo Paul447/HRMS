@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from decimal import Decimal
-from sickpolicy.models import SickLeaveProratedValue, MaxSickValue
+from sickpolicy.models import  MaxSickValue
 from unverifiedsickleave.models import SickLeaveBalance
 from logging import getLogger
 from django.db import transaction

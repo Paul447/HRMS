@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .serializer import PayFrequencySerializer
 from rest_framework import viewsets
 from .models import Pay_Frequency

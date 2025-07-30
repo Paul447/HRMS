@@ -1,7 +1,7 @@
 from celery import shared_task
 import logging
 
-from .notification import notification_and_email_trigger  # or wherever your function is
+# from .notification import notification_and_email_trigger  # or wherever your function is
 logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)

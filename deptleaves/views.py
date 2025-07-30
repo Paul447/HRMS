@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .serializer import DepartmentLeavesSerializer
 from department.models import UserProfile
 from datetime import datetime
@@ -8,7 +7,6 @@ from rest_framework import permissions
 from .pagination import DepartmentLeavesPagination
 from rest_framework import filters  # Import filters
 from rest_framework.views import APIView
-from django.utils.decorators import method_decorator
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.exceptions import NotAuthenticated
 from django.shortcuts import redirect

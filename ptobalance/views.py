@@ -3,11 +3,7 @@ from .models import PTOBalance
 from .serializer import PTOBalanceSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.views.generic import TemplateView
-from django.conf import settings
-from django.urls import reverse
-from rest_framework_simplejwt.tokens import AccessToken, TokenError
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.renderers import TemplateHTMLRenderer

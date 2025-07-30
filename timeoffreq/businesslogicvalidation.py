@@ -1,5 +1,4 @@
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 from unverifiedsickleave.models import SickLeaveBalance
 from sickpolicy.models import MaxSickValue
 from decimal import Decimal

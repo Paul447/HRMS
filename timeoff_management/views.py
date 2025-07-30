@@ -1,11 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import  redirect
 from rest_framework import viewsets
 from rest_framework import permissions
 
 from django.utils import timezone
 from .pagination import ManagerTimeOffManagementPagination
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from department.models import UserProfile
 from timeoffreq.models import TimeoffRequest

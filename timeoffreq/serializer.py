@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 # Make sure to import your models correctly
-from department.models import Department, UserProfile
+from department.models import  UserProfile
 from leavetype.models import DepartmentBasedLeaveType
 
 # Note: LeaveType is still implicitly used by DepartmentBasedLeaveType,
@@ -10,7 +10,6 @@ from payperiod.models import PayPeriod
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 import pytz
-from datetime import datetime, timedelta
 from .models import TimeoffRequest
 from .businesslogicvalidation import validate_pto_request
 from django.db import transaction

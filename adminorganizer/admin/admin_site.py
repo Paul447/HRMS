@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse as urls_reverse
 from django.contrib.auth.models import User, Group
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.admin import  GroupAdmin
 
 # Time Clock Management
 from timeclock.admin import ClockAdmin

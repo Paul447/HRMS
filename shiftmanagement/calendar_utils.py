@@ -1,7 +1,6 @@
 from datetime import datetime, time, timedelta
 import pytz
-from dateutil.relativedelta import relativedelta
-from .models import Squad, Employee, SquadShift
+from .models import Squad, Employee
 
 class CalendarEventGenerator:
     """Handles generation of calendar events from squad shifts."""

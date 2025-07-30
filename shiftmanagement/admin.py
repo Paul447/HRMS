@@ -2,10 +2,8 @@
 
 from django.contrib import admin
 from django.urls import path
-from django.utils import timezone
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.conf import settings
 from .config import ShiftGenerationConfig
 from .pattern_manager import ShiftPatternManager
 from .query_helper import ShiftQueryHelper

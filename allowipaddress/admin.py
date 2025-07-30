@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AllowIpAddress
+
 
 # Register your models here.
 

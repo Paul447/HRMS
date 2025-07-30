@@ -1,11 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView
-from rest_framework.viewsets import ViewSet, GenericViewSet
-from rest_framework.mixins import CreateModelMixin
-from django.views.generic import TemplateView
+from rest_framework.permissions import IsAuthenticated , BasePermission
+from rest_framework.viewsets import ViewSet
 from django.utils import timezone
 from django.conf import settings
 import pytz
@@ -13,14 +10,13 @@ from rest_framework import viewsets
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.decorators import action
-
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
-from .serializer import ClockSerializer , ClockSerializerPunch
+from .serializer import ClockSerializerPunch
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from decimal import Decimal
-from rest_framework.permissions import BasePermission
+
 
 from django.shortcuts import render, redirect
 # Import helper functions

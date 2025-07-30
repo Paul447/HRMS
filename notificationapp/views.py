@@ -1,5 +1,5 @@
 # notifications_app/views.py
-from rest_framework import generics, status
+from rest_framework import  status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -85,14 +85,14 @@ class NotificationViewSet(ReadOnlyModelViewSet):
     # If you want to allow deletion for individual notifications:
     # You'd typically use a ModelViewSet if you want standard DELETE.
     # With ReadOnlyModelViewSet, you have to add a custom action:
-    @action(detail=True, methods=["delete"], url_path="delete")
-    def delete_notification(self, request, pk=None):
-        """
-        Deletes a specific notification (by ID).
-        """
-        try:
-            notification = self.get_queryset().get(pk=pk)
-            notification.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)  # No Content status for successful deletion
-        except Notification.DoesNotExist:
-            return Response({"detail": "Notification not found or you do not have permission."}, status=status.HTTP_404_NOT_FOUND)
+    # @action(detail=True, methods=["delete"], url_path="delete")
+    # def delete_notification(self, request, pk=None):
+    #     """
+    #     Deletes a specific notification (by ID).
+    #     """
+    #     try:
+    #         notification = self.get_queryset().get(pk=pk)
+    #         notification.delete()
+    #         return Response(status=status.HTTP_204_NO_CONTENT)  # No Content status for successful deletion
+    #     except Notification.DoesNotExist:
+    #         return Response({"detail": "Notification not found or you do not have permission."}, status=status.HTTP_404_NOT_FOUND)

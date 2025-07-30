@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from department.models import UserProfile
 from rest_framework.request import Request
-from django.http import HttpResponse, HttpRequest 
+from django.http import HttpResponse
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.renderers import TemplateHTMLRenderer
 from .throttles import LoginRateThrottle

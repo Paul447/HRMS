@@ -1,23 +1,18 @@
 # Punch Report Views.py
-from django.shortcuts import render, redirect
-from django.views.generic import TemplateView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.shortcuts import redirect
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.renderers import TemplateHTMLRenderer
-from django.utils import timezone
 from django.conf import settings
-from datetime import datetime
 import pytz
 from django.contrib.auth.models import User
-from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import NotAuthenticated
 from payperiod.models import PayPeriod
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from .utils import get_pay_period_week_boundaries, get_user_weekly_summary
-from django.contrib.auth.mixins import LoginRequiredMixin
 from .permissions import IsSelfOrSuperuser
 
 

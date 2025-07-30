@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Pay_Frequency
-from django.contrib.auth.models import User, Permission, Group
 
 
 class PayFrequencySerializer(serializers.ModelSerializer):

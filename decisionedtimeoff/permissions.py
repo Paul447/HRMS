@@ -1,6 +1,5 @@
 from rest_framework import permissions
 from department.models import UserProfile
-from rest_framework import viewsets
 
 
 class IsManagerOfDepartment(permissions.BasePermission):

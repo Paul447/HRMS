@@ -2,8 +2,6 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from unverifiedsickleave.models import SickLeaveBalance
 from .serializer import TimeoffBalanceSerializer
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from .pagination import TimeoffBalancePagination
 from rest_framework import filters
 from timeoff_management.views import IsManagerOfDepartment
