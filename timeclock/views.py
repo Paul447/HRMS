@@ -12,11 +12,12 @@ import pytz
 from rest_framework import viewsets
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.exceptions import NotAuthenticated
+from rest_framework.decorators import action
 
 # Models and Serializers (assuming these are in the correct app imports)
 from .models import Clock
 from payperiod.models import PayPeriod
-from .serializer import ClockSerializer
+from .serializer import ClockSerializer , ClockSerializerPunch
 from payperiod.serializer import PayPeriodSerializerForClockPunchReport
 from decimal import Decimal
 from rest_framework.permissions import BasePermission
@@ -35,38 +36,77 @@ class IsSuperuser(BasePermission):
         return request.user and request.user.is_superuser
 
 
-class ClockInOutCreate(CreateModelMixin, GenericViewSet):
+class ClockInOutCreate(viewsets.GenericViewSet):
     """
-    API endpoint for users to clock in and clock out.
-    Handles the creation of new clock entries or updates existing open entries.
+    API endpoints for clocking in and clocking out.
     """
-
     permission_classes = [IsAuthenticated]
-    serializer_class = ClockSerializer
-    queryset = Clock.objects.none()  # since you won't be listing/querying anything
+    serializer_class = ClockSerializerPunch
+    queryset = Clock.objects.none()  # Not used since we override actions
 
-    def create(self, request, *args, **kwargs):
+    def list(self, request):
+        return Response({
+            "available_actions": {
+                "clock_in": request.build_absolute_uri("clock-in/"),
+                "clock_out": request.build_absolute_uri("clock-out/")
+            }
+        })
+
+    @action(detail=False, methods=['post'], url_path='clock-in')
+    def clock_in(self, request):
         user = request.user
+        current_time = timezone.now()
+
+        # Check if there's already an active clock-in
+        if Clock.objects.filter(user=user, clock_out_time__isnull=True).exists():
+            return Response({
+                "message": "Already clocked in. Please clock out first.",
+                "error_code": "ALREADY_CLOCKED_IN"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find pay period
+        pay_period = PayPeriod.get_pay_period_for_date(current_time)
+        if not pay_period:
+            return Response({
+                "message": "No active pay period found for current time. Cannot clock in.",
+                "error_code": "NO_PAY_PERIOD"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create clock entry
+        clock_entry = Clock.objects.create(
+            user=user,
+            clock_in_time=current_time,
+            clock_out_time=None,
+            pay_period=pay_period
+        )
+
+        serializer = self.get_serializer(clock_entry)
+        return Response({
+            "message": "Successfully clocked in.",
+            "clock_entry": serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['post'], url_path='clock-out')
+    def clock_out(self, request):
+        user = request.user
+
+        # Find active clock entry
         active_clock_entry = Clock.objects.filter(user=user, clock_out_time__isnull=True).first()
+        if not active_clock_entry:
+            return Response({
+                "message": "No active clock-in entry found. Please clock in first.",
+                "error_code": "NOT_CLOCKED_IN"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-        if active_clock_entry:
-            active_clock_entry.clock_out_time = timezone.now()
-            active_clock_entry.save()
-            message = "Successfully clocked out."
-            http_status = status.HTTP_200_OK
-        else:
-            current_time = timezone.now()
-            pay_period = PayPeriod.get_pay_period_for_date(current_time)
+        # Clock out
+        active_clock_entry.clock_out_time = timezone.now()
+        active_clock_entry.save()
 
-            if not pay_period:
-                return Response({"message": "No active pay period found for current time. Cannot clock in.", "error_code": "NO_PAY_PERIOD"}, status=status.HTTP_400_BAD_REQUEST)
-
-            active_clock_entry = Clock.objects.create(user=user, clock_in_time=current_time, clock_out_time=None, pay_period=pay_period)
-            message = "Successfully clocked in."
-            http_status = status.HTTP_201_CREATED
-
-        serializer = ClockSerializer(active_clock_entry)
-        return Response({"message": message, "clock_entry": serializer.data}, status=http_status)
+        serializer = self.get_serializer(active_clock_entry)
+        return Response({
+            "message": "Successfully clocked out.",
+            "clock_entry": serializer.data
+        }, status=status.HTTP_200_OK)
 
 
 class UserClockDataAPIView(ViewSet):

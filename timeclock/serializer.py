@@ -13,8 +13,8 @@ class ClockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Clock
-        fields = ["clock_in_time", "clock_out_time", "clock_in_time_local", "clock_out_time_local", "hours_worked"]
-        read_only_fields = ["user", "hours_worked"]  # User and hours/pay_period are set by backend
+        fields = ["clock_in_time", "clock_out_time","clock_in_time_local", "clock_out_time_local", "hours_worked"]
+        read_only_fields = ["user", "hours_worked",]  # User and hours/pay_period are set by backend
 
     def get_clock_in_time_local(self, obj):
         if obj.clock_in_time:
@@ -25,7 +25,35 @@ class ClockSerializer(serializers.ModelSerializer):
         if obj.clock_out_time:
             return timezone.localtime(obj.clock_out_time).strftime("%a %m/%d %H:%M %p")
         return None
+class ClockSerializerPunch(serializers.ModelSerializer):
+    clock_in_time_local = serializers.SerializerMethodField()
+    clock_out_time_local = serializers.SerializerMethodField()
 
+
+    class Meta:
+        model = Clock
+        fields = [
+            "clock_in_time_local",
+            "clock_out_time_local",
+        ]
+
+    def get_clock_in_time_local(self, obj):
+        if obj.clock_in_time:
+            return timezone.localtime(obj.clock_in_time).strftime("%a %m/%d %I:%M %p")
+        return None
+
+    def get_clock_out_time_local(self, obj):
+        if obj.clock_out_time:
+            return timezone.localtime(obj.clock_out_time).strftime("%a %m/%d %I:%M %p")
+        return None
+
+    def get_duration(self, obj):
+        if obj.clock_in_time and obj.clock_out_time:
+            delta = obj.clock_out_time - obj.clock_in_time
+            hours, remainder = divmod(delta.total_seconds(), 3600)
+            minutes = remainder // 60
+            return f"{int(hours)}h {int(minutes)}m"
+        return None
 
 # This serializer is used for displaying clock data in punch reports, where detailed clock information is needed.
 class ClockSerializerForPunchReportMain(serializers.ModelSerializer):

@@ -50,13 +50,15 @@ export async function handleClockAction(DOMElements, csrftoken, fetchAndRenderCl
         return;
     }
 
-    const originalButtonHtml = clockButton.innerHTML; // Store original content to restore
-    const currentAction = clockButton.textContent.includes('Clock In') ? 'Clock In' : 'Clock Out';
+    const originalButtonHtml = clockButton.innerHTML;
+    const isClockedIn = clockButton.textContent.toLowerCase().includes('clock out');
+    const action = isClockedIn ? 'clock-out' : 'clock-in';
+    const actionText = isClockedIn ? 'Clocking Out' : 'Clocking In';
 
-    showClockButtonLoadingState(clockButton, `${currentAction}ing...`);
+    showClockButtonLoadingState(clockButton, `${actionText}...`);
 
     try {
-        const response = await smartFetch('/api/v1/clock/clock-in-out/', {
+        const response = await smartFetch(`/api/v1/clock/clock-in-out/${action}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -67,28 +69,23 @@ export async function handleClockAction(DOMElements, csrftoken, fetchAndRenderCl
         });
 
         const data = await response.json();
-        console.log("[clockActions] Clock action API Response:", data);
+        console.log(`[clockActions] Clock ${action} API response:`, data);
 
         if (response.ok) {
             showNotification(data.message, 'success');
-            await fetchAndRenderClockData(DOMElements, csrftoken); // Re-fetch and re-render UI
+            await fetchAndRenderClockData(DOMElements, csrftoken);  // UI refresh
         } else {
             if (response.status === 401) {
-                showNotification('Your session has expired. Redirecting to login.', 'error');
+                showNotification('Session expired. Redirecting to login.', 'error');
                 setTimeout(() => window.location.href = '/auth/login/', 1500);
             } else {
-                showNotification(`Failed to ${currentAction.toLowerCase()}: ${data.detail || data.message || 'Unknown error.'}`, 'error');
+                showNotification(`Failed to ${action.replace('-', ' ')}: ${data.message || data.detail || 'Unknown error.'}`, 'error');
             }
         }
     } catch (error) {
-        console.error("[clockActions] Network or parsing error on clock action:", error);
-        showNotification('Network error during clock action. Please try again.', 'error');
+        console.error(`[clockActions] Network error on ${action}:`, error);
+        showNotification('Network error. Please try again.', 'error');
     } finally {
-        // This 'finally' block ensures the button state is reset even if an error occurs.
-        // However, since `fetchAndRenderClockData` re-renders the entire card,
-        // this `hideClockButtonLoadingState` primarily offers immediate visual
-        // feedback for very quick responses. The subsequent full re-render will set
-        // the final state.
         hideClockButtonLoadingState(clockButton, originalButtonHtml);
     }
 }

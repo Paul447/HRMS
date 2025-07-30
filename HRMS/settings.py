@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "timeclock",
     "biweeklycron",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
     "hrmsauth",
     "department",
     "leavetype",
@@ -91,6 +92,10 @@ IPWARE_META_PRECEDENCE_ORDER = (
     "HTTP_X_FORWARDED_FOR",
     "REMOTE_ADDR",
 )
+DRF_SPECTACULAR_SETTINGS = {
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.50.0/',
+}
+
 
 # Optional: Log a warning if spoofing is detected
 IPWARE_PROXY_COUNT = 1 
