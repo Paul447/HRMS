@@ -36,7 +36,7 @@ class ClockInOutCreate(viewsets.GenericViewSet):
     """
     API endpoints for clocking in and clocking out.
     """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = ClockSerializerPunch
     queryset = Clock.objects.none()  # Not used since we override actions
 

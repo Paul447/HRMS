@@ -14,7 +14,6 @@ class IPAddressRestrictionMiddleware:
 
     def _get_allowed_ips(self):
         allowed_ips = set(AllowIpAddress.objects.filter(is_active=True).values_list("ip_address", flat=True))
-        logger.info(f"Allowed IPs loaded: {allowed_ips}")
         return allowed_ips
 
     def __call__(self, request):

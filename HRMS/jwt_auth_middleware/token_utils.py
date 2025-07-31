@@ -47,7 +47,7 @@ def refresh_access_token(refresh_token_str):
                     refresh.blacklist()
                     logger.debug("Old refresh token blacklisted after rotation.")
             except User.DoesNotExist:
-                logger.warning(f"User with ID {user_id} not found during refresh rotation.")
+                logger.warning("User not found during refresh rotation.")
                 return None, None, "user_not_found"
 
         logger.info("Access token refreshed successfully.")

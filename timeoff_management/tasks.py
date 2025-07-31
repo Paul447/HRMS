@@ -35,15 +35,13 @@ def send_pto_notification_and_email_task(time_off_id, reviewer_id, new_status):
         notification_description = f"Your PTO request for {start_date_time} has been approved."
         email_template_name = "emails/pto_approved_email.html"
         level = "success"
-        logger.info(f"PTO request approved by {reviewer.username} for user {recipient.username}.")
+        
     elif new_status == "rejected":
         subject = f"Your PTO Request for {start_date_time} Has Been Rejected."
         notification_description = f"Your PTO request for {start_date_time} has been rejected."
         email_template_name = "emails/pto_rejected_email.html"
         level = "error"
-        logger.info(f"PTO request rejected by {reviewer.username} for user {recipient.username}.")
     else:
-        logger.warning(f"Unknown PTO status: {new_status}")
         return
 
     # Create a notification
@@ -56,7 +54,6 @@ def send_pto_notification_and_email_task(time_off_id, reviewer_id, new_status):
             level=level,
             content_object=time_off_instance
         )
-        logger.debug(f"Notification created for {recipient.username} (status: {new_status}).")
     except Exception as e:
         logger.error(f"Notification creation failed for PTO ID {time_off_id}: {e}")
 
@@ -76,6 +73,5 @@ def send_pto_notification_and_email_task(time_off_id, reviewer_id, new_status):
         plain_message = f"Dear {recipient.first_name},\n\nYour PTO request from {start_date_time} to {time_off_instance.end_date_time} has been {new_status}.\n\nReason: {time_off_instance.employee_leave_reason}\n\nRegards,\n{COMPANY_NAME}"
 
         send_mail(subject, plain_message, settings.DEFAULT_FROM_EMAIL, [recipient.email], html_message=html_message, fail_silently=False)
-        logger.info(f"Email sent to {recipient.email} for PTO request {time_off_id} (status: {new_status}).")
     except Exception as e:
         logger.error(f"Email sending failed for PTO ID {time_off_id} to {recipient.email}: {e}")

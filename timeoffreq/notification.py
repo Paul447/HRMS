@@ -45,10 +45,10 @@ def notification_and_email_trigger(timeoff_request_instance):
                 try:
                     recipient_user_profile = UserProfile.objects.get(user__email=superuser_email)
                 except UserProfile.DoesNotExist:
-                    logger.warning(f"Superuser profile not found for email {superuser_email}. In-app notification for superuser skipped.")
+                    # logger.warning(f"Superuser profile not found for email {superuser_email}. In-app notification for superuser skipped.")
                     recipient_user_profile = None  # Explicitly set to None if profile not found
             else:
-                logger.warning(f"Requester {requester.username} is a manager, but no active superuser email found. Skipping email notification.")
+                # logger.warning(f"Requester {requester.username} is a manager, but no active superuser email found. Skipping email notification.")
                 # Per requirement "if not found fail silently" -> so we just don't send the email here.
                 return  # Exit if manager but no superuser found/email.
 
@@ -58,16 +58,16 @@ def notification_and_email_trigger(timeoff_request_instance):
             if manager_profile and manager_email:
                 recipient_user_profile = manager_profile
                 recipient_email = manager_email
-                logger.info(f"Requester {requester.username} is a normal user. Will notify manager: {recipient_email}")
+                # logger.info(f"Requester {requester.username} is a normal user. Will notify manager: {recipient_email}")
             else:
-                logger.warning(f"Requester {requester.username} is a normal user, but no manager or manager email found for their department. Skipping notification.")
+                # logger.warning(f"Requester {requester.username} is a normal user, but no manager or manager email found for their department. Skipping notification.")
                 return  # Exit if normal user but no manager found/email.
 
     except UserProfile.DoesNotExist:
-        logger.error(f"UserProfile not found for requester {requester.username} (ID: {requester.id}). Skipping notifications.")
+        # logger.error(f"UserProfile not found for requester {requester.username} (ID: {requester.id}). Skipping notifications.")
         return
     except Exception as e:
-        logger.error(f"FATAL ERROR determining recipient for PTO request ID {timeoff_request_instance.id}: {e}", exc_info=True)
+        # logger.error(f"FATAL ERROR determining recipient for PTO request ID {timeoff_request_instance.id}: {e}", exc_info=True)
         return
 
     # --- Send In-App Notification (if recipient_user_profile is available) ---
