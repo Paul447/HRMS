@@ -110,13 +110,50 @@ class LogoutView(APIView):
 
 
 class UserInfoViewSet(ReadOnlyModelViewSet):
+    """
+    A secure endpoint that returns the authenticated user's profile information.
+    Only allows access to the logged-in user's own profile.
+    """
     permission_classes = [IsAuthenticated]
-    versioning_class = None  # Disable versioning for this view
+    queryset = UserProfile.objects.none()  # Prevent misuse of retrieve/list endpoints
 
-    def list(self, request):  # routers use `list` for GET /user-info/
+    def list(self, request, *args, **kwargs):
         user = request.user
-        user_profile = UserProfile.objects.filter(user=user).first()
-        return Response({"id": user.id, "username": user.username, "is_authenticated": user.is_authenticated, "is_superuser": user.is_superuser, "is_time_off": user_profile.is_time_off if user_profile else False, "is_manager": user_profile.is_manager if user_profile else False, "name": user_profile.department.name})
+
+        try:
+            user_profile = (
+                UserProfile.objects
+                .select_related("department")
+                .get(user=user)
+            )
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"detail": ("User profile not found.")},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": ("An unexpected error occurred."), "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        department_name = (
+            user_profile.department.name
+            if user_profile.department else None
+        )
+
+        return Response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "is_authenticated": user.is_authenticated,
+                "is_superuser": user.is_superuser,
+                "is_time_off": user_profile.is_time_off,
+                "is_manager": user_profile.is_manager,
+                "name": department_name,
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 # -----------------------------

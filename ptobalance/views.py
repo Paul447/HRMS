@@ -33,7 +33,6 @@ class PTOBalanceView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     permission_classes = [IsAuthenticated]
 
-    permission_classes = [IsAuthenticated]
     template_name = "ptobalance_view.html"
     versioning_class = None  # Disable versioning for this view
 
