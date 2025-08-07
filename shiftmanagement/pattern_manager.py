@@ -48,11 +48,11 @@ class ShiftPatternManager:
         pattern_value = self.config.BASE_PATTERN[day_index % len(self.config.BASE_PATTERN)]
 
         # Apply the pattern based on squad code
-        if squad_code in ['A', 'C']:
-            # Squads A and C work when the pattern value is 1 (True)
+        if squad_code in ['C', 'D']:
+            # Squads C and D work when the pattern value is 1 (True)
             return bool(pattern_value)
-        elif squad_code in ['B', 'D']:
-            # Squads B and D work when the pattern value is 0 (False - inverse)
+        elif squad_code in ['A', 'B']:
+            # Squads A and B work when the pattern value is 0 (False - inverse)
             return not bool(pattern_value)
         
         # If squad_code is not recognized, assume they are not working
@@ -93,7 +93,7 @@ class ShiftPatternManager:
         # If cycle_number is odd, the roles are reversed.
         is_a_b_day_shift = (cycle_number % 2 == 0)
 
-        if squad_code in ['C', 'D']:
+        if squad_code in ['D', 'B']:
             # For Squads C and D:
             # If it's an "A/B Day Shift" cycle (meaning A/B are on night), C/D get day shift.
             # Otherwise (A/B are on day), C/D get night shift.

@@ -51,7 +51,7 @@ from shiftmanagement.views import CalendarEventViewSet
 
 # ==========================
 # MAIN API ROUTER (v1)
-# ==========================
+# ==========================timeoffrequests/
 
 api_v1_router = DefaultRouter()
 
@@ -71,7 +71,7 @@ api_v1_router.register(r"department-leaves", DepartmentLeavesViewSet, basename="
 api_v1_router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
 
 # --- Time Off Management ---
-api_v1_router.register(r"timeoff-requests", TimeoffRequestViewSetEmployee, basename="timeoff_requests")
+api_v1_router.register(r"timeoffrequests", TimeoffRequestViewSetEmployee, basename="timeoff_requests")
 api_v1_router.register(r"past-timeoff-requests", PastTimeOffRequestViewSet, basename="past_timeoff_requests")
 api_v1_router.register(r"manager-timeoff-approval", ManagerTimeoffApprovalViewSet, basename="manager_timeoff_approval")
 api_v1_router.register(r"decisioned-timeoff", DecisionedTimeOffViewSet, basename="decisioned_timeoff")
