@@ -44,7 +44,7 @@ async function smartFetch(url, options = {}, isRetry = false) {
  */
 export async function fetchPTORequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    let url = '/api/v1/timeoff-requests/';
+    let url = '/api/v1/timeoffrequests/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }
@@ -96,7 +96,7 @@ export async function fetchPAYPeriods() {
  */
 export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
     const csrftoken = getCookie('csrftoken');
-    let url = '/api/v1/timeoff-requests/summary/';
+    let url = '/api/v1/timeoffrequests/summary/';
     if (payPeriodId) {
         url += `?pay_period_id=${payPeriodId}`;
     }
@@ -124,7 +124,7 @@ export async function fetchApprovedAndRejectedRequests(payPeriodId = null) {
  */
 export async function deletePTORequest(requestId) {
     const csrftoken = getCookie('csrftoken');
-    const response = await smartFetch(`/api/v1/timeoff-requests/${requestId}/`, {
+    const response = await smartFetch(`/api/v1/timeoffrequests/${requestId}/`, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
