@@ -247,6 +247,8 @@
                 </a>
             </div>
 
+
+        </div>
         <a href="{% url 'shiftmanagement:shift_calendar_view' %}"
             class="flex items-center space-x-3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-primary-700 active:bg-primary-600 transition-all duration-200 group text-primary-200 hover:text-white shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -257,7 +259,6 @@
             </svg>
             <span>Shift Schedule</span>
         </a>
-        </div>
 
         <form action="{% url 'hrmsauth:logout' %}" method="POST" class="w-full">
             {% csrf_token %}

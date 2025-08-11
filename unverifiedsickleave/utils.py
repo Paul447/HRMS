@@ -37,7 +37,7 @@ def unverified_verified_update():
 def reset_used_family_verified_sick_leave():
     """
     Reset the used family verified sick leave balances for all users.
-    This function is intended to be run monthly.
+    This function is intended to be at the end of year. 
     """
     try:
         sickleavebalances = SickLeaveBalance.objects.all()
