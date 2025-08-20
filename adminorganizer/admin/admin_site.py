@@ -83,8 +83,8 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(User, "Users", "auth"),
             create_model_entry(Group, "Groups", "auth"),
             create_model_entry(YearOfExperience, "Years of Experience", "yearofexperience"),
-            create_model_entry(UserProfile, "User Profiles", "department"),
-            create_model_entry(Department, "Departments", "department")
+            create_model_entry(UserProfile, "Employee Profiles", "department"),
+            create_model_entry(Department, "Department Units", "department")
         ]
         app_list.append({"name": "User & Organization", "app_label": "user_organization", "has_module_perms": True, "models": user_org_models})
 

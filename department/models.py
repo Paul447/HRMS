@@ -9,6 +9,10 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
+    class Meta:
+        db_table = "department_units"
+        verbose_name = "Department Unit"
+        verbose_name_plural = "Department Units"
 
 
 class UserProfile(models.Model):
@@ -16,3 +20,8 @@ class UserProfile(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     is_time_off = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "employee_profiles"
+        verbose_name = "Employee Profile"
+        verbose_name_plural = "Employee Profiles"
