@@ -30,8 +30,6 @@ from payfrequency.models import Pay_Frequency
 from accuralrates.models import AccrualRates
 
 # Adjustments
-from biweeklycron.admin import BiweeklyCronAdmin
-from biweeklycron.models import BiweeklyCron
 from holiday.admin import HolidayAdmin
 from holiday.models import Holiday
 from payperiod.admin import PayPeriodAdmin
@@ -119,7 +117,6 @@ class CustomAdminSite(admin.AdminSite):
 
         # 5. System Adjustments
         system_adjustments_models = [
-            create_model_entry(BiweeklyCron, "Biweekly Cron Jobs", "biweeklycron"),
             create_model_entry(Holiday, "Holidays", "holiday"),
             create_model_entry(PayPeriod, "Pay Periods", "payperiod"),
             create_model_entry(AllowIpAddress, "Allowed IP Addresses", "allowipaddress"),
@@ -159,7 +156,6 @@ hrms_admin_site.register(Group, GroupAdmin)
 hrms_admin_site.register(EmployeeType, EmployeeTypeAdmin)
 hrms_admin_site.register(Pay_Frequency, PayFrequencyAdmin)
 hrms_admin_site.register(AccrualRates, AccrualRatesAdmin)
-hrms_admin_site.register(BiweeklyCron, BiweeklyCronAdmin)
 hrms_admin_site.register(Holiday, HolidayAdmin)
 hrms_admin_site.register(PayPeriod, PayPeriodAdmin)
 hrms_admin_site.register(LeaveType, LeaveTypeAdmin)

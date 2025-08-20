@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     "accuralrates",
     "ptobalance",
     "timeclock",
-    "biweeklycron",
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "hrmsauth",
