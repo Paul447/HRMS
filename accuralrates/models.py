@@ -16,8 +16,9 @@ class AccrualRates(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Accrual Rate"
-        verbose_name_plural = "Accrual Rates"
+        db_table = "pto_accrual_rates"
+        verbose_name = "PTO Accrual Rate"
+        verbose_name_plural = "PTO Accrual Rates"
         unique_together = ("year_of_experience", "employee_type", "pay_frequency")  # Prevent duplicate entries
 
     def __str__(self):

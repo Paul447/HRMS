@@ -119,7 +119,7 @@ class CustomAdminSite(admin.AdminSite):
         system_adjustments_models = [
             create_model_entry(Holiday, "Holidays", "holiday"),
             create_model_entry(PayPeriod, "Pay Periods", "payperiod"),
-            create_model_entry(AllowIpAddress, "Allowed IP Addresses", "allowipaddress"),
+            create_model_entry(AllowIpAddress, "Whitelisted IP Addresses", "allowipaddress"),
             create_model_entry(Notification, "Notifications", "notificationapp"),
             create_model_entry(SickLeaveProratedValue, "Sick Leave Prorated Value", "sickpolicy"),
             create_model_entry(MaxSickValue, "Maximum Sick Values", "sickpolicy"),

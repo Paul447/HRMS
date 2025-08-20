@@ -10,8 +10,9 @@ class AllowIpAddress(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Allowed IP Address"
-        verbose_name_plural = "Allowed IP Addresses"
+        verbose_name = "Whitelisted IP Address"
+        verbose_name_plural = "Whitelisted IP Address"
+        db_table = "whitelisted_ip_addresses"
 
     def __str__(self):
         return self.ip_address
