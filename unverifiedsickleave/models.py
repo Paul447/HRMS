@@ -52,5 +52,6 @@ class SickLeaveBalance(models.Model):
 
 
     class Meta:
+        db_table = "sick_leave_balances"
         verbose_name = "Sick Leave Balance"
         verbose_name_plural = "Sick Leave Balances"

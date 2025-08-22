@@ -15,6 +15,7 @@ class SickLeaveProratedValue(models.Model):
     prorated_upfront_verified = models.DecimalField(max_digits=5, decimal_places=2, help_text="Base upfront verified sick leave 96 hrs. Automatically Prorated by FTE. Don't Modify unless the policy changes upfront verified sick leave value.", null=True, blank=True)
 
     class Meta:
+        db_table = "sick_leave_prorated_values"
         verbose_name = "Sick Leave Prorated Value"
         verbose_name_plural = "Sick Leave Prorated Values"
         unique_together = ("name", "fte_value")
@@ -65,6 +66,7 @@ class MaxSickValue(models.Model):
     threshold_FVSL = models.DecimalField(max_digits=5, decimal_places=2, default=96.0, help_text="Max 96 hrs/year for verified family care. Not prorated. Resets yearly.")
 
     class Meta:
+        db_table = "max_sick_value"
         verbose_name = "Maximum Sick Value (Global)"
         verbose_name_plural = "Maximum Sick Value (Global)"
 
