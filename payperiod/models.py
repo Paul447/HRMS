@@ -17,6 +17,7 @@ class PayPeriod(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At", help_text="The date and time when this pay period was last updated.")
 
     class Meta:
+        db_table = "pay_periods"
         verbose_name = "Pay Period"
         verbose_name_plural = "Pay Periods"
         ordering = ["start_date"]

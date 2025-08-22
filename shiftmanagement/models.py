@@ -47,6 +47,7 @@ class SquadShift(models.Model):
     shift_end = models.DateTimeField()
 
     class Meta:
+        db_table = "shift_assingments_to_squads"
         # Ensures a squad can only have one shift assigned at a given start time
         unique_together = ('squad', 'shift_start')
         ordering = ['shift_start', 'squad__name']

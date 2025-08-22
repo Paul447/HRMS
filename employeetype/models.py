@@ -9,3 +9,7 @@ class EmployeeType(models.Model):
 
     def __str__(self):
         return self.name
+    class Meta:
+        db_table = "employee_types"
+        verbose_name = "Employee Type"
+        verbose_name_plural = "Employee Types"

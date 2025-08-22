@@ -79,6 +79,7 @@ class Notification(models.Model):
 
     class Meta:
         # Order by newest first by default
+        db_table = "notifications"
         ordering = ["-timestamp"]
         # Essential for query performance
         indexes = [models.Index(fields=["recipient", "read", "-timestamp"]), models.Index(fields=["content_type", "object_id"])]  # Optimize for fetching unread/all notifications for a user  # Optimize for GenericForeignKey lookups

@@ -14,6 +14,7 @@ class Holiday(models.Model):
         return self.name
 
     class Meta:
+        db_table = "holidays"
         verbose_name = "Holiday"
         verbose_name_plural = "Holidays"
         ordering = ["date"]
