@@ -11,6 +11,11 @@ class YearOfExperience(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "experience_years"   # or keep "user_experience_years" if user-specific
+        verbose_name = "Years of Experience"
+        verbose_name_plural = "Years of Experience"
 
     def calculate_experience(self):
         """

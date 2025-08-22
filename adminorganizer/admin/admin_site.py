@@ -90,7 +90,7 @@ class CustomAdminSite(admin.AdminSite):
 
         # 2. Time Tracking
         time_tracking_models = [
-            create_model_entry(Clock, "Clocks", "timeclock")
+            create_model_entry(Clock, "Clock In/Out", "timeclock")
         ]
         app_list.append({"name": "Time Tracking", "app_label": "time_tracking", "has_module_perms": True, "models": time_tracking_models})
 

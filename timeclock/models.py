@@ -30,8 +30,9 @@ class Clock(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At", help_text="The date and time when this clock entry was last updated.")
 
     class Meta:
-        verbose_name = "Clock Entry"
-        verbose_name_plural = "Clock Entries"
+        db_table = "punch_entries"
+        verbose_name = "Punch Entry"
+        verbose_name_plural = "Punch Entries"
         ordering = ["-clock_in_time"]
 
     def __str__(self):
