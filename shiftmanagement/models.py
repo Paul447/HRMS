@@ -6,6 +6,10 @@ from django.contrib.auth.models import User
 class Squad(models.Model):
     # Changed max_length to 1 as per choices.
     name = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], unique=True)
+    class Meta:
+        db_table = "squads"
+        verbose_name = "Squad"
+        verbose_name_plural = "Squads"
 
     def __str__(self):
         return f"Squad {self.name}"
@@ -13,12 +17,22 @@ class Squad(models.Model):
 class ShiftType(models.Model):
     name = models.CharField(max_length=10, choices=[('DAY', 'Day Shift'), ('NIGHT', 'Night Shift')], unique=True)
 
+    class Meta:
+        db_table = "shift_types"
+        verbose_name = "Shift Type"
+        verbose_name_plural = "Shift Types"
+    
     def __str__(self):
         return self.name
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     squad = models.ForeignKey(Squad, on_delete=models.CASCADE) # Employee still belongs to a squad
+
+    class Meta:
+        db_table = "employees_in_squads"
+        verbose_name = "Squad Employee"
+        verbose_name_plural = "Squad Employees"
 
     def __str__(self):
         # Fallback to username if full name is not set

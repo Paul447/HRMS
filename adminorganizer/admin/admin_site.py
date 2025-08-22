@@ -56,9 +56,9 @@ from django_celery_results.models import TaskResult, GroupResult
 
 
 class CustomAdminSite(admin.AdminSite):
-    site_header = "HRMS Admin"
-    site_title = "DPS HRMS | Admin Portal"
-    index_title = "Welcome to DPS HRMS Admin"
+    site_header = "University Police Department Admin"
+    site_title = "University Police HRMS | Admin Portal"
+    index_title = "Welcome to University Police HRMS Admin"
 
     def get_app_list(self, request):
         app_list = []
@@ -95,39 +95,50 @@ class CustomAdminSite(admin.AdminSite):
         app_list.append({"name": "Time Tracking", "app_label": "time_tracking", "has_module_perms": True, "models": time_tracking_models})
 
         # 3. Leave & Balance
-        leave_balance_models = [
+        user_balance = [
             create_model_entry(PTOBalance, "PTO Balances", "ptobalance"),
+            create_model_entry(SickLeaveBalance, "Sick Leave Balances", "unverifiedsickleave")
+
+        ]
+
+        app_list.append({"name": "User Balance", "app_label": "leave_balance_management", "has_module_perms": True, "models": user_balance})
+
+        # Leave Management
+        leave_management_models = [
             create_model_entry(TimeoffRequest, "Time Off Requests", "timeoffreq"),
             create_model_entry(LeaveType, "Leave Types", "leavetype"),
             create_model_entry(DepartmentBasedLeaveType, "Unit Based Leave Types", "leavetype"),
-            create_model_entry(Squad, "Squads", "shiftmanagement"),
-            create_model_entry(ShiftType, "Shift Types", "shiftmanagement"),
-            create_model_entry(Employee, "Employees", "shiftmanagement"), 
-            create_model_entry(SquadShift, "Shift Assignments", "shiftmanagement")  
-        ]
-        app_list.append({"name": "Leave & Balance", "app_label": "leave_balance_management", "has_module_perms": True, "models": leave_balance_models})
-
-        # 4. Compensation & Accruals
-        comp_accruals_models = [
             create_model_entry(EmployeeType, "Employee Types", "employeetype"),
             create_model_entry(Pay_Frequency, "Pay Frequencies", "payfrequency"),
-            create_model_entry(AccrualRates, "Accrual Rates", "accuralrates")
+        ]
+        app_list.append({"name": "Leave Management", "app_label": "leave_management", "has_module_perms": True, "models": leave_management_models})
+        # 4. Shift Management and Assignments
+        shift_management_models = [
+            create_model_entry(Squad, "Squads", "shiftmanagement"),
+            create_model_entry(ShiftType, "Shift Types", "shiftmanagement"),
+            create_model_entry(Employee, "Employees", "shiftmanagement"),
+            create_model_entry(SquadShift, "Squad Shifts", "shiftmanagement")
+        ]
+        app_list.append({"name": "Shift Management", "app_label": "shift_management", "has_module_perms": True, "models": shift_management_models})
+
+        # 5. Compensation & Accruals
+        comp_accruals_models = [
+            create_model_entry(AccrualRates, "Accrual Rates", "accuralrates"),
+            create_model_entry(SickLeaveProratedValue, "Sick Leave Prorated Value", "sickpolicy"),
+            create_model_entry(MaxSickValue, "Maximum Sick Values", "sickpolicy"),
         ]
         app_list.append({"name": "Compensation & Accruals", "app_label": "compensation_accruals", "has_module_perms": True, "models": comp_accruals_models})
 
-        # 5. System Adjustments
+        # 6. System Adjustments
         system_adjustments_models = [
             create_model_entry(Holiday, "Holidays", "holiday"),
             create_model_entry(PayPeriod, "Pay Periods", "payperiod"),
             create_model_entry(AllowIpAddress, "Whitelisted IP Addresses", "allowipaddress"),
-            create_model_entry(Notification, "Notifications", "notificationapp"),
-            create_model_entry(SickLeaveProratedValue, "Sick Leave Prorated Value", "sickpolicy"),
-            create_model_entry(MaxSickValue, "Maximum Sick Values", "sickpolicy"),
-            create_model_entry(SickLeaveBalance, "Sick Leave Balances", "unverifiedsickleave")
+            create_model_entry(Notification, "Notifications", "notificationapp"),            
         ]
         app_list.append({"name": "System Adjustments", "app_label": "system_adjustments", "has_module_perms": True, "models": system_adjustments_models})
 
-        # 6. Background Tasks (Celery)
+        # 7. Background Tasks (Celery)
         celery_models = [
             create_model_entry(PeriodicTask, "Periodic Tasks", "django_celery_beat"),
             create_model_entry(CrontabSchedule, "Crontab Schedules", "django_celery_beat"),
