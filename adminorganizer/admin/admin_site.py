@@ -99,7 +99,7 @@ class CustomAdminSite(admin.AdminSite):
             create_model_entry(PTOBalance, "PTO Balances", "ptobalance"),
             create_model_entry(TimeoffRequest, "Time Off Requests", "timeoffreq"),
             create_model_entry(LeaveType, "Leave Types", "leavetype"),
-            create_model_entry(DepartmentBasedLeaveType, "Department Based Leave Types", "leavetype"),
+            create_model_entry(DepartmentBasedLeaveType, "Unit Based Leave Types", "leavetype"),
             create_model_entry(Squad, "Squads", "shiftmanagement"),
             create_model_entry(ShiftType, "Shift Types", "shiftmanagement"),
             create_model_entry(Employee, "Employees", "shiftmanagement"), 

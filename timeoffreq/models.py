@@ -33,6 +33,7 @@ class TimeoffRequest(models.Model):
     reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name="Reviewed At", help_text="Timestamp when the time off request was last reviewed (approved or rejected)")
 
     class Meta:
+        db_table = "time_off_requests"
         verbose_name = "Time Off Request"
         verbose_name_plural = "Time Off Requests"
         ordering = ["-created_at"]

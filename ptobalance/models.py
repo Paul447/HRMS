@@ -27,6 +27,7 @@ class PTOBalance(models.Model):
         return f"{self.user.username} - PTO: {self.pto_balance}"
 
     class Meta:
+        db_table = "pto_balances"
         constraints = [models.CheckConstraint(check=Q(pto_balance__lte=340), name="PTO_balance_max_340")]
         verbose_name = "PTO Balance"
         verbose_name_plural = "PTO Balance"

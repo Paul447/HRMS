@@ -9,6 +9,10 @@ class LeaveType(models.Model):
 
     def __str__(self):
         return self.name
+    class Meta:
+        db_table = "leave_types"
+        verbose_name = "Leave Type"
+        verbose_name_plural = "Leave Types"
 
 
 class DepartmentBasedLeaveType(models.Model):
@@ -21,6 +25,7 @@ class DepartmentBasedLeaveType(models.Model):
         return f"{self.department.name} - {self.leave_type.name}"
 
     class Meta:
-        verbose_name = "Department Leave Type"
-        verbose_name_plural = "Department Leave Types"
+        db_table = "unit_based_leave_types"
+        verbose_name = "Unit Leave Type"
+        verbose_name_plural = "Unit Leave Types"
         unique_together = ("department", "leave_type")
