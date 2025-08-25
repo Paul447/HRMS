@@ -175,7 +175,7 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_TRUSTED_ORIGINS = ['https://2c15dd26add0.ngrok-free.app']
 
 SPECTACULAR_SETTINGS.update({
-    "TITLE": "Human Resource Management System API",
+    "TITLE": "University Police Department Time Clock System",
     "DESCRIPTION": "Your project description",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,

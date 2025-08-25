@@ -56,9 +56,9 @@ from django_celery_results.models import TaskResult, GroupResult
 
 
 class CustomAdminSite(admin.AdminSite):
-    site_header = "University Police Department Admin"
-    site_title = "University Police Department HRMS | Admin Portal"
-    index_title = "Welcome to University Police Department HRMS Admin"
+    site_header = "UP Time Clock System Admin"
+    site_title = "UP Time Clock System | Admin Portal"
+    index_title = "Welcome to University Police Time Clock System Admin"
 
     def get_app_list(self, request):
         app_list = []
