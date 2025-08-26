@@ -37,27 +37,38 @@ APP_DIRS = True
 # Application definition
 
 INSTALLED_APPS = [
+    # Django default apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Third-party apps
     "django_extensions",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "django_filters",
+    "django_celery_beat",
+    "django_celery_results",
+    "ipware",
+
+    # Local apps
+    "hrmsauth",
+    "usermanagement",
+    "department",
     "payfrequency",
     "employeetype",
     "yearofexperience",
     "accuralrates",
     "ptobalance",
     "timeclock",
-    "drf_spectacular",
-    "drf_spectacular_sidecar",
-    "hrmsauth",
-    "department",
+    "shiftmanagement",
     "leavetype",
     "payperiod",
     "holiday",
@@ -73,13 +84,8 @@ INSTALLED_APPS = [
     "timeoffreq",
     "usertimeoffbalance",
     "decisionedtimeoff",
-    "usermanagement",
-    "django_filters",
-    "django_celery_beat",
-    "django_celery_results",
-    "shiftmanagement",
-    "ipware",
 ]
+
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
