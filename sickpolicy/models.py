@@ -66,9 +66,9 @@ class MaxSickValue(models.Model):
     threshold_FVSL = models.DecimalField(max_digits=5, decimal_places=2, default=96.0, help_text="Max 96 hrs/year for verified family care. Not prorated. Resets yearly.")
 
     class Meta:
-        db_table = "max_sick_value"
-        verbose_name = "Maximum Sick Value (Global)"
-        verbose_name_plural = "Maximum Sick Value (Global)"
+        db_table = "sick_leave_constants"
+        verbose_name = "Sick Leave Constants value (Global)"
+        verbose_name_plural = "Sick Leave Constants (Global)"
 
     def save(self, *args, **kwargs):
         if MaxSickValue.objects.exists() and not self.pk:

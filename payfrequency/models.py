@@ -7,7 +7,7 @@ class Pay_Frequency(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "pay_frequencies"
+        db_table = "payfrequencies"
         verbose_name = "Pay Frequency"
         verbose_name_plural = "Pay Frequencies"
 
