@@ -105,4 +105,3 @@ To enable event tracking:
 ------------------------------------------------------------
 Once all the above steps are completed, your HRMS application should be fully operational.
 ------------------------------------------------------------
-<img width="468" height="648" alt="image" src="https://github.com/user-attachments/assets/f91ba8f5-f79d-4e6d-a7e3-d1eed3245fa3" />
