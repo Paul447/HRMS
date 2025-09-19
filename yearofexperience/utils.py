@@ -44,6 +44,7 @@ def update_experience_records():
                     updated_experience_count += 1
                     logger.debug(f"Updated experience for user '{exp.user.username}' to {exp.years_of_experience} years.")
 
+
             pto_balance_records = PTOBalance.objects.select_related(
                 "user", "employee_type", "pay_frequency", "user__experience"
             ).all()
