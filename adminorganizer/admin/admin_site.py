@@ -47,12 +47,8 @@ from leavetype.models import LeaveType, DepartmentBasedLeaveType
 from shiftmanagement.admin import SquadAdmin , ShiftTypeAdmin, EmployeeAdmin, SquadShiftAdmin
 from shiftmanagement.models import Squad, ShiftType, Employee, SquadShift
 
-# Celery (Beat + Results) Models
-from django_celery_beat.models import (
-    PeriodicTask, CrontabSchedule, IntervalSchedule,
-    SolarSchedule, ClockedSchedule
-)
-from django_celery_results.models import TaskResult, GroupResult
+
+# from django_celery_results.models import TaskResult, GroupResult
 
 
 class CustomAdminSite(admin.AdminSite):
@@ -139,16 +135,6 @@ class CustomAdminSite(admin.AdminSite):
         app_list.append({"name": "System Adjustments", "app_label": "system_adjustments", "has_module_perms": True, "models": system_adjustments_models})
 
         # 7. Background Tasks (Celery)
-        celery_models = [
-            create_model_entry(PeriodicTask, "Periodic Tasks", "django_celery_beat"),
-            create_model_entry(CrontabSchedule, "Crontab Schedules", "django_celery_beat"),
-            create_model_entry(IntervalSchedule, "Interval Schedules", "django_celery_beat"),
-            create_model_entry(SolarSchedule, "Solar Schedules", "django_celery_beat"),
-            create_model_entry(ClockedSchedule, "Clocked Schedules", "django_celery_beat"),
-            create_model_entry(TaskResult, "Task Results", "django_celery_results"),
-            create_model_entry(GroupResult, "Group Results", "django_celery_results"),
-        ]
-        app_list.append({"name": "Background Tasks (Celery)", "app_label": "celery_management", "has_module_perms": True, "models": celery_models})
 
         return app_list
 
@@ -184,11 +170,4 @@ hrms_admin_site.register(ShiftType, ShiftTypeAdmin)
 hrms_admin_site.register(Employee, EmployeeAdmin)
 hrms_admin_site.register(SquadShift, SquadShiftAdmin)
 
-# Register Celery models
-hrms_admin_site.register(PeriodicTask)
-hrms_admin_site.register(CrontabSchedule)
-hrms_admin_site.register(IntervalSchedule)
-hrms_admin_site.register(SolarSchedule)
-hrms_admin_site.register(ClockedSchedule)
-hrms_admin_site.register(TaskResult)
-hrms_admin_site.register(GroupResult)
+

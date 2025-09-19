@@ -17,10 +17,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as broker
-CELERY_RESULT_BACKEND = 'django-db'  # Store results in DB
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -54,8 +50,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "django_filters",
-    "django_celery_beat",
-    "django_celery_results",
     "ipware",
 
     # Local apps
@@ -87,7 +81,6 @@ INSTALLED_APPS = [
 ]
 
 
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 IPWARE_TRUSTED_PROXIES = ["127.0.0.1"]
@@ -244,7 +237,7 @@ WSGI_APPLICATION = "HRMS.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'HRMS',               # Your database name
+        'NAME': 'UPTIMECLOCK',               # Your database name
         'USER': 'sa',                   # SQL Server username
         'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
         'HOST': 'localhost',            # Or container IP if using Docker

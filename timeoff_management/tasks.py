@@ -1,6 +1,4 @@
 # pto/tasks.py
-
-from celery import shared_task
 import logging
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -13,7 +11,6 @@ from timeoffreq.models import TimeoffRequest
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-@shared_task
 def send_pto_notification_and_email_task(time_off_id, reviewer_id, new_status):
     try:
         time_off_instance = TimeoffRequest.objects.get(id=time_off_id)
