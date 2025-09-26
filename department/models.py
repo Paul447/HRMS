@@ -19,6 +19,8 @@ class Department(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField("auth.User", on_delete=models.CASCADE, related_name="profile")
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    employee_type = models.ForeignKey("employeetype.EmployeeType", on_delete=models.SET_NULL, null=True, blank=True)
+    payfreq = models.ForeignKey("payfrequency.Pay_Frequency", on_delete=models.SET_NULL, null=True, blank=True)
     tenure = models.DecimalField(max_digits=4, decimal_places=2, default=0.0,null=True, editable=False)
     is_time_off = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
