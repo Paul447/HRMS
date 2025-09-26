@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .models import PTOBalance
-from .serializer import PTOBalanceSerializer
+# from .serializer import PTOBalanceSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import redirect
@@ -12,21 +12,21 @@ from rest_framework.exceptions import NotAuthenticated
 # Create your views here.
 
 
-class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = PTOBalanceSerializer
+# class PTOBalanceViewSet(viewsets.ReadOnlyModelViewSet):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = PTOBalanceSerializer
 
-    def get_queryset(self):
-        user = self.request.user
-        return PTOBalance.objects.filter(user=user)
+#     def get_queryset(self):
+#         user = self.request.user
+#         return PTOBalance.objects.filter(user=user)
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"detail": "PTO balance not found."}, status=404)
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+#         if not queryset.exists():
+#             return Response({"detail": "PTO balance not found."}, status=404)
 
-        serializer = self.get_serializer(queryset.first())
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#         serializer = self.get_serializer(queryset.first())
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PTOBalanceView(APIView):

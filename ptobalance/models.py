@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from employeetype.models import EmployeeType
-from payfrequency.models import Pay_Frequency
-from yearofexperience.models import YearOfExperience
 from accuralrates.models import AccrualRates
 from django.core.validators import MaxValueValidator
 from django.db.models import Q, F
@@ -11,9 +8,6 @@ from django.db.models import Q, F
 # Create your models here.
 class PTOBalance(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="pto_balance")
-    employee_type = models.ForeignKey(EmployeeType, on_delete=models.CASCADE, related_name="pto_balances")
-    pay_frequency = models.ForeignKey(Pay_Frequency, on_delete=models.CASCADE, related_name="pto_balances")
-    year_of_experience = models.ForeignKey(YearOfExperience, on_delete=models.CASCADE, related_name="pto_balances", editable=False)
     accrual_rate = models.ForeignKey(AccrualRates, on_delete=models.CASCADE, related_name="pto_balances", editable=False)
     pto_balance = models.DecimalField(max_digits=5, decimal_places=2, default=0.0, validators=[MaxValueValidator(340)])  # PTO balance field
     created_at = models.DateTimeField(auto_now_add=True)

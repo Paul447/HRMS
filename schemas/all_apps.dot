@@ -1,5 +1,5 @@
 digraph model_graph {
-	graph [bb="0,0,3126,683.5",
+	graph [bb="0,0,3348,683.5",
 		fontname=Roboto,
 		fontsize=8,
 		rankdir=TB,
@@ -14,7 +14,7 @@ digraph model_graph {
 		fontsize=8
 	];
 	subgraph cluster_department {
-		graph [bb="8,14.5,226,353",
+		graph [bb="459,14.5,689,372.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -26,7 +26,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="117,339.38",
+			lp="574,358.88",
 			lwidth=2.30,
 			style=rounded
 		];
@@ -72,9 +72,9 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="117,64.125",
+			pos="588,64.125",
 			width=2.3924];
-		department_models_UserProfile	[height=1.3368,
+		department_models_UserProfile	[height=1.8785,
 			label=<
       <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
       <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
@@ -93,6 +93,22 @@ digraph model_graph {
     
       <TR><TD ALIGN="LEFT" BORDER="0">
       <FONT COLOR="#7B7B7B" FACE="Roboto"><B>Department</B></FONT>
+      </TD><TD ALIGN="LEFT">
+      <FONT COLOR="#7B7B7B" FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+      </TD></TR>
+    
+    
+    
+      <TR><TD ALIGN="LEFT" BORDER="0">
+      <FONT COLOR="#7B7B7B" FACE="Roboto"><B>Employee type</B></FONT>
+      </TD><TD ALIGN="LEFT">
+      <FONT COLOR="#7B7B7B" FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+      </TD></TR>
+    
+    
+    
+      <TR><TD ALIGN="LEFT" BORDER="0">
+      <FONT COLOR="#7B7B7B" FACE="Roboto"><B>Payfreq</B></FONT>
       </TD><TD ALIGN="LEFT">
       <FONT COLOR="#7B7B7B" FACE="Roboto"><B>ForeignKey (id)</B></FONT>
       </TD></TR>
@@ -122,19 +138,27 @@ digraph model_graph {
       </TD></TR>
     
     
+    
+      <TR><TD ALIGN="LEFT" BORDER="0">
+      <FONT FACE="Roboto">Tenure</FONT>
+      </TD><TD ALIGN="LEFT">
+      <FONT FACE="Roboto">DecimalField</FONT>
+      </TD></TR>
+    
+    
       </TABLE>
       >,
-			pos="117,269.62",
-			width=2.7986];
+			pos="574,269.62",
+			width=2.9653];
 		department_models_UserProfile -> department_models_Department	[arrowhead=none,
 			arrowtail=dot,
 			dir=both,
 			label=" Department (Userprofile)",
-			lp="114.88,160",
-			pos="s,81.804,221.62 77.892,213.99 69.194,195.8 63.829,175.16 68.75,155.5 73.068,138.25 81.374,120.68 89.895,105.68"];
+			lp="627.88,160",
+			pos="s,578.54,202.23 579.14,193.51 580.01,180.82 580.9,167.79 581.75,155.5 582.87,139.18 584.12,121.21 585.19,105.61"];
 	}
 	subgraph cluster_payfrequency {
-		graph [bb="2459,14.5,2650,141",
+		graph [bb="243,14.5,434,141",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -146,7 +170,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2554.5,127.38",
+			lp="338.5,127.38",
 			lwidth=2.43,
 			style=rounded
 		];
@@ -192,11 +216,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2554,64.125",
+			pos="338,64.125",
 			width=2.3924];
 	}
 	subgraph cluster_employeetype {
-		graph [bb="2695,14.5,2888,141",
+		graph [bb="8,14.5,201,141",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -208,7 +232,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2791.5,127.38",
+			lp="104.5,127.38",
 			lwidth=2.47,
 			style=rounded
 		];
@@ -254,11 +278,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2791,64.125",
+			pos="104,64.125",
 			width=2.3924];
 	}
 	subgraph cluster_yearofexperience {
-		graph [bb="1256,213.5,1498,353",
+		graph [bb="1108,213.5,1350,353",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -270,7 +294,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="1377,339.38",
+			lp="1229,339.38",
 			lwidth=2.66,
 			style=rounded
 		];
@@ -324,11 +348,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1377,269.62",
+			pos="1229,269.62",
 			width=3.1424];
 	}
 	subgraph cluster_accuralrates {
-		graph [bb="2636,194,2862,372.5",
+		graph [bb="112,194,338,372.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -340,7 +364,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2749,358.88",
+			lp="225,358.88",
 			lwidth=2.35,
 			style=rounded
 		];
@@ -418,11 +442,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2749,269.62",
+			pos="225,269.62",
 			width=2.9236];
 	}
 	subgraph cluster_ptobalance {
-		graph [bb="2396,451.5,2640,643",
+		graph [bb="938,471,1158,623.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -434,11 +458,11 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2518,629.38",
+			lp="1048,609.88",
 			lwidth=2.28,
 			style=rounded
 		];
-		ptobalance_models_PTOBalance	[height=2.059,
+		ptobalance_models_PTOBalance	[height=1.5174,
 			label=<
       <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
       <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
@@ -464,33 +488,9 @@ digraph model_graph {
     
     
       <TR><TD ALIGN="LEFT" BORDER="0">
-      <FONT FACE="Roboto"><B>Employee type</B></FONT>
-      </TD><TD ALIGN="LEFT">
-      <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
-      </TD></TR>
-    
-    
-    
-      <TR><TD ALIGN="LEFT" BORDER="0">
-      <FONT FACE="Roboto"><B>Pay frequency</B></FONT>
-      </TD><TD ALIGN="LEFT">
-      <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
-      </TD></TR>
-    
-    
-    
-      <TR><TD ALIGN="LEFT" BORDER="0">
       <FONT FACE="Roboto"><B>User</B></FONT>
       </TD><TD ALIGN="LEFT">
       <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
-      </TD></TR>
-    
-    
-    
-      <TR><TD ALIGN="LEFT" BORDER="0">
-      <FONT FACE="Roboto"><B>Year of experience</B></FONT>
-      </TD><TD ALIGN="LEFT">
-      <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
       </TD></TR>
     
     
@@ -520,11 +520,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2518,533.62",
-			width=3.1736];
+			pos="1048,533.62",
+			width=2.8194];
 	}
 	subgraph cluster_timeclock {
-		graph [bb="1104,451.5,1350,643",
+		graph [bb="2069,451.5,2315,643",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -536,7 +536,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="1227,629.38",
+			lp="2192,629.38",
 			lwidth=2.19,
 			style=rounded
 		];
@@ -622,11 +622,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1227,533.62",
+			pos="2192,533.62",
 			width=3.1944];
 	}
 	subgraph cluster_shiftmanagement {
-		graph [bb="1866,27.5,2262,353",
+		graph [bb="2944,27.5,3340,353",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -638,7 +638,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2064,339.38",
+			lp="3142,339.38",
 			lwidth=2.68,
 			style=rounded
 		];
@@ -668,7 +668,7 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1983,64.125",
+			pos="3057,64.125",
 			width=2.1424];
 		shiftmanagement_models_ShiftType	[height=0.79514,
 			label=<
@@ -696,7 +696,7 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2164,64.125",
+			pos="3242,64.125",
 			width=2.1424];
 		shiftmanagement_models_Employee	[height=0.97569,
 			label=<
@@ -732,14 +732,14 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1965,269.62",
+			pos="3043,269.62",
 			width=2.5174];
 		shiftmanagement_models_Employee -> shiftmanagement_models_Squad	[arrowhead=none,
 			arrowtail=dot,
 			dir=both,
 			label=" Squad (Employee)",
-			lp="2009,160",
-			pos="s,1968,234.56 1968.8,225.78 1972.3,185.57 1977.6,126.63 1980.6,92.442"];
+			lp="3084.9,160",
+			pos="s,3045.3,234.56 3045.9,225.78 3048.7,185.57 3052.8,126.63 3055.1,92.442"];
 		shiftmanagement_models_SquadShift	[height=1.3368,
 			label=<
       <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
@@ -790,23 +790,23 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2164,269.62",
+			pos="3242,269.62",
 			width=2.4965];
 		shiftmanagement_models_SquadShift -> shiftmanagement_models_Squad	[arrowhead=none,
 			arrowtail=dot,
 			dir=both,
 			label=" Squad (Squadshift)",
-			lp="2103.7,160",
-			pos="s,2122.2,221.68 2116.3,215 2081.4,175.72 2035.4,124.02 2007.6,92.747"];
+			lp="3179.6,160",
+			pos="s,3199.3,221.68 3193.7,215.48 3157.9,176.15 3110.7,124.15 3082.1,92.747"];
 		shiftmanagement_models_SquadShift -> shiftmanagement_models_ShiftType	[arrowhead=none,
 			arrowtail=dot,
 			dir=both,
 			label=" Shift type (Squadshift)",
-			lp="2204.5,160",
-			pos="s,2164,221.68 2164,213.04 2164,174.02 2164,123.5 2164,92.747"];
+			lp="3282.5,160",
+			pos="s,3242,221.68 3242,213.04 3242,174.02 3242,123.5 3242,92.747"];
 	}
 	subgraph cluster_leavetype {
-		graph [bb="310,14.5,514,353",
+		graph [bb="896,14.5,1100,353",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -818,7 +818,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="412,339.38",
+			lp="998,339.38",
 			lwidth=2.17,
 			style=rounded
 		];
@@ -864,7 +864,7 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="404,64.125",
+			pos="990,64.125",
 			width=2.3924];
 		leavetype_models_DepartmentBasedLeaveType	[height=1.3368,
 			label=<
@@ -916,17 +916,17 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="412,269.62",
+			pos="998,269.62",
 			width=2.6007];
 		leavetype_models_DepartmentBasedLeaveType -> leavetype_models_LeaveType	[arrowhead=none,
 			arrowtail=dot,
 			dir=both,
 			label=" Leave type (Departmentbasedleavetype)",
-			lp="444.12,160",
-			pos="s,388.72,221.58 385.42,213.62 379.18,198.1 373.42,180.95 370.25,164.5 366.42,144.64 372.25,123.32 380.09,105.54"];
+			lp="1067.6,160",
+			pos="s,996.15,221.68 995.81,212.81 994.47,178.89 992.8,136.35 991.59,105.64"];
 	}
 	subgraph cluster_payperiod {
-		graph [bb="2270,213.5,2490,353",
+		graph [bb="2013,213.5,2233,353",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -938,7 +938,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2380,339.38",
+			lp="2123,339.38",
 			lwidth=2.22,
 			style=rounded
 		];
@@ -992,11 +992,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2380,269.62",
+			pos="2123,269.62",
 			width=2.8403];
 	}
 	subgraph cluster_holiday {
-		graph [bb="2648,471,2836,623.5",
+		graph [bb="2565,471,2753,623.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1008,7 +1008,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2742,609.88",
+			lp="2659,609.88",
 			lwidth=2.05,
 			style=rounded
 		];
@@ -1070,11 +1070,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2742,533.62",
+			pos="2659,533.62",
 			width=2.3924];
 	}
 	subgraph cluster_allowipaddress {
-		graph [bb="2844,471,3062,623.5",
+		graph [bb="2882,471,3100,623.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1086,7 +1086,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="2953,609.88",
+			lp="2991,609.88",
 			lwidth=2.55,
 			style=rounded
 		];
@@ -1148,11 +1148,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="2953,533.62",
+			pos="2991,533.62",
 			width=2.7986];
 	}
 	subgraph cluster_notificationapp {
-		graph [bb="1030,174.5,1248,392",
+		graph [bb="1787,174.5,2005,392",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1164,7 +1164,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="1139,378.38",
+			lp="1896,378.38",
 			lwidth=2.54,
 			style=rounded
 		];
@@ -1266,11 +1266,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1139,269.62",
+			pos="1896,269.62",
 			width=2.7986];
 	}
 	subgraph cluster_sickpolicy {
-		graph [bb="1342,8,1858,147.5",
+		graph [bb="2420,8,2936,147.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1282,7 +1282,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="1600,133.88",
+			lp="2678,133.88",
 			lwidth=2.23,
 			style=rounded
 		];
@@ -1336,7 +1336,7 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1468,64.125",
+			pos="2546,64.125",
 			width=3.2882];
 		sickpolicy_models_MaxSickValue	[height=1.3368,
 			label=<
@@ -1388,11 +1388,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1727,64.125",
+			pos="2805,64.125",
 			width=3.4097];
 	}
 	subgraph cluster_unverifiedsickleave {
-		graph [bb="1606,187.5,1858,379",
+		graph [bb="2371,187.5,2623,379",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1404,7 +1404,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="1732,365.38",
+			lp="2497,365.38",
 			lwidth=2.81,
 			style=rounded
 		];
@@ -1490,11 +1490,11 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="1732,269.62",
+			pos="2497,269.62",
 			width=3.2882];
 	}
 	subgraph cluster_timeoffreq {
-		graph [bb="601,419,831,675.5",
+		graph [bb="1463,419,1693,675.5",
 			color=olivedrab4,
 			label=<
           <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1506,7 +1506,7 @@ digraph model_graph {
           </TABLE>
           >,
 			lheight=0.27,
-			lp="716,661.88",
+			lp="1578,661.88",
 			lwidth=2.23,
 			style=rounded
 		];
@@ -1632,9 +1632,22 @@ digraph model_graph {
     
       </TABLE>
       >,
-			pos="716,533.62",
+			pos="1578,533.62",
 			width=2.9653];
 	}
+	department_models_UserProfile -> payfrequency_models_Pay_Frequency	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Payfreq (Userprofile)",
+		lp="507.47,160",
+		pos="s,509.48,202.13 503.38,196.21 489.02,182.34 473.78,168.19 459,155.5 439.01,138.34 416.06,120.72 395.57,105.65"];
+	department_models_UserProfile -> employeetype_models_EmployeeType	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Employee type (Userprofile)",
+		lp="404,160",
+		pos="s,467.47,218.49 459.75,214.85 425.42,198.68 387.67,180.88 353,164.5 344.55,160.51 343.02,157.93 334,155.5 293.09,144.48 279.27,160.67 \
+239,147.5 210.16,138.07 181.07,121.44 157.31,105.57"];
 	django_contrib_auth_models_User	[height=0.5,
 		label=<
   <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1643,104 +1656,81 @@ digraph model_graph {
   </TD></TR>
   </TABLE>
   >,
-		pos="1161,64.125",
+		pos="1699,64.125",
 		width=0.8125];
 	department_models_UserProfile -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=none,
 		dir=both,
-		label=" User (Userprofile)",
-		lp="574.62,160",
-		pos="193.23,221.61 226.59,203.46 266.98,184.66 306,174.5 397.29,150.74 425.71,184 518,164.5 528.84,162.21 530.53,158.32 541.25,155.5 \
-763.93,96.961 1042.2,73.431 1131.8,67.045"];
+		label=" User (Profile)",
+		lp="751.88,160",
+		pos="644.83,202.11 669.01,183.45 697.4,165.53 726.75,155.5 766.42,141.94 1062.2,150.82 1104,147.5 1322.8,130.09 1584.1,85.616 1670,70.357"];
 	yearofexperience_models_YearOfExperience -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=none,
 		dir=both,
 		label=" User (Experience)",
-		lp="1329.2,160",
-		pos="1349.5,221.6 1333,197.8 1309.9,170.78 1282,155.5 1258,142.36 1244.5,161.46 1221,147.5 1195.3,132.23 1177.4,101.22 1168.2,81.911"];
+		lp="1330.2,160",
+		pos="1246.5,221.54 1257.5,198.33 1273.9,171.87 1296.5,155.5 1357.3,111.49 1588.1,78.988 1670,68.631"];
 	accuralrates_models_AccrualRates -> payfrequency_models_Pay_Frequency	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Pay frequency (Accrual rates)",
-		lp="2699.7,160",
-		pos="s,2685.4,202.27 2679.3,195.85 2650.2,165.48 2617.5,131.35 2592.8,105.58"];
+		lp="280,160",
+		pos="s,216.06,202.09 216.54,193.11 217.61,180.11 220.41,167.07 226,155.5 235.46,135.93 251.43,119.22 268.38,105.7"];
 	accuralrates_models_AccrualRates -> employeetype_models_EmployeeType	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Employee type (Accrual rates)",
-		lp="2821.2,160",
-		pos="s,2758,202 2759.5,193.3 2761.6,180.64 2763.9,167.66 2766.5,155.5 2770,138.96 2774.7,120.95 2779.1,105.38"];
-	ptobalance_models_PTOBalance -> payfrequency_models_Pay_Frequency	[arrowhead=none,
-		arrowtail=dot,
-		dir=both,
-		label=" Pay frequency (Pto balances)",
-		lp="2578.4,269.62",
-		pos="s,2514.2,459.51 2513.9,450.81 2511.6,377.93 2511.5,268.58 2524.8,174.5 2528,151.34 2534.6,126.08 2540.6,105.67"];
-	ptobalance_models_PTOBalance -> employeetype_models_EmployeeType	[arrowhead=none,
-		arrowtail=dot,
-		dir=both,
-		label=" Employee type (Pto balances)",
-		lp="2966.7,269.62",
-		pos="s,2583.6,459.58 2590,454.04 2606.5,440.26 2624.8,427.6 2644,419 2689.4,398.71 2832.4,428.64 2866,392 2937.1,314.44 2914.8,253.3 \
-2876,155.5 2868.6,136.88 2855.4,119.86 2841.5,105.74"];
-	ptobalance_models_PTOBalance -> yearofexperience_models_YearOfExperience	[arrowhead=none,
-		arrowtail=dot,
-		dir=both,
-		label=" Year of experience (Pto balances)",
-		lp="1182.5,404.5",
-		pos="s,2403.8,519.39 2395.1,518.41 2183,494.36 1734.3,445.7 1354,419 1341.1,418.09 1130,418.36 1121,409 1118.2,406.11 1118.3,402.91 1121,\
-400 1131,389.38 1238.7,397.89 1252,392 1288.2,375.99 1320.1,344.59 1342.6,317.73"];
+		lp="164.25,160",
+		pos="s,135.61,202.24 129.9,195.68 121.87,186.01 114.8,175.58 109.5,164.5 100.85,146.42 98.91,124.32 99.375,105.56"];
 	ptobalance_models_PTOBalance -> accuralrates_models_AccrualRates	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Accrual rate (Pto balances)",
-		lp="2683,404.5",
-		pos="s,2582.3,459.64 2588,453.26 2620.7,416.09 2659.3,372.32 2690.5,336.94"];
+		lp="550.98,404.5",
+		pos="s,946.56,516.63 937.98,515.14 817.04,493.95 618.24,453.29 455,392 412.73,376.13 368.39,354.14 330.05,333.23"];
 	ptobalance_models_PTOBalance -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=none,
 		dir=both,
 		label=" User (Pto balance)",
-		lp="1567.1,269.62",
-		pos="2403.8,532.88 2170.7,530.85 1652.4,512.54 1532.2,392 1463.4,322.87 1571.4,243.09 1502,174.5 1489.4,162.06 1440.5,167.02 1423,164.5 \
-1398,160.92 1392.1,158.19 1367,155.5 1350.8,153.76 1235.3,155.26 1221,147.5 1194.6,133.13 1176.8,101.52 1167.8,81.904"];
+		lp="1415.1,269.62",
+		pos="1149.5,513.01 1218.5,494.12 1305.7,458.25 1354,392 1411.4,313.33 1319,250.2 1380.2,174.5 1453.7,83.756 1606.2,68.021 1670,65.496"];
 	timeclock_models_Clock -> payperiod_models_PayPeriod	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Associated Pay Period (Clocks)",
-		lp="2294.9,404.5",
-		pos="s,1341.7,526.74 1350.5,526.23 1590.1,512.16 2108.6,473.1 2266,392 2299.3,374.86 2328.1,344 2348.4,317.69"];
+		lp="2190.4,404.5",
+		pos="s,2152.4,459.75 2148.8,451.64 2142.9,437.74 2137.5,423.19 2133.8,409 2125.9,379.19 2123.2,344.59 2122.5,317.45"];
 	timeclock_models_Clock -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Employee (Clocks)",
-		lp="991.5,269.62",
-		pos="s,1112.1,503.45 1104,500.42 1048.9,479.2 989.27,445.19 957,392 906.86,309.35 907.36,257.45 957,174.5 995.28,110.54 1085.2,81.842 \
-1131.8,70.888"];
+		lp="2308.5,269.62",
+		pos="s,2230.2,459.56 2233.7,451.47 2268.3,371.56 2302.1,250.71 2237,174.5 2169.8,95.89 1830,71.96 1728,66.494"];
 	shiftmanagement_models_Employee -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=none,
 		dir=both,
 		label=" User (Employee)",
-		lp="1870.6,160",
-		pos="1936.2,234.78 1917.1,214.43 1890.5,189.61 1862,174.5 1830.1,157.56 1818.8,160.01 1783,155.5 1752,151.6 1248.7,161.86 1221,147.5 \
-1194.3,133.67 1176.6,101.88 1167.7,82.086"];
+		lp="2728.7,160",
+		pos="2952.6,235.03 2874.7,207.87 2758.6,171.61 2654,155.5 2576,143.49 2377.7,153.77 2299,147.5 2078.4,129.93 1814.9,85.558 1728.2,70.341"];
 	leavetype_models_DepartmentBasedLeaveType -> department_models_Department	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Department (Departmentbasedleavetype)",
-		lp="289.25,160",
-		pos="s,320.74,221.56 312.86,217.47 265.66,192.97 218.36,168.13 213.5,164.5 190.57,147.37 168.11,124.7 150.63,105.33"];
+		lp="856.46,160",
+		pos="s,904.45,222.19 896.47,218.23 826.56,183.53 734.9,138.04 669.71,105.68"];
 	notificationapp_models_Notification -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Actor (Initiated notifications)",
-		lp="1139.8,160",
-		pos="s,1087,182.71 1086.4,173.73 1086.5,167.6 1087.4,161.49 1089.5,155.5 1099.8,125.83 1124.4,98.562 1141.8,81.908"];
+		lp="1873.9,160",
+		pos="s,1839.4,182.74 1834.1,176.09 1828.3,168.91 1822.2,161.95 1816,155.5 1787.9,126.23 1749.9,98.662 1725,81.847"];
 	notificationapp_models_Notification -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Recipient (Notifications)",
-		lp="1234.5,160",
-		pos="s,1184.8,182.5 1187.5,174.06 1188.4,170.87 1189.3,167.68 1190,164.5 1196.8,135.09 1182.2,101.48 1171.3,81.853"];
+		lp="1768.9,160",
+		pos="s,1796.7,182.63 1788.9,178.37 1786.3,177.01 1783.6,175.72 1781,174.5 1758.3,164.04 1744.1,181.39 1725.8,164.5 1702.6,143.22 1698.6,\
+104.23 1698.4,81.938"];
 	django_contrib_contenttypes_models_ContentType	[height=0.5,
 		label=<
   <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
@@ -1749,57 +1739,52 @@ digraph model_graph {
   </TD></TR>
   </TABLE>
   >,
-		pos="1281,64.125",
+		pos="2359,64.125",
 		width=1.4062];
 	notificationapp_models_Notification -> django_contrib_contenttypes_models_ContentType	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Content type (Notification)",
-		lp="1586.9,160",
-		pos="s,1234.4,182.58 1242.3,178.62 1245.5,177.13 1248.7,175.75 1252,174.5 1266.7,168.87 1525,175.86 1536,164.5 1566.7,132.73 1376.7,168.79 \
-1338,147.5 1312.1,133.25 1295.5,101.6 1287.2,81.943"];
+		lp="2409.1,160",
+		pos="s,1991.4,182.54 1999.3,178.6 2002.5,177.11 2005.7,175.74 2009,174.5 2027,167.69 2341.3,178.02 2355,164.5 2376.6,143.13 2370.4,104.18 \
+2364.4,81.914"];
 	unverifiedsickleave_models_SickLeaveBalance -> sickpolicy_models_SickLeaveProratedValue	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Sick prorated (Sick leave balances)",
-		lp="1715.5,160",
-		pos="s,1684.9,195.76 1679.3,189.31 1667.4,176.31 1653.9,164.25 1639,155.5 1621.9,145.43 1613.5,154.83 1595,147.5 1572.4,138.54 1549.6,\
-125.3 1529.6,112.04"];
+		lp="2586.3,160",
+		pos="s,2514.6,195.73 2516.6,187.17 2522.8,161.68 2529.3,134.42 2534.7,112.14"];
 	unverifiedsickleave_models_SickLeaveBalance -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=none,
 		dir=both,
 		label=" User (Sick leave balance)",
-		lp="1485.5,160",
-		pos="1643.4,195.69 1629.5,187.23 1614.9,179.77 1600,174.5 1532.4,150.54 1508.4,182.39 1439,164.5 1430,162.17 1429.1,157.73 1420,155.5 \
-1398.5,150.21 1240.5,157.93 1221,147.5 1194.5,133.33 1176.7,101.65 1167.8,81.969"];
+		lp="2304.5,160",
+		pos="2383.5,195.66 2367.3,187.5 2350.6,180.12 2334,174.5 2301.7,163.55 2290.7,174.13 2258,164.5 2249,161.86 2247.9,158.3 2239,155.5 2049.7,\
+96.085 1810.1,73.475 1728,67.153"];
 	timeoffreq_models_TimeoffRequest -> leavetype_models_DepartmentBasedLeaveType	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Leave Type (Timeoff requests)",
-		lp="552.5,404.5",
-		pos="s,609.53,486.37 601.84,482.3 565.65,462.82 527.23,438.13 497,409 470,382.98 448.11,346.65 433.31,317.74"];
+		lp="1199.1,404.5",
+		pos="s,1471.5,504.41 1463.1,502.13 1332.8,467.02 1134.6,411.67 1104,392 1074.2,372.88 1048,343.02 1029.1,317.7"];
 	timeoffreq_models_TimeoffRequest -> payperiod_models_PayPeriod	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Pay Period (Timeoff requests)",
-		lp="2167.6,404.5",
-		pos="s,822.66,492.78 830.8,489.97 906.17,464.15 1007.6,433.49 1100,419 1132,413.98 2236.4,405.21 2266,392 2300.8,376.44 2330.1,344.66 \
-2350.2,317.52"];
+		lp="2042.6,404.5",
+		pos="s,1684.5,513.43 1693.2,511.5 1784.1,491.09 1911.5,453.95 2009,392 2039.7,372.46 2067.8,342.76 2088.4,317.62"];
 	timeoffreq_models_TimeoffRequest -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Employee (Timeoff requests)",
-		lp="863.5,269.62",
-		pos="s,766.1,427 769.17,418.79 772.44,409.83 775.43,400.83 778,392 805.29,298.11 747.32,248.7 811,174.5 894.65,77.034 1063.8,65.261 1131.8,\
-64.648"];
+		lp="1730.5,269.62",
+		pos="s,1627.7,427.31 1630.8,419.02 1634.2,409.97 1637.3,400.9 1640,392 1668.4,298.08 1660.3,271.02 1678,174.5 1684,141.6 1691.5,103.22 \
+1695.7,81.786"];
 	timeoffreq_models_TimeoffRequest -> django_contrib_auth_models_User	[arrowhead=none,
 		arrowtail=dot,
 		dir=both,
 		label=" Reviewed By (Reviewed timeoff requests)",
-		lp="698.25,269.62",
-		pos="s,636.89,427.23 633.08,419.39 628.9,410.4 625.29,401.23 622.5,392 594.54,299.46 561.33,249.35 622.5,174.5 688,94.355 1029.4,71.493 \
-1131.9,66.387"];
-	"\n\n\n"	[height=0.5,
-		pos="3099,533.62",
-		width=0.75];
+		lp="1560.2,269.62",
+		pos="s,1498.9,427.23 1495.1,419.39 1490.9,410.4 1487.3,401.23 1484.5,392 1456.5,299.46 1434,256.93 1484.5,174.5 1525.4,107.67 1621.5,\
+80.06 1669.9,70.072"];
 }
