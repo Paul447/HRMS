@@ -234,13 +234,14 @@ WSGI_APPLICATION = "HRMS.wsgi.application"
 #         },
 #     }
 # }
+
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'upTimeClock',               # Your database name
-        'USER': 'DailyLogs',                   # SQL Server username
-        'PASSWORD': 'random1234',  # SQL Server password
-        'HOST': 'DPSData',            # Or container IP if using Docker
+        'NAME': 'UPTIMECLOCK',               # Your database name
+        'USER': 'sa',                   # SQL Server username
+        'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
+        'HOST': 'localhost',            # Or container IP if using Docker
         'PORT': '1433',                 # Default SQL Server port
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',  # Must match installed ODBC driver
@@ -248,6 +249,20 @@ DATABASES = {
         },
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'upTimeClock',               # Your database name
+#         'USER': 'DailyLogs',                   # SQL Server username
+#         'PASSWORD': 'random1234',  # SQL Server password
+#         'HOST': 'DPSData',            # Or container IP if using Docker
+#         'PORT': '1433',                 # Default SQL Server port
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',  # Must match installed ODBC driver
+#             'Trusted_Connection': 'yes',
+#         },
+#     }
+# }
 
 
 LOGGING = {
