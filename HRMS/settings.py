@@ -238,7 +238,7 @@ WSGI_APPLICATION = "HRMS.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'UPTIMECLOCK',               # Your database name
+        'NAME': 'Hello',               # Your database name
         'USER': 'sa',                   # SQL Server username
         'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
         'HOST': 'localhost',            # Or container IP if using Docker

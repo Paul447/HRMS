@@ -37,7 +37,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     Manages additional user-specific information, linked to Django's built-in User model.
     """
 
-    list_display = ("user", "department")
+    list_display = ("user", "department", "tenure", "is_time_off", "is_manager")
     search_fields = ("user__username", "department__name")  # Allows searching by username of the linked User  # Allows searching by department name
     list_filter = ("department",)  # Provides a filter sidebar for departments
     ordering = ("user__username",)  # Order UserProfiles by the linked user's username
