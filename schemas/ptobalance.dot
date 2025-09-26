@@ -1,0 +1,180 @@
+digraph model_graph {
+	graph [bb="0,0,621.69,229.25",
+		fontname=Roboto,
+		fontsize=8,
+		rankdir=TB,
+		splines=true
+	];
+	node [fontname=Roboto,
+		fontsize=8,
+		label="\N",
+		shape=plaintext
+	];
+	edge [fontname=Roboto,
+		fontsize=8
+	];
+	ptobalance_models_PTOBalance	[height=2.059,
+		label=<
+    <TABLE BGCOLOR="white" BORDER="1" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="5" ALIGN="CENTER" BGCOLOR="#1b563f">
+    <FONT FACE="Roboto" COLOR="white" POINT-SIZE="10"><B>
+    PTO Balance
+    </B></FONT></TD></TR>
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>ID</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>BigAutoField</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>Accrual rate</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>Employee type</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>Pay frequency</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>User</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>OneToOneField (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto"><B>Year of experience</B></FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto"><B>ForeignKey (id)</B></FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">Created at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT FACE="Roboto">Pto balance</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT FACE="Roboto">DecimalField</FONT>
+    </TD></TR>
+  
+  
+  
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">Updated at</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT COLOR="#7B7B7B" FACE="Roboto">DateTimeField</FONT>
+    </TD></TR>
+  
+  
+    </TABLE>
+    >,
+		pos="267.25,155.12",
+		width=2.9236];
+	django_contrib_auth_models_User	[height=0.5,
+		label=<
+  <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="#1b563f">
+  <FONT FACE="Roboto" POINT-SIZE="12" COLOR="white">User</FONT>
+  </TD></TR>
+  </TABLE>
+  >,
+		pos="29.25,18",
+		width=0.8125];
+	ptobalance_models_PTOBalance -> django_contrib_auth_models_User	[arrowhead=none,
+		arrowtail=none,
+		dir=both,
+		label=" User (Pto balance)",
+		lp="109.38,58.5",
+		pos="162.25,112.12 132.76,98.325 101.42,81.672 74.5,63 63.336,55.255 52.371,44.69 44.031,35.854"];
+	employeetype_models_EmployeeType	[height=0.5,
+		label=<
+  <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="#1b563f">
+  <FONT FACE="Roboto" POINT-SIZE="12" COLOR="white">EmployeeType</FONT>
+  </TD></TR>
+  </TABLE>
+  >,
+		pos="133.25,18",
+		width=1.5729];
+	ptobalance_models_PTOBalance -> employeetype_models_EmployeeType	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Employee type (Pto balances)",
+		lp="208.88,58.5",
+		pos="s,170.57,81.131 164.53,74.74 161.01,70.898 157.66,66.979 154.5,63 148.07,54.891 142.94,44.518 139.34,35.881"];
+	payfrequency_models_Pay_Frequency	[height=0.5,
+		label=<
+  <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="#1b563f">
+  <FONT FACE="Roboto" POINT-SIZE="12" COLOR="white">Pay_Frequency</FONT>
+  </TD></TR>
+  </TABLE>
+  >,
+		pos="267.25,18",
+		width=1.6354];
+	ptobalance_models_PTOBalance -> payfrequency_models_Pay_Frequency	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Pay frequency (Pto balances)",
+		lp="320.88,58.5",
+		pos="s,267.25,81.026 267.25,72.367 267.25,58.598 267.25,45.652 267.25,35.96"];
+	yearofexperience_models_YearOfExperience	[height=0.5,
+		label=<
+  <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="#1b563f">
+  <FONT FACE="Roboto" POINT-SIZE="12" COLOR="white">YearOfExperience</FONT>
+  </TD></TR>
+  </TABLE>
+  >,
+		pos="409.25,18",
+		width=1.8021];
+	ptobalance_models_PTOBalance -> yearofexperience_models_YearOfExperience	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Year of experience (Pto balances)",
+		lp="447.39,58.5",
+		pos="s,360.16,81.141 366.58,74.968 370.61,71.014 374.52,67.016 378.25,63 386.01,54.648 393.41,44.263 399.04,35.68"];
+	accuralrates_models_AccrualRates	[height=0.5,
+		label=<
+  <TABLE BGCOLOR="white" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="#1b563f">
+  <FONT FACE="Roboto" POINT-SIZE="12" COLOR="white">AccrualRates</FONT>
+  </TD></TR>
+  </TABLE>
+  >,
+		pos="549.25,18",
+		width=1.4583];
+	ptobalance_models_PTOBalance -> accuralrates_models_AccrualRates	[arrowhead=none,
+		arrowtail=dot,
+		dir=both,
+		label=" Accrual rate (Pto balances)",
+		lp="572.19,58.5",
+		pos="s,372.26,128.67 380.69,125.98 424.66,111.64 473.81,91.151 513.25,63 523.37,55.775 532.25,45.003 538.66,35.926"];
+}

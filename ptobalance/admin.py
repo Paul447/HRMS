@@ -1,4 +1,5 @@
 from django.contrib import admin
+import math
 from django.db import models
 from .models import PTOBalance, AccrualRates, YearOfExperience
 
@@ -21,30 +22,27 @@ class PTOBalanceAdmin(admin.ModelAdmin):
         employeetype = obj.employee_type
         payfrequency = obj.pay_frequency
 
-        try:
-            user_experience_obj = obj.user.experience
-            year_of_experience_value = user_experience_obj.years_of_experience
-        except YearOfExperience.DoesNotExist:
-            year_of_experience_value = 0.0
-            user_experience_obj = None
-            print(f"Warning: YearOfExperience record missing for user {obj.user.username}")  # Consider using logger.warning here
+        user_experience_obj = getattr(obj.user, 'experience', None)
+        year_of_experience_value = getattr(user_experience_obj, 'years_of_experience', 0.0)
 
-        thresholds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        x = 1
-        for threshold in thresholds:
-            if year_of_experience_value < threshold:
-                x = threshold
-                break
-        else:
-            x = 11
+        if user_experience_obj is None:
+            print(f"Warning: YearOfExperience record missing for user {obj.user.username}")
 
-        accrualrate = AccrualRates.objects.filter(employee_type=employeetype, pay_frequency=payfrequency, year_of_experience=x).first()
+        # Simple threshold calculation
+        x = min(max(math.ceil(year_of_experience_value), 1), 11)
+
+        # Fetch accrual rate
+        accrualrate = AccrualRates.objects.filter(
+            employee_type=employeetype,
+            pay_frequency=payfrequency,
+            year_of_experience=x
+        ).first()
 
         if accrualrate:
             obj.accrual_rate = accrualrate
         else:
             obj.accrual_rate = None
-            print(f"Warning: No AccrualRate found for EType:{employeetype.name}, PFreq:{payfrequency.frequency}, YOE:{x}")  # Consider using logger.error here
+            print(f"Warning: No AccrualRate found for EType:{employeetype.name}, PFreq:{payfrequency.frequency}, YOE:{x}")
 
         obj.year_of_experience = user_experience_obj
 
