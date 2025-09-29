@@ -13,7 +13,6 @@ apps=(
     "department"
     "payfrequency"
     "employeetype"
-    "yearofexperience"
     "accuralrates"
     "ptobalance"
     "timeclock"
