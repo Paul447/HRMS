@@ -78,7 +78,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if user.is_superuser:
             # Superusers see all pending requests
-            return TimeoffRequest.objects.filter(status="pending").select_related("employee", "requested_leave_type", "reference_pay_period", "employee__userprofile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("created_at")
+            return TimeoffRequest.objects.filter(status="pending").select_related("employee", "requested_leave_type", "reference_pay_period", "employee__profile", "requested_leave_type__department", "requested_leave_type__leave_type").order_by("created_at")
 
         try:
             user_profile = UserProfile.objects.get(user=user)
@@ -113,7 +113,7 @@ class ManagerTimeoffApprovalViewSet(viewsets.ReadOnlyModelViewSet):
         timeoff_request.reviewed_at = timezone.now()
         timeoff_request.save(process_timeoff_logic=False)  # Avoid re-processing logic
         serializer = self.get_serializer(timeoff_request)
-        send_pto_notification_and_email_task.delay(serializer.instance.id, timeoff_request.reviewer.id, timeoff_request.status)
+        send_pto_notification_and_email_task(serializer.instance.id, timeoff_request.reviewer.id, timeoff_request.status)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])

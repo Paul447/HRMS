@@ -128,7 +128,7 @@ class TimeoffRequest(models.Model):
     def post_save_hook(self, created, **kwargs):
         """Hook for additional notifications or actions after save."""
         if created:
-            trigger_notification_and_email_task.delay(self.pk)
+            trigger_notification_and_email_task(self , self.pk)
             pass
         else:
             # If this is an update, handle accordingly

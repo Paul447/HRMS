@@ -6,7 +6,7 @@ from django.utils import timezone
 from decimal import Decimal
 from django.db.models import Sum
 from timeclock.serializer import ClockSerializerForPunchReportMain
-
+from department.models import UserProfile
 from ptobalance.models import PTOBalance
 from timeclock.models import Clock  # Assuming 'clock' is your app name for Clock model
 from timeoffreq.models import TimeoffRequest
@@ -42,7 +42,7 @@ def _get_employee_type(user):
     """
     Fetches the employee type for a given user.
     """
-    pto_balance_entry = PTOBalance.objects.filter(user=user).first()
+    pto_balance_entry = UserProfile.objects.filter(user=user).first()
     return pto_balance_entry.employee_type.name if pto_balance_entry and pto_balance_entry.employee_type else "Unknown"
 
 
