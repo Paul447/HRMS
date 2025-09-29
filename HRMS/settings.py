@@ -220,35 +220,36 @@ WSGI_APPLICATION = "HRMS.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "HRMS",
-#         "USER": "root",
-#         "PASSWORD": "dpspassword",
-#         "HOST": "localhost",
-#         "PORT": "3306",
-#         "OPTIONS": {
-#             "charset": "utf8mb4",
-#             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-#         },
-#     }
-# }
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'Hello',               # Your database name
-        'USER': 'sa',                   # SQL Server username
-        'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
-        'HOST': 'localhost',            # Or container IP if using Docker
-        'PORT': '1433',                 # Default SQL Server port
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',  # Must match installed ODBC driver
-            'Trusted_Connection': 'yes',
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "HRMS",
+        "USER": "root",
+        "PASSWORD": "dpspassword",
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'Hello',               # Your database name
+#         'USER': 'Subesh',                   # SQL Server username
+#         'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
+#         'HOST': 'localhost',            # Or container IP if using Docker
+#         'PORT': '1433',                 # Default SQL Server port
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',  # Must match installed ODBC driver
+#             'Trusted_Connection': 'yes',
+            
+#         },
+#     }
+# }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'mssql',

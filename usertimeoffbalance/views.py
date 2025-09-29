@@ -17,7 +17,8 @@ from django.shortcuts import redirect
 
 class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    ViewSet for retrieving time-off balances, visible to managers and superusers only.
+    ViewSet for retrieving time-off balances.
+    Only managers and superusers can see results.
     """
     serializer_class = TimeoffBalanceSerializer
     permission_classes = [permissions.IsAuthenticated, IsManagerOfDepartment]
@@ -26,26 +27,36 @@ class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["user__first_name", "user__last_name"]
 
     def get_queryset(self):
+        return self._build_queryset()
+
+    def _build_queryset(self):
         user = self.request.user
-        base_queryset = SickLeaveBalance.objects.select_related(
-            "user",
-            "user__pto_balance",
-            "user__pto_balance__accrual_rate",
-            "user__profile",
-            "user__profile__employee_type",
-            "user__profile__payfreq",
-            # "user__profile__tenure",
+
+        # Prefetch/select_related to avoid N+1 queries
+        qs = (
+            SickLeaveBalance.objects
+            .select_related(
+                "user",
+                "user__profile",
+                "user__pto_balance",
+                "user__pto_balance__accrual_rate",
+                "user__profile__employee_type",
+                "user__profile__payfreq",
+            )
         )
 
-
+        # Superusers see everything
         if user.is_superuser:
-            return base_queryset
+            return qs
 
-        user_profile = getattr(user, "userprofile", None)
-        if user_profile and user_profile.is_manager:
-            return base_queryset.filter(user__userprofile__department=user_profile.department)
+        # Managers see balances for their department
+        profile = getattr(user, "profile", None)
+        if profile and profile.is_manager:
+            return qs.filter(user__profile__department=profile.department)
 
-        return base_queryset.none()
+        # Everyone else sees nothing
+        return qs.none()
+
 
 
 class TimeOffBalanceTemplate(APIView):

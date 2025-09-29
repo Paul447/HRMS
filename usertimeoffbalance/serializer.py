@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email"]
+        fields = ["username", "first_name", "last_name", "email"]
 
 
 class TimeoffBalanceSerializer(serializers.ModelSerializer):
@@ -16,10 +16,10 @@ class TimeoffBalanceSerializer(serializers.ModelSerializer):
         source="user.pto_balance.pto_balance", max_digits=5, decimal_places=2, read_only=True
     )
     employee_type = serializers.CharField(
-        source="user.profile.employee_type", read_only=True
+        source="user.profile.employee_type.name", read_only=True
     )
     pay_frequency = serializers.CharField(
-        source="user.profile.payfreq.pay_frequency", read_only=True
+        source="user.profile.payfreq.frequency", read_only=True
     )
     year_of_experience = serializers.CharField(
         source="user.profile.tenure", read_only=True
@@ -41,4 +41,5 @@ class TimeoffBalanceSerializer(serializers.ModelSerializer):
             "year_of_experience",
             "accrual_rate",
         ]
+
 
