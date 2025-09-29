@@ -34,7 +34,7 @@ from payperiod.views import (
     PayPeriodViewSetForCurrentFutureTimeOffRequest,
 )
 from timeclock.views import UserClockDataAPIView, ClockInOutCreate
-# from ptobalance.views import PTOBalanceViewSet
+from ptobalance.views import PTOBalanceViewSet
 from deptleaves.views import DepartmentLeavesViewSet
 from onshift.views import UserClockOnShiftViewSet
 from notificationapp.views import NotificationViewSet
@@ -66,7 +66,7 @@ api_v1_router.register(r"future-pay-period", PayPeriodViewSetForCurrentFutureTim
 api_v1_router.register(r"current-future-pay-period", PayPeriodViewSetForCurrentFutureTimeOffRequest, basename="current_future_pay_period")
 
 # --- PTO & Leave Balance ---
-# api_v1_router.register(r"pto-balance", PTOBalanceViewSet, basename="pto_balance")
+api_v1_router.register(r"pto-balance", PTOBalanceViewSet, basename="pto_balance")
 api_v1_router.register(r"department-leaves", DepartmentLeavesViewSet, basename="department_leaves")
 api_v1_router.register(r"timeoff-balance", TimeoffBalanceViewSet, basename="timeoff_balance")
 

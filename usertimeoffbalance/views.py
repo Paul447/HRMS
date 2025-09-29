@@ -30,11 +30,13 @@ class TimeoffBalanceViewSet(viewsets.ReadOnlyModelViewSet):
         base_queryset = SickLeaveBalance.objects.select_related(
             "user",
             "user__pto_balance",
-            "user__pto_balance__employee_type",
-            "user__pto_balance__pay_frequency",
-            "user__pto_balance__year_of_experience",
-            "user__pto_balance__accrual_rate"
+            "user__pto_balance__accrual_rate",
+            "user__profile",
+            "user__profile__employee_type",
+            "user__profile__payfreq",
+            # "user__profile__tenure",
         )
+
 
         if user.is_superuser:
             return base_queryset
