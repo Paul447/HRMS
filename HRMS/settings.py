@@ -237,7 +237,7 @@ DATABASES = {
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'mssql',
-#         'NAME': 'Hello',               # Your database name
+#         'NAME': 'UPTIME',               # Your database name
 #         'USER': 'Subesh',                   # SQL Server username
 #         'PASSWORD': 'MyStr0ngP@ssw0rd!',  # SQL Server password
 #         'HOST': 'localhost',            # Or container IP if using Docker
