@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     "department",
     "payfrequency",
     "employeetype",
-    "yearofexperience",
     "accuralrates",
     "ptobalance",
     "timeclock",
