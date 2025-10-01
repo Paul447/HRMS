@@ -65,44 +65,5 @@ Run the following commands to prepare and launch the application:
     python manage.py runserver
 
 
-------------------------------------------------------------
-6. Asynchronous Task Setup
-------------------------------------------------------------
 
-Install Redis
-
-Mac:
-    redis-server --version
-    brew install redis
-    brew services start redis
-    redis-server
-    redis-cli ping
-
-Windows:
-    1. Download Redis from the official website.
-    2. Start Redis:
-        redis-server
-    3. Verify Redis is running:
-        redis-cli ping
-
-
-------------------------------------------------------------
-7. Celery Configuration
-------------------------------------------------------------
-
-Check that Celery is properly configured to use Redis as the broker.
-
-In settings.py:
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
-Start the Celery worker:
-    celery -A HRMS worker --loglevel=info
-
-To enable event tracking:
-    celery -A HRMS worker --loglevel=info -E
-
-
-------------------------------------------------------------
-Once all the above steps are completed, your HRMS application should be fully operational.
-------------------------------------------------------------
 
