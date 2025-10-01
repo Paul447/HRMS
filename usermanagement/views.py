@@ -30,13 +30,6 @@ class ChangePasswordView(APIView):
             user.set_password(new_password)
             user.save()
 
-            # Optional: Invalidate all other sessions for the user to enhance security
-            # This is a good practice after a password change.
-            # Requires 'django.contrib.sessions' to be in INSTALLED_APPS
-            # and 'django.contrib.auth.middleware.SessionAuthenticationMiddleware' for older Django versions.
-            # For newer Django, check if the session hash changes on password change.
-            # user.update_session_auth_hash(request) # This is for session authentication
-
             return Response(
                 {"detail": "Password updated successfully."},
                 status=status.HTTP_200_OK

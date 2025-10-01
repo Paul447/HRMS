@@ -170,7 +170,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CSRF_COOKIE_HTTPONLY = False  # Must be readable by JS to send header
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_TRUSTED_ORIGINS = ['https://2c15dd26add0.ngrok-free.app']
 
 SPECTACULAR_SETTINGS.update({
     "TITLE": "University Police Department Time Clock System",
