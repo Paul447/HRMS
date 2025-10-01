@@ -14,8 +14,6 @@ from timeoffreq.admin import TimeoffreqAdmin
 from timeoffreq.models import TimeoffRequest
 
 # User Management
-# from yearofexperience.admin import YearOfExperienceAdmin
-# from yearofexperience.models import YearOfExperience
 from department.admin import DepartmentAdmin, UserProfileAdmin, CustomUserAdmin
 from department.models import Department, UserProfile
 from notificationapp.models import Notification
@@ -48,7 +46,7 @@ from shiftmanagement.admin import SquadAdmin , ShiftTypeAdmin, EmployeeAdmin, Sq
 from shiftmanagement.models import Squad, ShiftType, Employee, SquadShift
 
 
-# from django_celery_results.models import TaskResult, GroupResult
+
 
 
 class CustomAdminSite(admin.AdminSite):
@@ -78,7 +76,6 @@ class CustomAdminSite(admin.AdminSite):
         user_org_models = [
             create_model_entry(User, "Users", "auth"),
             create_model_entry(Group, "Groups", "auth"),
-            # create_model_entry(YearOfExperience, "Years of Experience", "yearofexperience"),
             create_model_entry(UserProfile, "Employee Profiles", "department"),
             create_model_entry(Department, "Department Units", "department")
         ]
@@ -134,7 +131,6 @@ class CustomAdminSite(admin.AdminSite):
         ]
         app_list.append({"name": "System Adjustments", "app_label": "system_adjustments", "has_module_perms": True, "models": system_adjustments_models})
 
-        # 7. Background Tasks (Celery)
 
         return app_list
 
@@ -145,7 +141,7 @@ hrms_admin_site = CustomAdminSite(name="hrms_admin")
 # Register models
 hrms_admin_site.register(Clock, ClockAdmin)
 hrms_admin_site.register(PTOBalance, PTOBalanceAdmin)
-# hrms_admin_site.register(YearOfExperience, YearOfExperienceAdmin)
+
 hrms_admin_site.register(Department, DepartmentAdmin)
 hrms_admin_site.register(UserProfile, UserProfileAdmin)
 hrms_admin_site.register(User, CustomUserAdmin)
